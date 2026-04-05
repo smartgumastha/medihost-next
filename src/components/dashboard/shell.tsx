@@ -62,7 +62,10 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
     router.push('/login');
   }
 
+  const [hmsLoading, setHmsLoading] = useState(false);
+
   async function openClinicSoftware() {
+    setHmsLoading(true);
     try {
       const res = await fetch('/api/auth/hms-token', { method: 'POST' });
       const data = await res.json();
@@ -81,10 +84,13 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         const hmsUrl = `https://app.hemato.in?mw_token=${encodeURIComponent(data.hms_token)}&mw_hospital_id=${encodeURIComponent(data.hospital_id || '')}&mw_login_data=${loginData}`;
         window.open(hmsUrl, '_blank');
       } else {
+        // No HMS token — open HMS directly, user will need to login there
         window.open('https://app.hemato.in', '_blank');
       }
     } catch {
       window.open('https://app.hemato.in', '_blank');
+    } finally {
+      setHmsLoading(false);
     }
   }
 
@@ -130,9 +136,10 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
               variant="outline"
               size="sm"
               onClick={openClinicSoftware}
+              disabled={hmsLoading}
               className="hidden sm:flex text-xs font-medium h-8 px-3 border-gray-300 text-gray-700 hover:bg-gray-50"
             >
-              Open Clinic Software
+              {hmsLoading ? 'Opening...' : '🏥 Clinic Software'}
             </Button>
 
             {/* Bell */}
@@ -194,16 +201,17 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
 
       {/* ─── Sidebar ─── */}
       <aside
-        className={`fixed top-14 left-0 bottom-0 w-[240px] bg-white border-r border-gray-200 z-40 overflow-y-auto transition-transform duration-200 ease-in-out ${
+        className={`fixed top-14 left-0 bottom-0 w-[240px] z-40 overflow-y-auto transition-transform duration-200 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
+        style={{ background: 'linear-gradient(180deg, #0F172A 0%, #1A2332 100%)' }}
       >
         {/* Store name + plan */}
-        <div className="px-4 py-4 border-b border-gray-200">
-          <div className="text-sm font-semibold text-gray-900 truncate">
+        <div className="px-4 py-4 border-b border-white/10">
+          <div className="text-sm font-semibold text-white truncate" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
             {user.name || 'My Clinic'}
           </div>
-          <span className="inline-block mt-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+          <span className="inline-block mt-1 text-[10px] font-medium text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/20">
             {user.role?.replace(/_/g, ' ') || 'Admin'}
           </span>
         </div>
@@ -212,9 +220,9 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         <nav className="py-2">
           {visibleSections.map((section, sIdx) => (
             <div key={section.title}>
-              {sIdx > 0 && <div className="mx-4 my-2 border-t border-gray-100" />}
+              {sIdx > 0 && <div className="mx-4 my-2 border-t border-white/5" />}
               <div className="px-4 pt-3 pb-1.5">
-                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                   {section.title}
                 </span>
               </div>
@@ -228,14 +236,14 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                       <a
                         href={item.href}
                         onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-md transition-colors relative ${
+                        className={`flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg transition-all relative ${
                           isActive
-                            ? 'bg-emerald-50/80 text-emerald-700'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            ? 'bg-emerald-500/15 text-emerald-400'
+                            : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
                         }`}
                       >
                         {isActive && (
-                          <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-emerald-500" />
+                          <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-emerald-400" />
                         )}
                         <span className="text-base leading-none">{item.icon}</span>
                         {item.label}
@@ -249,10 +257,10 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         </nav>
 
         {/* Bottom */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white">
+        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10" style={{ background: 'rgba(15, 23, 42, 0.9)' }}>
           <button
             onClick={openClinicSoftware}
-            className="w-full text-left px-4 py-3 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors flex items-center gap-2"
+            className="w-full text-left px-4 py-3 text-xs font-medium text-emerald-400 hover:bg-white/5 hover:text-emerald-300 transition-colors flex items-center gap-2"
           >
             <span>🏥</span>
             Open Clinic Software
