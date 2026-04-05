@@ -140,17 +140,34 @@ export function MarketingDashboard({ user }: { user: AuthUser | null }) {
   }, []);
   const clearToast = useCallback(() => setToast(null), []);
 
-  const handleAiReply = (reviewId: string) => {
+  const handleAiReply = async (reviewId: string) => {
     setGeneratingReply(reviewId);
-    setTimeout(() => {
-      const review = reviews.find((r) => r.id === reviewId);
-      const reply =
-        review && review.rating >= 4
-          ? `Thank you for your wonderful feedback, ${review.name.split('.')[0]}! We truly appreciate your trust in us and are delighted to know you had a great experience. We look forward to serving you again!`
-          : `Thank you for sharing your experience, ${review?.name.split('.')[0]}. We sincerely apologize for the inconvenience. Your feedback helps us improve. We would love to make it right — please reach out to us directly.`;
-      setGeneratingReply(null);
-      setDraftReply({ id: reviewId, text: reply });
-    }, 1500);
+    const review = reviews.find((r) => r.id === reviewId);
+
+    // Try real AI reply first
+    try {
+      const res = await fetch('/api/ai/review-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reviewText: review?.text, rating: review?.rating, businessName: user?.name }),
+      });
+      const data = await res.json();
+      if (data.success && data.reply) {
+        setGeneratingReply(null);
+        setDraftReply({ id: reviewId, text: data.reply });
+        return;
+      }
+    } catch {
+      // Fall through to template reply
+    }
+
+    // Fallback template reply
+    const reply =
+      review && review.rating >= 4
+        ? `Thank you for your wonderful feedback, ${review.name.split('.')[0]}! We truly appreciate your trust in us and are delighted to know you had a great experience. We look forward to serving you again!`
+        : `Thank you for sharing your experience, ${review?.name.split('.')[0]}. We sincerely apologize for the inconvenience. Your feedback helps us improve. We would love to make it right — please reach out to us directly.`;
+    setGeneratingReply(null);
+    setDraftReply({ id: reviewId, text: reply });
   };
 
   const postReply = (reviewId: string) => {
@@ -164,11 +181,43 @@ export function MarketingDashboard({ user }: { user: AuthUser | null }) {
     showToast('Reply posted successfully!', 'success');
   };
 
-  const handleGenerateContent = () => {
+  const handleGenerateContent = async () => {
     showToast('AI is generating new content... Check back shortly!', 'success');
-    setTimeout(() => {
-      setPosts((prev) => [...prev]);
-    }, 2000);
+
+    // Try real AI social post generation
+    try {
+      const res = await fetch('/api/ai/social-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessName: user?.name || '',
+          practiceType: 'clinic',
+          city: '',
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.posts && Array.isArray(data.posts)) {
+        const bgColors = ['bg-purple-100', 'bg-blue-100', 'bg-emerald-100'];
+        const emojis = ['\u2728', '\uD83D\uDCAA', '\uD83C\uDF1F'];
+        const newPosts: SocialPost[] = data.posts.map((p: { title: string; google?: string }, i: number) => ({
+          id: `ai-${Date.now()}-${i}`,
+          title: p.title || `AI Post ${i + 1}`,
+          description: p.google?.slice(0, 80) || 'AI-generated social media post',
+          status: 'draft' as const,
+          platform: 'Google, Instagram, WhatsApp',
+          emoji: emojis[i % emojis.length],
+          bgColor: bgColors[i % bgColors.length],
+        }));
+        setPosts((prev) => [...newPosts, ...prev]);
+        showToast('AI generated 3 new post ideas!', 'success');
+        return;
+      }
+    } catch {
+      // Fall through to no-op
+    }
+
+    // Fallback: just keep existing posts
+    setPosts((prev) => [...prev]);
   };
 
   const handleDeletePost = (postId: string) => {

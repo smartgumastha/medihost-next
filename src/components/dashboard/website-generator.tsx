@@ -252,16 +252,44 @@ export function WebsiteGenerator({ user }: { user: AuthUser | null }) {
     PRACTICE_TYPES.find((p) => p.id === 'clinic')?.icon || '\uD83C\uDFE5';
 
   /* ---- Generate ---- */
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!user) return;
     setGenerating(true);
     setGenStep(0);
+
+    // Try AI generation first
+    let aiContent: Partial<WebsiteContent> | null = null;
+    try {
+      const res = await fetch('/api/ai/website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessName: user?.name || '',
+          ownerName: user?.name || '',
+          practiceType: 'clinic',
+          city: '',
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.content) {
+        aiContent = data.content;
+      }
+    } catch {
+      // Fall through to template generation
+    }
 
     const interval = setInterval(() => {
       setGenStep((prev) => {
         if (prev >= GENERATION_STEPS.length - 1) {
           clearInterval(interval);
           const generated = generateContent(user);
+          // Merge AI content over template if available
+          if (aiContent) {
+            if (aiContent.tagline) generated.tagline = aiContent.tagline;
+            if (aiContent.about) generated.about = aiContent.about;
+            if (aiContent.features) generated.features = aiContent.features;
+            if (aiContent.stats) generated.stats = aiContent.stats;
+          }
           setContent(generated);
           setGenerating(false);
           setWebsiteState('editor');
