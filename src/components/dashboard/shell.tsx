@@ -8,7 +8,6 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { canAccess, type AuthUser, type DashboardPage } from '@/lib/auth';
-import { HMS_URL } from '@/lib/constants';
 
 const NAV_ITEMS: { page: DashboardPage; label: string; icon: string; href: string }[] = [
   { page: 'dashboard', label: 'Dashboard', icon: '📊', href: '/dashboard' },
@@ -34,8 +33,31 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
     router.push('/login');
   }
 
-  function openClinicSoftware() {
-    window.open(HMS_URL, '_blank');
+  async function openClinicSoftware() {
+    try {
+      const res = await fetch('/api/auth/hms-token', { method: 'POST' });
+      const data = await res.json();
+
+      if (data.success && data.hms_token) {
+        const loginData = encodeURIComponent(JSON.stringify({
+          token: data.hms_token,
+          hospitalId: String(data.hospital_id || ''),
+          userid: String(data.user_id || ''),
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
+          email: data.email || '',
+          role: data.role || 'HOSPITAL_ADMIN',
+          role_id: 2,
+        }));
+        const hmsUrl = `https://app.hemato.in?mw_token=${encodeURIComponent(data.hms_token)}&mw_hospital_id=${encodeURIComponent(data.hospital_id || '')}&mw_login_data=${loginData}`;
+        window.open(hmsUrl, '_blank');
+      } else {
+        // No HMS token available — open HMS directly (user will need to log in there)
+        window.open('https://app.hemato.in', '_blank');
+      }
+    } catch {
+      window.open('https://app.hemato.in', '_blank');
+    }
   }
 
   return (
