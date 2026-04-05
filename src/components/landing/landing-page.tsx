@@ -431,43 +431,29 @@ export function LandingPage() {
       </nav>
 
       {/* ===== Hero Section ===== */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] via-[#131C31] to-[#1E293B]" />
         {/* Animated gradient mesh */}
         <div className="absolute inset-0 gradient-mesh" />
 
-        {/* Floating orbs */}
-        <div
-          className="orb w-[500px] h-[500px] bg-emerald-500/20 top-[10%] left-[10%]"
-          style={{ animation: 'floatSlow 8s ease-in-out infinite' }}
-        />
-        <div
-          className="orb w-[400px] h-[400px] bg-blue-500/15 top-[30%] right-[5%]"
-          style={{ animation: 'float 6s ease-in-out infinite 1s' }}
-        />
-        <div
-          className="orb w-[300px] h-[300px] bg-violet-500/10 bottom-[10%] left-[30%]"
-          style={{ animation: 'floatSlow 10s ease-in-out infinite 2s' }}
-        />
-
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-20 pb-10">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-16 pb-6">
           {/* Badge */}
           <div
-            className="inline-flex items-center gap-2 px-5 py-2 mb-5 bg-white/5 backdrop-blur-xl text-slate-300 rounded-full text-sm font-medium border border-white/10"
+            className="inline-flex items-center gap-2 px-4 py-1.5 mb-3 bg-white/5 backdrop-blur-xl text-slate-300 rounded-full text-xs font-medium border border-white/10"
             style={{ animation: 'fadeInUp 0.6s ease-out' }}
           >
-            <span className="text-base">{'\uD83D\uDE80'}</span>
+            <span className="text-sm">{'\uD83D\uDE80'}</span>
             AI-Powered SaaS for the Medical Fraternity
           </div>
 
           {/* Headline */}
           <h1
-            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05]"
+            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05]"
             style={{ letterSpacing: '-0.03em', animation: 'fadeInUp 0.6s ease-out 0.1s both' }}
           >
             Your{' '}
-            <span className="inline-block min-w-[280px] sm:min-w-[360px] text-left">
+            <span className="inline-block min-w-[220px] sm:min-w-[300px] text-left">
               <span key={practiceIndex} className="inline-block" style={{ animation: 'fadeInUp 0.4s ease-out' }}>
                 {PRACTICE_TYPES[practiceIndex]}
               </span>
@@ -478,23 +464,15 @@ export function LandingPage() {
 
           {/* Subtext */}
           <p
-            className="mt-4 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed"
+            className="mt-3 text-base text-slate-400 max-w-xl mx-auto leading-relaxed"
             style={{ animation: 'fadeInUp 0.6s ease-out 0.2s both' }}
           >
-            AI-powered website, custom domain, appointments, billing, EMR, and one-click marketing &mdash; for clinics, labs, pharmacies, and every medical practice. Go live in 60 seconds.
+            AI-powered website, custom domain, appointments, billing, EMR, and one-click marketing &mdash; for every medical practice. Go live in 60 seconds.
           </p>
 
           {/* Domain Search */}
-          <div className="mt-8" style={{ animation: 'fadeInUp 0.6s ease-out 0.3s both' }}>
+          <div className="mt-6" style={{ animation: 'fadeInUp 0.6s ease-out 0.3s both' }}>
             <DomainSearch />
-          </div>
-
-          {/* See it in action */}
-          <div
-            className="mt-12 text-sm text-slate-500 font-medium"
-            style={{ animation: 'float 3s ease-in-out infinite' }}
-          >
-            See it in action &darr;
           </div>
         </div>
       </section>
