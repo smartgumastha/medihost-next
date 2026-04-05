@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { SignupForm } from '@/components/auth/signup-form';
 
 export const metadata = {
@@ -33,7 +34,9 @@ export default function SignupPage() {
           <h2 className="text-2xl font-extrabold text-white mb-1 text-center">Create your account</h2>
           <p className="text-sm text-slate-400 mb-8 text-center">Start your free clinic in under a minute</p>
 
-          <SignupForm />
+          <Suspense fallback={<div className="text-slate-500 text-center py-8">Loading...</div>}>
+            <SignupForm />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -25,23 +25,41 @@ export function DomainSearch() {
     // TODO: Call /api/ai/chat for real response
   }
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!query.trim()) return;
     setSearching(true);
     setSearched(false);
+    const name = query.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 
-    setTimeout(() => {
-      const name = query.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-      setResults([
-        { domain: `${name}.com`, available: true, price: '\u20B9899/yr', bestPick: true },
-        { domain: `${name}.in`, available: true, price: '\u20B9699/yr' },
-        { domain: `${name}clinic.com`, available: true, price: '\u20B9899/yr' },
-        { domain: `dr${name}.in`, available: true, price: '\u20B9699/yr' },
-        { domain: `${name}.co.in`, available: false, price: '\u2014' },
-      ]);
-      setSearching(false);
-      setSearched(true);
-    }, 1200);
+    // Try real API first
+    try {
+      const res = await fetch(`/api/proxy/api/presence/domains/check-multi?domain=${encodeURIComponent(name)}`);
+      if (res.ok) {
+        const data = await res.json();
+        const apiResults = data.results || data.data?.results;
+        if (apiResults && apiResults.length > 0) {
+          setResults(apiResults.map((r: DomainResult, i: number) => ({ ...r, bestPick: i === 0 })));
+          setSearching(false);
+          setSearched(true);
+          return;
+        }
+      }
+    } catch {}
+
+    // Fallback to mock
+    setResults([
+      { domain: `${name}.com`, available: true, price: '\u20B9899/yr', bestPick: true },
+      { domain: `${name}.in`, available: true, price: '\u20B9699/yr' },
+      { domain: `${name}clinic.com`, available: true, price: '\u20B9899/yr' },
+      { domain: `dr${name}.in`, available: true, price: '\u20B9699/yr' },
+      { domain: `${name}.co.in`, available: false, price: '\u2014' },
+    ]);
+    setSearching(false);
+    setSearched(true);
+  };
+
+  const handleSelectDomain = (domain: string) => {
+    window.location.href = `/signup?domain=${encodeURIComponent(domain)}`;
   };
 
   return (
@@ -177,8 +195,11 @@ export function DomainSearch() {
                     {r.price}
                   </span>
                   {r.available && (
-                    <button className="px-5 py-1.5 text-sm font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all">
-                      Select
+                    <button
+                      onClick={() => handleSelectDomain(r.domain)}
+                      className="px-5 py-1.5 text-sm font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
+                    >
+                      Buy &rarr;
                     </button>
                   )}
                 </div>

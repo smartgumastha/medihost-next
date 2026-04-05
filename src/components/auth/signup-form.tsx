@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PRACTICE_TYPES } from '@/lib/constants';
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedDomain = searchParams.get('domain') || '';
   const [form, setForm] = useState({
     business_name: '',
     owner_name: '',
@@ -14,6 +16,14 @@ export function SignupForm() {
     password: '',
     partner_type: 'clinic',
   });
+
+  // Pre-fill business name from domain
+  useEffect(() => {
+    if (selectedDomain) {
+      const name = selectedDomain.split('.')[0].replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      setForm(prev => ({ ...prev, business_name: prev.business_name || name }));
+    }
+  }, [selectedDomain]);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,7 +49,7 @@ export function SignupForm() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, selected_domain: selectedDomain }),
       });
       const data = await res.json();
 
@@ -59,6 +69,15 @@ export function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {selectedDomain && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+          <span className="text-emerald-400 text-lg">🌐</span>
+          <div>
+            <div className="text-xs text-emerald-400/70 font-medium">Selected Domain</div>
+            <div className="text-sm font-bold text-emerald-300">{selectedDomain}</div>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label htmlFor="business_name" className="block text-sm font-medium text-slate-300">

@@ -451,10 +451,10 @@ export function LandingPage() {
           style={{ animation: 'floatSlow 10s ease-in-out infinite 2s' }}
         />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-24 pb-16">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-20 pb-10">
           {/* Badge */}
           <div
-            className="inline-flex items-center gap-2 px-5 py-2 mb-8 bg-white/5 backdrop-blur-xl text-slate-300 rounded-full text-sm font-medium border border-white/10"
+            className="inline-flex items-center gap-2 px-5 py-2 mb-5 bg-white/5 backdrop-blur-xl text-slate-300 rounded-full text-sm font-medium border border-white/10"
             style={{ animation: 'fadeInUp 0.6s ease-out' }}
           >
             <span className="text-base">{'\uD83D\uDE80'}</span>
@@ -478,14 +478,14 @@ export function LandingPage() {
 
           {/* Subtext */}
           <p
-            className="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed"
+            className="mt-4 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed"
             style={{ animation: 'fadeInUp 0.6s ease-out 0.2s both' }}
           >
             AI-powered website, custom domain, appointments, billing, EMR, and one-click marketing &mdash; for clinics, labs, pharmacies, and every medical practice. Go live in 60 seconds.
           </p>
 
           {/* Domain Search */}
-          <div className="mt-10" style={{ animation: 'fadeInUp 0.6s ease-out 0.3s both' }}>
+          <div className="mt-8" style={{ animation: 'fadeInUp 0.6s ease-out 0.3s both' }}>
             <DomainSearch />
           </div>
 
