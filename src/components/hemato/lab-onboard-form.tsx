@@ -27,8 +27,8 @@ const TEST_CATEGORIES = [
 const WORKING_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const inputClass =
-  "w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-[#DC2626]/50 transition text-sm";
-const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
+  "w-full bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-[#DC2626]/50 focus:ring-1 focus:ring-[#DC2626]/20 transition text-sm";
+const labelClass = "block text-sm font-medium text-gray-300 mb-2";
 
 function StepIndicator({
   current,
@@ -38,32 +38,43 @@ function StepIndicator({
   steps: string[];
 }) {
   return (
-    <div className="flex items-center gap-2 mb-10 overflow-x-auto pb-2">
-      {steps.map((s, i) => (
-        <div key={s} className="flex items-center gap-2 shrink-0">
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition ${
-              i < current
-                ? "bg-[#DC2626] text-white"
-                : i === current
-                ? "bg-[#DC2626]/20 text-[#DC2626] border border-[#DC2626]"
-                : "bg-white/5 text-gray-500 border border-white/10"
-            }`}
-          >
-            {i < current ? "✓" : i + 1}
+    <div className="mb-10">
+      {/* Progress bar */}
+      <div className="flex gap-1.5 mb-3">
+        {steps.map((_, i) => (
+          <div key={i} className={`flex-1 h-1 rounded-full transition-all duration-300 ${
+            i < current ? "bg-[#DC2626]" : i === current ? "bg-[#DC2626]/60" : "bg-white/[0.08]"
+          }`} />
+        ))}
+      </div>
+      {/* Step indicators */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        {steps.map((s, i) => (
+          <div key={s} className="flex items-center gap-2 shrink-0">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
+                i < current
+                  ? "bg-[#DC2626] text-white shadow-lg shadow-[#DC2626]/30"
+                  : i === current
+                  ? "bg-[#DC2626]/20 text-[#DC2626] border border-[#DC2626]/60"
+                  : "bg-white/[0.05] text-gray-500 border border-white/[0.08]"
+              }`}
+            >
+              {i < current ? "✓" : i + 1}
+            </div>
+            <span
+              className={`text-xs hidden sm:block ${
+                i === current ? "text-white font-medium" : "text-gray-500"
+              }`}
+            >
+              {s}
+            </span>
+            {i < steps.length - 1 && (
+              <div className="w-6 h-px bg-white/[0.08] hidden sm:block" />
+            )}
           </div>
-          <span
-            className={`text-xs hidden sm:block ${
-              i === current ? "text-white" : "text-gray-500"
-            }`}
-          >
-            {s}
-          </span>
-          {i < steps.length - 1 && (
-            <div className="w-6 h-px bg-white/10 hidden sm:block" />
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -160,11 +171,11 @@ export function LabOnboardForm() {
     return (
       <div className="min-h-screen bg-[#0C0D0F] text-white flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <div className="w-20 h-20 rounded-full bg-[#DC2626]/10 border-2 border-[#DC2626] flex items-center justify-center text-4xl mx-auto">
+          <div className="w-20 h-20 rounded-full bg-[#DC2626]/10 border-2 border-[#DC2626] flex items-center justify-center text-4xl mx-auto shadow-lg shadow-[#DC2626]/20">
             ✓
           </div>
           <h2 className="mt-6 text-2xl font-bold">Registration Submitted!</h2>
-          <p className="mt-3 text-gray-400">
+          <p className="mt-3 text-gray-400 leading-relaxed">
             Our team will review your application and contact you within 24
             hours. Check your WhatsApp for confirmation.
           </p>
@@ -181,10 +192,10 @@ export function LabOnboardForm() {
 
   return (
     <div className="min-h-screen bg-[#0C0D0F] text-white">
-      <nav className="border-b border-white/10">
+      <nav className="border-b border-white/[0.08] bg-[#0C0D0F]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/hemato" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-[#DC2626] flex items-center justify-center font-bold text-lg">
+          <Link href="/hemato" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-[#DC2626] flex items-center justify-center font-bold text-lg shadow-lg shadow-[#DC2626]/20">
               H
             </div>
             <span className="font-semibold">Hemato</span>
@@ -200,6 +211,7 @@ export function LabOnboardForm() {
         {step === 0 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Lab Information</h2>
+            <p className="text-sm text-gray-500 -mt-3">Tell us about your diagnostic lab.</p>
             <div>
               <label className={labelClass}>Lab Name *</label>
               <input
@@ -209,7 +221,7 @@ export function LabOnboardForm() {
                 onChange={(e) => setLabName(e.target.value)}
               />
               {errors.labName && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.labName}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.labName}</p>
               )}
             </div>
             <div>
@@ -221,7 +233,7 @@ export function LabOnboardForm() {
                 onChange={(e) => setOwnerName(e.target.value)}
               />
               {errors.ownerName && (
-                <p className="text-[#DC2626] text-xs mt-1">
+                <p className="text-[#DC2626] text-xs mt-1.5">
                   {errors.ownerName}
                 </p>
               )}
@@ -236,7 +248,7 @@ export function LabOnboardForm() {
                   onChange={(e) => setPhone(e.target.value)}
                 />
                 {errors.phone && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.phone}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.phone}</p>
                 )}
               </div>
               <div>
@@ -249,7 +261,7 @@ export function LabOnboardForm() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 {errors.email && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.email}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.email}</p>
                 )}
               </div>
             </div>
@@ -278,7 +290,7 @@ export function LabOnboardForm() {
                   </option>
                 </select>
                 {errors.labType && (
-                  <p className="text-[#DC2626] text-xs mt-1">
+                  <p className="text-[#DC2626] text-xs mt-1.5">
                     {errors.labType}
                   </p>
                 )}
@@ -300,6 +312,7 @@ export function LabOnboardForm() {
         {step === 1 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Location Details</h2>
+            <p className="text-sm text-gray-500 -mt-3">Where is your lab located?</p>
             <div>
               <label className={labelClass}>Full Address *</label>
               <textarea
@@ -310,7 +323,7 @@ export function LabOnboardForm() {
                 onChange={(e) => setAddress(e.target.value)}
               />
               {errors.address && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.address}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.address}</p>
               )}
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -323,7 +336,7 @@ export function LabOnboardForm() {
                   onChange={(e) => setCity(e.target.value)}
                 />
                 {errors.city && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.city}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.city}</p>
                 )}
               </div>
               <div>
@@ -335,7 +348,7 @@ export function LabOnboardForm() {
                   onChange={(e) => setPincode(e.target.value)}
                 />
                 {errors.pincode && (
-                  <p className="text-[#DC2626] text-xs mt-1">
+                  <p className="text-[#DC2626] text-xs mt-1.5">
                     {errors.pincode}
                   </p>
                 )}
@@ -366,14 +379,16 @@ export function LabOnboardForm() {
         {step === 2 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Certifications</h2>
+            <p className="text-sm text-gray-500 -mt-3">Your accreditation details.</p>
             <div>
               <label className={labelClass}>NABL Accreditation *</label>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-2.5 mt-2">
                 {["NABL Accredited", "Applied / In Progress", "Not Yet"].map(
                   (opt) => (
                     <label
                       key={opt}
-                      className="flex items-center gap-3 cursor-pointer"
+                      className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg hover:bg-white/[0.03] transition"
+                      onClick={() => setNablStatus(opt)}
                     >
                       <div
                         className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
@@ -392,7 +407,7 @@ export function LabOnboardForm() {
                 )}
               </div>
               {errors.nablStatus && (
-                <p className="text-[#DC2626] text-xs mt-1">
+                <p className="text-[#DC2626] text-xs mt-1.5">
                   {errors.nablStatus}
                 </p>
               )}
@@ -400,7 +415,7 @@ export function LabOnboardForm() {
             <div>
               <label className={labelClass}>Certification Upload</label>
               <div
-                className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center cursor-pointer hover:border-[#DC2626]/30 transition"
+                className="border-2 border-dashed border-white/[0.1] rounded-xl p-8 text-center cursor-pointer hover:border-[#DC2626]/30 transition"
                 onClick={() => setCertFile("nabl_certificate.pdf")}
               >
                 {certFile ? (
@@ -432,16 +447,17 @@ export function LabOnboardForm() {
         {step === 3 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Services Offered</h2>
+            <p className="text-sm text-gray-500 -mt-3">What tests does your lab perform?</p>
             <div>
               <label className={labelClass}>Test Categories *</label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="grid grid-cols-2 gap-2.5 mt-2">
                 {TEST_CATEGORIES.map((cat) => (
                   <label
                     key={cat}
-                    className="flex items-center gap-2 cursor-pointer"
+                    className="flex items-center gap-2.5 cursor-pointer p-2 rounded-lg hover:bg-white/[0.03] transition"
                   >
                     <div
-                      className={`w-5 h-5 rounded border flex items-center justify-center transition ${
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition ${
                         categories.includes(cat)
                           ? "bg-[#DC2626] border-[#DC2626]"
                           : "border-white/20"
@@ -463,15 +479,15 @@ export function LabOnboardForm() {
                 ))}
               </div>
               {errors.categories && (
-                <p className="text-[#DC2626] text-xs mt-1">
+                <p className="text-[#DC2626] text-xs mt-1.5">
                   {errors.categories}
                 </p>
               )}
             </div>
             <div>
-              <label className="flex items-center gap-3 cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg hover:bg-white/[0.03] transition">
                 <div
-                  className={`w-5 h-5 rounded border flex items-center justify-center transition ${
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition ${
                     homeCollection
                       ? "bg-[#DC2626] border-[#DC2626]"
                       : "border-white/20"
@@ -521,10 +537,10 @@ export function LabOnboardForm() {
                           : [...prev, day]
                       )
                     }
-                    className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                       workDays.includes(day)
-                        ? "bg-[#DC2626] text-white"
-                        : "bg-white/5 text-gray-400 border border-white/10"
+                        ? "bg-[#DC2626] text-white shadow-lg shadow-[#DC2626]/20"
+                        : "bg-white/[0.05] text-gray-400 border border-white/[0.08] hover:border-white/20"
                     }`}
                   >
                     {day}
@@ -539,6 +555,7 @@ export function LabOnboardForm() {
         {step === 4 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Pricing & Bank Details</h2>
+            <p className="text-sm text-gray-500 -mt-3">For settlements and payouts.</p>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Price Range</label>
@@ -580,7 +597,7 @@ export function LabOnboardForm() {
                 onChange={(e) => setBankName(e.target.value)}
               />
               {errors.bankName && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.bankName}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.bankName}</p>
               )}
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -593,7 +610,7 @@ export function LabOnboardForm() {
                   onChange={(e) => setAccountNo(e.target.value)}
                 />
                 {errors.accountNo && (
-                  <p className="text-[#DC2626] text-xs mt-1">
+                  <p className="text-[#DC2626] text-xs mt-1.5">
                     {errors.accountNo}
                   </p>
                 )}
@@ -607,7 +624,7 @@ export function LabOnboardForm() {
                   onChange={(e) => setIfsc(e.target.value)}
                 />
                 {errors.ifsc && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.ifsc}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.ifsc}</p>
                 )}
               </div>
             </div>
@@ -615,13 +632,13 @@ export function LabOnboardForm() {
         )}
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/5">
+        <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/[0.06]">
           {step > 0 ? (
             <button
               onClick={prev}
-              className="text-sm text-gray-400 hover:text-white transition"
+              className="text-sm text-gray-400 hover:text-white transition flex items-center gap-1.5"
             >
-              Back
+              ← Back
             </button>
           ) : (
             <div />
@@ -629,14 +646,14 @@ export function LabOnboardForm() {
           {step < STEPS.length - 1 ? (
             <button
               onClick={next}
-              className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-8 py-3 rounded-xl transition text-sm"
+              className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-8 py-3 rounded-xl transition text-sm shadow-lg shadow-[#DC2626]/20"
             >
-              Next
+              Next →
             </button>
           ) : (
             <button
               onClick={submit}
-              className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-8 py-3 rounded-xl transition text-sm"
+              className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-8 py-3 rounded-xl transition text-sm shadow-lg shadow-[#DC2626]/20"
             >
               Submit via WhatsApp
             </button>

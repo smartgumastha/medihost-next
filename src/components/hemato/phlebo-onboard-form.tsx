@@ -41,8 +41,8 @@ const HYDERABAD_ZONES = [
 ];
 
 const inputClass =
-  "w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-[#DC2626]/50 transition text-sm";
-const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
+  "w-full bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-[#DC2626]/50 focus:ring-1 focus:ring-[#DC2626]/20 transition text-sm";
+const labelClass = "block text-sm font-medium text-gray-300 mb-2";
 
 function StepIndicator({
   current,
@@ -52,32 +52,43 @@ function StepIndicator({
   steps: string[];
 }) {
   return (
-    <div className="flex items-center gap-2 mb-10 overflow-x-auto pb-2">
-      {steps.map((s, i) => (
-        <div key={s} className="flex items-center gap-2 shrink-0">
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition ${
-              i < current
-                ? "bg-[#DC2626] text-white"
-                : i === current
-                ? "bg-[#DC2626]/20 text-[#DC2626] border border-[#DC2626]"
-                : "bg-white/5 text-gray-500 border border-white/10"
-            }`}
-          >
-            {i < current ? "✓" : i + 1}
+    <div className="mb-10">
+      {/* Progress bar */}
+      <div className="flex gap-1.5 mb-3">
+        {steps.map((_, i) => (
+          <div key={i} className={`flex-1 h-1 rounded-full transition-all duration-300 ${
+            i < current ? "bg-[#DC2626]" : i === current ? "bg-[#DC2626]/60" : "bg-white/[0.08]"
+          }`} />
+        ))}
+      </div>
+      {/* Step indicators */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        {steps.map((s, i) => (
+          <div key={s} className="flex items-center gap-2 shrink-0">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
+                i < current
+                  ? "bg-[#DC2626] text-white shadow-lg shadow-[#DC2626]/30"
+                  : i === current
+                  ? "bg-[#DC2626]/20 text-[#DC2626] border border-[#DC2626]/60"
+                  : "bg-white/[0.05] text-gray-500 border border-white/[0.08]"
+              }`}
+            >
+              {i < current ? "✓" : i + 1}
+            </div>
+            <span
+              className={`text-xs hidden sm:block ${
+                i === current ? "text-white font-medium" : "text-gray-500"
+              }`}
+            >
+              {s}
+            </span>
+            {i < steps.length - 1 && (
+              <div className="w-6 h-px bg-white/[0.08] hidden sm:block" />
+            )}
           </div>
-          <span
-            className={`text-xs hidden sm:block ${
-              i === current ? "text-white" : "text-gray-500"
-            }`}
-          >
-            {s}
-          </span>
-          {i < steps.length - 1 && (
-            <div className="w-6 h-px bg-white/10 hidden sm:block" />
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -166,11 +177,11 @@ export function PhleboOnboardForm() {
     return (
       <div className="min-h-screen bg-[#0C0D0F] text-white flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <div className="w-20 h-20 rounded-full bg-[#DC2626]/10 border-2 border-[#DC2626] flex items-center justify-center text-4xl mx-auto">
+          <div className="w-20 h-20 rounded-full bg-[#DC2626]/10 border-2 border-[#DC2626] flex items-center justify-center text-4xl mx-auto shadow-lg shadow-[#DC2626]/20">
             ✓
           </div>
           <h2 className="mt-6 text-2xl font-bold">Application Submitted!</h2>
-          <p className="mt-3 text-gray-400">
+          <p className="mt-3 text-gray-400 leading-relaxed">
             Welcome to the Hemato collection network. Our team will contact you
             within 24 hours for verification and training.
           </p>
@@ -187,10 +198,10 @@ export function PhleboOnboardForm() {
 
   return (
     <div className="min-h-screen bg-[#0C0D0F] text-white">
-      <nav className="border-b border-white/10">
+      <nav className="border-b border-white/[0.08] bg-[#0C0D0F]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/hemato" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-[#DC2626] flex items-center justify-center font-bold text-lg">
+          <Link href="/hemato" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-[#DC2626] flex items-center justify-center font-bold text-lg shadow-lg shadow-[#DC2626]/20">
               H
             </div>
             <span className="font-semibold">Hemato</span>
@@ -206,6 +217,7 @@ export function PhleboOnboardForm() {
         {step === 0 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Personal Details</h2>
+            <p className="text-sm text-gray-500 -mt-3">Your basic information.</p>
             <div>
               <label className={labelClass}>Full Name *</label>
               <input
@@ -215,7 +227,7 @@ export function PhleboOnboardForm() {
                 onChange={(e) => setName(e.target.value)}
               />
               {errors.name && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.name}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.name}</p>
               )}
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -228,7 +240,7 @@ export function PhleboOnboardForm() {
                   onChange={(e) => setPhone(e.target.value)}
                 />
                 {errors.phone && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.phone}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.phone}</p>
                 )}
               </div>
               <div>
@@ -252,7 +264,7 @@ export function PhleboOnboardForm() {
                   onChange={(e) => setDob(e.target.value)}
                 />
                 {errors.dob && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.dob}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.dob}</p>
                 )}
               </div>
               <div>
@@ -276,14 +288,14 @@ export function PhleboOnboardForm() {
                   </option>
                 </select>
                 {errors.gender && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.gender}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.gender}</p>
                 )}
               </div>
             </div>
             <div>
               <label className={labelClass}>Photo</label>
               <div
-                className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center cursor-pointer hover:border-[#DC2626]/30 transition"
+                className="border-2 border-dashed border-white/[0.1] rounded-xl p-6 text-center cursor-pointer hover:border-[#DC2626]/30 transition"
                 onClick={() => setPhotoFile("photo.jpg")}
               >
                 {photoFile ? (
@@ -303,6 +315,7 @@ export function PhleboOnboardForm() {
         {step === 1 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Identity & Address</h2>
+            <p className="text-sm text-gray-500 -mt-3">For verification purposes.</p>
             <div>
               <label className={labelClass}>Aadhaar Number *</label>
               <input
@@ -312,7 +325,7 @@ export function PhleboOnboardForm() {
                 onChange={(e) => setAadhaar(e.target.value)}
               />
               {errors.aadhaar && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.aadhaar}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.aadhaar}</p>
               )}
             </div>
             <div>
@@ -325,7 +338,7 @@ export function PhleboOnboardForm() {
                 onChange={(e) => setAddress(e.target.value)}
               />
               {errors.address && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.address}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.address}</p>
               )}
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -338,7 +351,7 @@ export function PhleboOnboardForm() {
                   onChange={(e) => setCity(e.target.value)}
                 />
                 {errors.city && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.city}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.city}</p>
                 )}
               </div>
               <div>
@@ -350,7 +363,7 @@ export function PhleboOnboardForm() {
                   onChange={(e) => setPincode(e.target.value)}
                 />
                 {errors.pincode && (
-                  <p className="text-[#DC2626] text-xs mt-1">
+                  <p className="text-[#DC2626] text-xs mt-1.5">
                     {errors.pincode}
                   </p>
                 )}
@@ -363,6 +376,7 @@ export function PhleboOnboardForm() {
         {step === 2 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Professional Details</h2>
+            <p className="text-sm text-gray-500 -mt-3">Your experience and skills.</p>
             <div>
               <label className={labelClass}>Experience *</label>
               <select
@@ -390,7 +404,7 @@ export function PhleboOnboardForm() {
                 </option>
               </select>
               {errors.experience && (
-                <p className="text-[#DC2626] text-xs mt-1">
+                <p className="text-[#DC2626] text-xs mt-1.5">
                   {errors.experience}
                 </p>
               )}
@@ -406,14 +420,14 @@ export function PhleboOnboardForm() {
             </div>
             <div>
               <label className={labelClass}>Skills</label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="grid grid-cols-2 gap-2.5 mt-2">
                 {SKILLS.map((skill) => (
                   <label
                     key={skill}
-                    className="flex items-center gap-2 cursor-pointer"
+                    className="flex items-center gap-2.5 cursor-pointer p-2 rounded-lg hover:bg-white/[0.03] transition"
                   >
                     <div
-                      className={`w-5 h-5 rounded border flex items-center justify-center transition ${
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition ${
                         skills.includes(skill)
                           ? "bg-[#DC2626] border-[#DC2626]"
                           : "border-white/20"
@@ -442,6 +456,7 @@ export function PhleboOnboardForm() {
         {step === 3 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Work Preferences</h2>
+            <p className="text-sm text-gray-500 -mt-3">Where and when do you want to work?</p>
             <div>
               <label className={labelClass}>Preferred Zones *</label>
               <div className="grid grid-cols-3 gap-2 mt-2">
@@ -456,10 +471,10 @@ export function PhleboOnboardForm() {
                           : [...prev, zone]
                       )
                     }
-                    className={`px-3 py-2 rounded-lg text-xs transition ${
+                    className={`px-3 py-2 rounded-lg text-xs font-medium transition ${
                       zones.includes(zone)
-                        ? "bg-[#DC2626] text-white"
-                        : "bg-white/5 text-gray-400 border border-white/10"
+                        ? "bg-[#DC2626] text-white shadow-lg shadow-[#DC2626]/20"
+                        : "bg-white/[0.05] text-gray-400 border border-white/[0.08] hover:border-white/20"
                     }`}
                   >
                     {zone}
@@ -467,7 +482,7 @@ export function PhleboOnboardForm() {
                 ))}
               </div>
               {errors.zones && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.zones}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.zones}</p>
               )}
             </div>
             <div>
@@ -491,7 +506,7 @@ export function PhleboOnboardForm() {
                 </option>
               </select>
               {errors.availability && (
-                <p className="text-[#DC2626] text-xs mt-1">
+                <p className="text-[#DC2626] text-xs mt-1.5">
                   {errors.availability}
                 </p>
               )}
@@ -517,7 +532,7 @@ export function PhleboOnboardForm() {
                 </option>
               </select>
               {errors.shift && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.shift}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.shift}</p>
               )}
             </div>
             <div>
@@ -551,7 +566,7 @@ export function PhleboOnboardForm() {
         {step === 4 && (
           <div className="space-y-5">
             <h2 className="text-xl font-bold">Bank Details</h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 -mt-3">
               For daily payout of your collection earnings.
             </p>
             <div>
@@ -563,7 +578,7 @@ export function PhleboOnboardForm() {
                 onChange={(e) => setBankName(e.target.value)}
               />
               {errors.bankName && (
-                <p className="text-[#DC2626] text-xs mt-1">{errors.bankName}</p>
+                <p className="text-[#DC2626] text-xs mt-1.5">{errors.bankName}</p>
               )}
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -576,7 +591,7 @@ export function PhleboOnboardForm() {
                   onChange={(e) => setAccountNo(e.target.value)}
                 />
                 {errors.accountNo && (
-                  <p className="text-[#DC2626] text-xs mt-1">
+                  <p className="text-[#DC2626] text-xs mt-1.5">
                     {errors.accountNo}
                   </p>
                 )}
@@ -590,7 +605,7 @@ export function PhleboOnboardForm() {
                   onChange={(e) => setIfsc(e.target.value)}
                 />
                 {errors.ifsc && (
-                  <p className="text-[#DC2626] text-xs mt-1">{errors.ifsc}</p>
+                  <p className="text-[#DC2626] text-xs mt-1.5">{errors.ifsc}</p>
                 )}
               </div>
             </div>
@@ -607,13 +622,13 @@ export function PhleboOnboardForm() {
         )}
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/5">
+        <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/[0.06]">
           {step > 0 ? (
             <button
               onClick={prev}
-              className="text-sm text-gray-400 hover:text-white transition"
+              className="text-sm text-gray-400 hover:text-white transition flex items-center gap-1.5"
             >
-              Back
+              ← Back
             </button>
           ) : (
             <div />
@@ -621,14 +636,14 @@ export function PhleboOnboardForm() {
           {step < STEPS.length - 1 ? (
             <button
               onClick={next}
-              className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-8 py-3 rounded-xl transition text-sm"
+              className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-8 py-3 rounded-xl transition text-sm shadow-lg shadow-[#DC2626]/20"
             >
-              Next
+              Next →
             </button>
           ) : (
             <button
               onClick={submit}
-              className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-8 py-3 rounded-xl transition text-sm"
+              className="bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-8 py-3 rounded-xl transition text-sm shadow-lg shadow-[#DC2626]/20"
             >
               Submit via WhatsApp
             </button>

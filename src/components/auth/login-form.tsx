@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 export function LoginForm() {
   const router = useRouter();
@@ -44,42 +41,55 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
+        <label htmlFor="email" className="block text-sm font-medium text-slate-300">
+          Email
+        </label>
+        <input
           id="email"
           type="email"
           placeholder="you@clinic.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="h-11"
+          className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder:text-slate-500 outline-none focus:border-emerald-500/50 transition-colors"
         />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <a href="/reset-password" className="text-xs text-emerald-600 hover:underline">Forgot password?</a>
+          <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+            Password
+          </label>
+          <a href="/reset-password" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+            Forgot password?
+          </a>
         </div>
-        <Input
+        <input
           id="password"
           type="password"
           placeholder="Enter your password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="h-11"
+          className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder:text-slate-500 outline-none focus:border-emerald-500/50 transition-colors"
         />
       </div>
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+        <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
           {error}
         </div>
       )}
-      <Button type="submit" className="w-full h-11 bg-emerald-600 hover:bg-emerald-700" disabled={loading}>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         {loading ? 'Signing in...' : 'Sign in'}
-      </Button>
-      <p className="text-center text-xs text-gray-500 mt-4">
-        Don&apos;t have an account? <a href="/signup" className="text-emerald-600 font-semibold hover:underline">Sign up</a>
+      </button>
+      <p className="text-center text-sm text-slate-400 mt-4">
+        Don&apos;t have an account?{' '}
+        <a href="/signup" className="text-emerald-400 font-semibold hover:text-emerald-300 transition-colors">
+          Sign up
+        </a>
       </p>
     </form>
   );

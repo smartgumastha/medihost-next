@@ -10,6 +10,8 @@ const partnerTypes = [
     icon: "🔬",
     href: "/hemato/join/lab",
     active: true,
+    accent: "border-[#DC2626]/40",
+    glow: "shadow-[0_0_30px_rgba(220,38,38,0.15)]",
   },
   {
     id: "hospital",
@@ -18,6 +20,8 @@ const partnerTypes = [
     icon: "🏥",
     href: "#",
     active: false,
+    accent: "",
+    glow: "",
   },
   {
     id: "physio",
@@ -26,6 +30,8 @@ const partnerTypes = [
     icon: "🦴",
     href: "#",
     active: false,
+    accent: "",
+    glow: "",
   },
   {
     id: "pharmacy",
@@ -34,6 +40,8 @@ const partnerTypes = [
     icon: "💊",
     href: "#",
     active: false,
+    accent: "",
+    glow: "",
   },
   {
     id: "phlebo",
@@ -42,25 +50,37 @@ const partnerTypes = [
     icon: "🩸",
     href: "/hemato/join/phlebotomist",
     active: true,
+    accent: "border-[#DC2626]/40",
+    glow: "shadow-[0_0_30px_rgba(220,38,38,0.15)]",
   },
 ];
 
 export function JoinPage() {
   return (
     <div className="min-h-screen bg-[#0C0D0F] text-white">
+      {/* Background subtle gradient */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-10 blur-[120px]"
+          style={{ background: "radial-gradient(circle, #DC2626 0%, transparent 70%)" }}
+        />
+      </div>
+
       {/* Nav */}
-      <nav className="border-b border-white/10">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center">
-          <Link href="/hemato" className="flex items-center gap-2">
+      <nav className="border-b border-white/10 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/hemato" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg bg-[#DC2626] flex items-center justify-center font-bold text-lg">
               H
             </div>
             <span className="font-semibold text-lg">Hemato</span>
           </Link>
+          <Link href="/hemato" className="text-sm text-gray-500 hover:text-white transition-colors">
+            ← Back
+          </Link>
         </div>
       </nav>
 
-      <div className="max-w-3xl mx-auto px-4 py-16">
+      <div className="max-w-3xl mx-auto px-4 py-16 relative z-10">
         <h1 className="text-3xl sm:text-4xl font-bold text-center">
           Join <span className="text-[#DC2626]">Hemato</span> as a Partner
         </h1>
@@ -73,18 +93,22 @@ export function JoinPage() {
           {partnerTypes.map((p) => {
             const content = (
               <div
-                className={`bg-white/5 border rounded-xl p-6 flex items-start gap-5 transition ${
+                className={`relative overflow-hidden rounded-xl p-6 flex items-start gap-5 transition-all duration-300 ${
                   p.active
-                    ? "border-white/10 hover:border-[#DC2626]/40 cursor-pointer"
-                    : "border-white/5 opacity-60"
+                    ? `border border-white/10 hover:${p.accent} ${p.glow} cursor-pointer bg-white/[0.04] backdrop-blur-sm hover:bg-white/[0.07]`
+                    : "border border-white/5 opacity-50 bg-white/[0.02]"
                 }`}
               >
+                {/* Glassmorphic border accent for active items */}
+                {p.active && (
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#DC2626] to-transparent opacity-50" />
+                )}
                 <div className="text-3xl shrink-0">{p.icon}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
                     <h3 className="font-semibold text-lg">{p.title}</h3>
                     {!p.active && (
-                      <span className="text-xs bg-white/10 text-gray-400 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-white/10 text-gray-400 px-2 py-0.5 rounded-full backdrop-blur-sm">
                         Coming Soon
                       </span>
                     )}
@@ -93,7 +117,7 @@ export function JoinPage() {
                 </div>
                 {p.active && (
                   <svg
-                    className="w-5 h-5 text-gray-500 shrink-0 mt-1"
+                    className="w-5 h-5 text-[#DC2626] shrink-0 mt-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -117,6 +141,13 @@ export function JoinPage() {
               <div key={p.id}>{content}</div>
             );
           })}
+        </div>
+
+        {/* Bottom info */}
+        <div className="mt-12 text-center">
+          <p className="text-sm text-gray-500">
+            Questions? <a href="https://wa.me/917993135689" className="text-[#DC2626] font-medium hover:underline">Chat with us on WhatsApp</a>
+          </p>
         </div>
       </div>
     </div>

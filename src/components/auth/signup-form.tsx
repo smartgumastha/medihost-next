@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { PRACTICE_TYPES } from '@/lib/constants';
 
 export function SignupForm() {
@@ -58,75 +55,87 @@ export function SignupForm() {
     }
   }
 
+  const inputClass = "w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder:text-slate-500 outline-none focus:border-emerald-500/50 transition-colors";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="business_name">Business / Clinic Name *</Label>
-          <Input
+          <label htmlFor="business_name" className="block text-sm font-medium text-slate-300">
+            Business / Clinic Name *
+          </label>
+          <input
             id="business_name"
             type="text"
             placeholder="e.g. Smile Dental Clinic"
             value={form.business_name}
             onChange={(e) => update('business_name', e.target.value)}
-            className="h-11"
+            className={inputClass}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="owner_name">Owner / Doctor Name *</Label>
-          <Input
+          <label htmlFor="owner_name" className="block text-sm font-medium text-slate-300">
+            Owner / Doctor Name *
+          </label>
+          <input
             id="owner_name"
             type="text"
             placeholder="Dr. Sharma"
             value={form.owner_name}
             onChange={(e) => update('owner_name', e.target.value)}
-            className="h-11"
+            className={inputClass}
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="signup_email">Email *</Label>
-        <Input
+        <label htmlFor="signup_email" className="block text-sm font-medium text-slate-300">
+          Email *
+        </label>
+        <input
           id="signup_email"
           type="email"
           placeholder="you@clinic.com"
           value={form.email}
           onChange={(e) => update('email', e.target.value)}
-          className="h-11"
+          className={inputClass}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone</Label>
+        <label htmlFor="phone" className="block text-sm font-medium text-slate-300">
+          Phone
+        </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 select-none">+91</span>
-          <Input
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500 select-none">+91</span>
+          <input
             id="phone"
             type="tel"
             placeholder="98765 43210"
             value={form.phone}
             onChange={(e) => update('phone', e.target.value)}
-            className="h-11 pl-12"
+            className={`${inputClass} pl-12`}
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="signup_password">Password *</Label>
+        <label htmlFor="signup_password" className="block text-sm font-medium text-slate-300">
+          Password *
+        </label>
         <div className="relative">
-          <Input
+          <input
             id="signup_password"
             type={showPassword ? 'text' : 'password'}
             placeholder="Min 8 characters"
             value={form.password}
             onChange={(e) => update('password', e.target.value)}
-            className="h-11 pr-16"
+            className={`${inputClass} pr-16`}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-300 transition-colors"
           >
             {showPassword ? 'Hide' : 'Show'}
           </button>
@@ -134,15 +143,17 @@ export function SignupForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="partner_type">Business Type</Label>
+        <label htmlFor="partner_type" className="block text-sm font-medium text-slate-300">
+          Business Type
+        </label>
         <select
           id="partner_type"
           value={form.partner_type}
           onChange={(e) => update('partner_type', e.target.value)}
-          className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white outline-none focus:border-emerald-500/50 transition-colors appearance-none"
         >
           {PRACTICE_TYPES.map((pt) => (
-            <option key={pt.id} value={pt.id}>
+            <option key={pt.id} value={pt.id} className="bg-[#1E293B] text-white">
               {pt.icon} {pt.label}
             </option>
           ))}
@@ -150,18 +161,22 @@ export function SignupForm() {
       </div>
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+        <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
           {error}
         </div>
       )}
 
-      <Button type="submit" className="w-full h-11 bg-emerald-600 hover:bg-emerald-700" disabled={loading}>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         {loading ? 'Creating account...' : 'Create Account'}
-      </Button>
+      </button>
 
-      <p className="text-center text-xs text-gray-500 mt-4">
+      <p className="text-center text-sm text-slate-400 mt-4">
         Already have an account?{' '}
-        <a href="/login" className="text-emerald-600 font-semibold hover:underline">
+        <a href="/login" className="text-emerald-400 font-semibold hover:text-emerald-300 transition-colors">
           Sign in
         </a>
       </p>

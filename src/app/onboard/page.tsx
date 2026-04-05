@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getAuthFromCookie } from '@/lib/auth';
 import { OnboardWizard } from '@/components/auth/onboard-wizard';
 
-export const metadata = { title: 'Setup Your Clinic — MediHost' };
+export const metadata = { title: 'Setup Your Clinic — MediHost AI' };
 
 export default async function OnboardPage() {
   const cookieStore = await cookies();

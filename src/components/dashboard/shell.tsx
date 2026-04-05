@@ -9,24 +9,53 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { canAccess, type AuthUser, type DashboardPage } from '@/lib/auth';
 
-const NAV_ITEMS: { page: DashboardPage; label: string; icon: string; href: string }[] = [
-  { page: 'dashboard', label: 'Dashboard', icon: '📊', href: '/dashboard' },
-  { page: 'profile', label: 'My Profile', icon: '👤', href: '/dashboard/profile' },
-  { page: 'website', label: 'My Website', icon: '⭐', href: '/dashboard/website' },
-  { page: 'domain', label: 'Domain', icon: '🌐', href: '/dashboard/domain' },
-  { page: 'doctors', label: 'My Doctors', icon: '⚕️', href: '/dashboard/doctors' },
-  { page: 'products', label: 'Tests & Services', icon: '💊', href: '/dashboard/products' },
-  { page: 'marketing', label: 'Marketing', icon: '📢', href: '/dashboard/marketing' },
-  { page: 'analytics', label: 'Analytics', icon: '📈', href: '/dashboard/analytics' },
-  { page: 'plan', label: 'Plan & Billing', icon: '💎', href: '/dashboard/plan' },
+const NAV_SECTIONS: {
+  title: string;
+  items: { page: DashboardPage; label: string; icon: string; href: string }[];
+}[] = [
+  {
+    title: 'General',
+    items: [
+      { page: 'dashboard', label: 'Dashboard', icon: '📊', href: '/dashboard' },
+      { page: 'profile', label: 'My Profile', icon: '👤', href: '/dashboard/profile' },
+    ],
+  },
+  {
+    title: 'Online Presence',
+    items: [
+      { page: 'website', label: 'My Website', icon: '⭐', href: '/dashboard/website' },
+      { page: 'domain', label: 'Domain', icon: '🌐', href: '/dashboard/domain' },
+    ],
+  },
+  {
+    title: 'Clinic',
+    items: [
+      { page: 'doctors', label: 'My Doctors', icon: '⚕️', href: '/dashboard/doctors' },
+      { page: 'products', label: 'Tests & Services', icon: '💊', href: '/dashboard/products' },
+    ],
+  },
+  {
+    title: 'Growth',
+    items: [
+      { page: 'marketing', label: 'Marketing', icon: '📢', href: '/dashboard/marketing' },
+      { page: 'analytics', label: 'Analytics', icon: '📈', href: '/dashboard/analytics' },
+    ],
+  },
+  {
+    title: 'Account',
+    items: [
+      { page: 'plan', label: 'Plan & Billing', icon: '💎', href: '/dashboard/plan' },
+    ],
+  },
 ];
+
+// Flat list for backward compat
+const NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items);
 
 export function DashboardShell({ user, children }: { user: AuthUser; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const visibleItems = NAV_ITEMS.filter(item => canAccess(user.role, item.page));
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -52,7 +81,6 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         const hmsUrl = `https://app.hemato.in?mw_token=${encodeURIComponent(data.hms_token)}&mw_hospital_id=${encodeURIComponent(data.hospital_id || '')}&mw_login_data=${loginData}`;
         window.open(hmsUrl, '_blank');
       } else {
-        // No HMS token available — open HMS directly (user will need to log in there)
         window.open('https://app.hemato.in', '_blank');
       }
     } catch {
@@ -60,81 +88,181 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
     }
   }
 
+  // Filter sections to only include items the user can access
+  const visibleSections = NAV_SECTIONS.map(section => ({
+    ...section,
+    items: section.items.filter(item => canAccess(user.role, item.page)),
+  })).filter(section => section.items.length > 0);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 h-14">
+    <div className="min-h-screen" style={{ backgroundColor: '#F6F6F7' }}>
+      {/* ─── Top Nav ─── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 h-14">
         <div className="flex items-center justify-between h-full px-4">
+          {/* Left: hamburger + logo */}
           <div className="flex items-center gap-3">
-            <button className="lg:hidden text-gray-600 text-xl" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
-            <a href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white text-sm font-extrabold">M</div>
-              <span className="text-lg font-extrabold text-gray-900">Medi<span className="text-emerald-600">Host</span></span>
+            <button
+              className="lg:hidden text-gray-500 hover:text-gray-700 p-1"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label="Toggle sidebar"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="3" y1="5" x2="17" y2="5" />
+                <line x1="3" y1="10" x2="17" y2="10" />
+                <line x1="3" y1="15" x2="17" y2="15" />
+              </svg>
+            </button>
+            <a href="/dashboard" className="flex items-center gap-1.5">
+              <span className="text-[17px] font-bold text-gray-900 tracking-tight">
+                MediHost AI
+              </span>
+              <span className="relative flex h-2 w-2 -mt-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-[10px] font-semibold text-gray-400 -ml-0.5 mt-0.5">&trade;</span>
             </a>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={openClinicSoftware} className="hidden sm:flex gap-2 text-xs">
-              🏥 Open Clinic Software
+
+          {/* Right: actions */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openClinicSoftware}
+              className="hidden sm:flex text-xs font-medium h-8 px-3 border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Open Clinic Software
             </Button>
+
+            {/* Bell */}
+            <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </button>
+
+            {/* User dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1 cursor-pointer">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs font-bold">
+              <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1.5 transition-colors cursor-pointer">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="bg-emerald-50 text-emerald-700 text-xs font-semibold">
                     {user.name?.charAt(0)?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-semibold text-gray-700 hidden sm:block">{user.name}</span>
+                <span className="text-sm font-medium text-gray-700 hidden sm:block max-w-[120px] truncate">
+                  {user.name}
+                </span>
+                <svg className="w-3.5 h-3.5 text-gray-400 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>My Profile</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/dashboard/plan')}>Plan & Billing</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-48">
+                <div className="px-3 py-2 border-b border-gray-100">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                </div>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} className="text-sm">
+                  My Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/plan')} className="text-sm">
+                  Plan & Billing
+                </DropdownMenuItem>
                 {(user.role === 'SUPER_ADMIN' || user.role === 'HOSPITAL_ADMIN') && (
-                  <DropdownMenuItem onClick={() => router.push('/admin')}>Admin Panel</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/admin')} className="text-sm">
+                    Admin Panel
+                  </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600">Log out</DropdownMenuItem>
+                <div className="border-t border-gray-100" />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600 text-sm">
+                  Log out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </nav>
 
-      {/* Mobile overlay */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      {/* ─── Mobile overlay ─── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 z-40 lg:hidden backdrop-blur-sm"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-      {/* Sidebar */}
-      <aside className={`fixed top-14 left-0 bottom-0 w-60 bg-white border-r border-gray-200 z-40 overflow-y-auto transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-        <nav className="py-4">
-          <ul className="space-y-0.5">
-            {visibleItems.map(item => {
-              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-              return (
-                <li key={item.page}>
-                  <a
-                    href={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-5 py-2.5 text-sm font-medium transition-colors border-l-3 ${
-                      isActive
-                        ? 'bg-emerald-50 text-emerald-700 border-l-emerald-600 font-semibold'
-                        : 'text-gray-600 border-l-transparent hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <span className="text-base">{item.icon}</span>
-                    {item.label}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+      {/* ─── Sidebar ─── */}
+      <aside
+        className={`fixed top-14 left-0 bottom-0 w-[240px] bg-white border-r border-gray-200 z-40 overflow-y-auto transition-transform duration-200 ease-in-out ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0`}
+      >
+        {/* Store name + plan */}
+        <div className="px-4 py-4 border-b border-gray-200">
+          <div className="text-sm font-semibold text-gray-900 truncate">
+            {user.name || 'My Clinic'}
+          </div>
+          <span className="inline-block mt-1 text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+            {user.role?.replace(/_/g, ' ') || 'Admin'}
+          </span>
+        </div>
+
+        {/* Navigation sections */}
+        <nav className="py-2">
+          {visibleSections.map((section, sIdx) => (
+            <div key={section.title}>
+              {sIdx > 0 && <div className="mx-4 my-2 border-t border-gray-100" />}
+              <div className="px-4 pt-3 pb-1.5">
+                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                  {section.title}
+                </span>
+              </div>
+              <ul className="space-y-0.5 px-2">
+                {section.items.map(item => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                  return (
+                    <li key={item.page}>
+                      <a
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-md transition-colors relative ${
+                          isActive
+                            ? 'bg-emerald-50/80 text-emerald-700'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        }`}
+                      >
+                        {isActive && (
+                          <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-emerald-500" />
+                        )}
+                        <span className="text-base leading-none">{item.icon}</span>
+                        {item.label}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="text-[10px] text-gray-400 uppercase font-semibold tracking-wider mb-1">Role</div>
-          <div className="text-xs font-semibold text-gray-600">{user.role.replace(/_/g, ' ')}</div>
+
+        {/* Bottom */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white">
+          <button
+            onClick={openClinicSoftware}
+            className="w-full text-left px-4 py-3 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors flex items-center gap-2"
+          >
+            <span>🏥</span>
+            Open Clinic Software
+          </button>
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="lg:ml-60 pt-14 min-h-screen">
-        <div className="p-6 max-w-6xl">
+      {/* ─── Main content ─── */}
+      <main className="lg:ml-[240px] pt-14 min-h-screen">
+        <div className="p-6 max-w-[1200px] mx-auto">
           {children}
         </div>
       </main>

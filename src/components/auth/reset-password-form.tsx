@@ -36,12 +36,12 @@ export function ResetPasswordForm() {
   if (sent) {
     return (
       <div className="text-center">
-        <div className="text-4xl mb-4">✉️</div>
-        <h3 className="text-lg font-bold text-gray-900 mb-2">Check your email</h3>
-        <p className="text-sm text-gray-500 mb-6">
-          If an account exists for <strong>{email}</strong>, we&#39;ve sent a password reset link.
+        <div className="text-4xl mb-4">&#9993;&#65039;</div>
+        <h3 className="text-lg font-bold text-white mb-2">Check your email</h3>
+        <p className="text-sm text-slate-400 mb-6">
+          If an account exists for <strong className="text-slate-200">{email}</strong>, we&#39;ve sent a password reset link.
         </p>
-        <a href="/login" className="text-sm text-emerald-600 hover:text-emerald-700 font-semibold">
+        <a href="/login" className="text-sm text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
           Back to login
         </a>
       </div>
@@ -49,15 +49,15 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl px-4 py-3">
           {error}
         </div>
       )}
 
-      <div>
-        <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 mb-1">
+      <div className="space-y-2">
+        <label htmlFor="reset-email" className="block text-sm font-medium text-slate-300">
           Email address
         </label>
         <input
@@ -67,20 +67,20 @@ export function ResetPasswordForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@clinic.com"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder:text-slate-500 outline-none focus:border-emerald-500/50 transition-colors"
         />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-emerald-600 text-white py-2.5 px-4 rounded-lg font-bold text-sm hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Sending...' : 'Send Reset Link'}
       </button>
 
       <div className="text-center">
-        <a href="/login" className="text-sm text-gray-500 hover:text-emerald-600">
+        <a href="/login" className="text-sm text-slate-400 hover:text-emerald-400 transition-colors">
           Back to login
         </a>
       </div>
