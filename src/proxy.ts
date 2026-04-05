@@ -4,6 +4,20 @@ export function proxy(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const { pathname } = request.nextUrl;
 
+  // Partner app (partner.hemato.in)
+  if (hostname === 'partner.hemato.in') {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname === '/' ? '/hemato/partner' : `/hemato/partner${pathname}`;
+    return NextResponse.rewrite(url);
+  }
+
+  // Phlebo app (phlebo.hemato.in)
+  if (hostname === 'phlebo.hemato.in') {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname === '/' ? '/hemato/phlebo' : `/hemato/phlebo${pathname}`;
+    return NextResponse.rewrite(url);
+  }
+
   // Hemato.in domain routing
   const isHemato = hostname === 'hemato.in' || hostname === 'www.hemato.in';
   if (isHemato) {
