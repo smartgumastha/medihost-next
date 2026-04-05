@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function proxy(request: NextRequest) {
+  // Subdomain routing for clinic storefronts
+  const hostname = request.headers.get('host') || '';
+  const isSubdomain = hostname.endsWith('.medihost.in') &&
+    hostname !== 'medihost.in' &&
+    hostname !== 'www.medihost.in' &&
+    !hostname.startsWith('app.') &&
+    !hostname.startsWith('partner.') &&
+    !hostname.startsWith('phlebo.');
+
+  if (isSubdomain) {
+    const subdomain = hostname.split('.medihost.in')[0];
+    const url = request.nextUrl.clone();
+    url.pathname = `/storefront/${subdomain}`;
+    return NextResponse.rewrite(url);
+  }
+
   const { pathname } = request.nextUrl;
 
   // Get auth cookie
@@ -38,5 +54,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/api/proxy/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/api/proxy/:path*', '/storefront/:path*'],
 };
