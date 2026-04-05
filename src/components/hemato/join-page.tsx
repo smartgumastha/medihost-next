@@ -8,7 +8,7 @@ const partnerTypes = [
     title: "Diagnostic Lab",
     desc: "Register your lab, list tests, receive marketplace orders.",
     icon: "🔬",
-    href: "/hemato/join/lab",
+    href: "/join/lab",
     active: true,
     accent: "border-[#DC2626]/40",
     glow: "shadow-[0_0_30px_rgba(220,38,38,0.15)]",
@@ -48,7 +48,7 @@ const partnerTypes = [
     title: "Phlebotomist",
     desc: "Join our home collection network. Earn per collection.",
     icon: "🩸",
-    href: "/hemato/join/phlebotomist",
+    href: "/join/phlebotomist",
     active: true,
     accent: "border-[#DC2626]/40",
     glow: "shadow-[0_0_30px_rgba(220,38,38,0.15)]",
@@ -68,13 +68,13 @@ export function JoinPage() {
       {/* Nav */}
       <nav className="border-b border-white/10 relative z-10">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/hemato" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg bg-[#DC2626] flex items-center justify-center font-bold text-lg">
               H
             </div>
             <span className="font-semibold text-lg">Hemato</span>
           </Link>
-          <Link href="/hemato" className="text-sm text-gray-500 hover:text-white transition-colors">
+          <Link href="/" className="text-sm text-gray-500 hover:text-white transition-colors">
             ← Back
           </Link>
         </div>

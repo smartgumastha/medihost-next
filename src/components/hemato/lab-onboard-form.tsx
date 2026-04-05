@@ -180,7 +180,7 @@ export function LabOnboardForm() {
             hours. Check your WhatsApp for confirmation.
           </p>
           <Link
-            href="/hemato"
+            href="/"
             className="mt-8 inline-block bg-[#DC2626] hover:bg-[#B91C1C] text-white font-medium px-6 py-3 rounded-xl transition"
           >
             Back to Hemato
@@ -194,7 +194,7 @@ export function LabOnboardForm() {
     <div className="min-h-screen bg-[#0C0D0F] text-white">
       <nav className="border-b border-white/[0.08] bg-[#0C0D0F]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/hemato" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg bg-[#DC2626] flex items-center justify-center font-bold text-lg shadow-lg shadow-[#DC2626]/20">
               H
             </div>

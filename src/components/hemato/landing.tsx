@@ -93,7 +93,7 @@ export function HematoLanding() {
         <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: "rgba(250,250,248,0.92)", backdropFilter: "blur(20px)", borderColor: "#e5e5e0" }}>
           <div className="max-w-[1140px] mx-auto px-6 h-14 flex items-center justify-between">
             <div className="flex items-center gap-8">
-              <Link href="/hemato" className="flex items-center gap-2.5">
+              <Link href="/" className="flex items-center gap-2.5">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                   <path d="M16 2C16 2 6 14 6 20C6 25.5 10.5 30 16 30C21.5 30 26 25.5 26 20C26 14 16 2 16 2Z" fill="#DC2626"/>
                   <text x="16" y="22" textAnchor="middle" fill="white" fontFamily="'Space Mono',monospace" fontWeight="700" fontSize="12">H</text>
@@ -109,14 +109,14 @@ export function HematoLanding() {
             </div>
             <div className="flex items-center gap-2">
               <Link
-                href="/hemato/phlebo"
+                href="/phlebo"
                 className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-white px-4 py-2 rounded-[10px]"
                 style={{ background: "#D97706" }}
               >
                 🏍️ Phlebo App
               </Link>
               <Link
-                href="/hemato/join/lab"
+                href="/join/lab"
                 className="hidden sm:inline-flex items-center text-[13px] font-semibold px-4 py-2 rounded-[10px] border"
                 style={{ borderColor: "#e5e5e0", color: "#1a1a18" }}
               >
@@ -291,7 +291,7 @@ export function HematoLanding() {
                     ))}
                   </div>
                   <Link
-                    href="/hemato/join/lab"
+                    href="/join/lab"
                     className="inline-flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-[10px] transition-all hover:-translate-y-0.5"
                     style={{ background: "#0D9488" }}
                   >
@@ -412,7 +412,7 @@ export function HematoLanding() {
                     ))}
                   </div>
                   <Link
-                    href="/hemato/join/phlebotomist"
+                    href="/join/phlebotomist"
                     className="inline-flex items-center gap-2 text-sm font-semibold text-white px-5 py-2.5 rounded-[10px] transition-all hover:-translate-y-0.5"
                     style={{ background: "#DC2626" }}
                   >
@@ -470,14 +470,14 @@ export function HematoLanding() {
                     🔬 Book a Test
                   </Link>
                   <Link
-                    href="/hemato/join/lab"
+                    href="/join/lab"
                     className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] text-xs font-semibold transition-all"
                     style={{ background: "#fff", border: "1px solid #e5e5e0" }}
                   >
                     🏥 Register Lab
                   </Link>
                   <Link
-                    href="/hemato/join/phlebotomist"
+                    href="/join/phlebotomist"
                     className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] text-xs font-semibold transition-all"
                     style={{ background: "#fff", border: "1px solid #e5e5e0" }}
                   >
@@ -513,7 +513,7 @@ export function HematoLanding() {
               {/* Links */}
               {[
                 { title: "FOR PATIENTS", links: [{ label: "Book Test", href: "#packages" }, { label: "Labs Near Me", href: "#labs" }, { label: "Health Packages", href: "#packages" }] },
-                { title: "FOR PARTNERS", links: [{ label: "Register Lab", href: "/hemato/join/lab" }, { label: "Phlebo Signup", href: "/hemato/join/phlebotomist" }, { label: "Lab Dashboard", href: "/hemato/lab" }] },
+                { title: "FOR PARTNERS", links: [{ label: "Register Lab", href: "/join/lab" }, { label: "Phlebo Signup", href: "/join/phlebotomist" }, { label: "Lab Partner App", href: "/partner" }] },
                 { title: "COMPANY", links: [{ label: "About", href: "#" }, { label: "Contact", href: "https://wa.me/917993135689" }, { label: "Careers", href: "#" }] },
               ].map((col) => (
                 <div key={col.title}>
