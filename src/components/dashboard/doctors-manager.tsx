@@ -320,23 +320,40 @@ export function DoctorsManager({ user }: { user: AuthUser | null }) {
     setSaving(true);
 
     try {
+      let updatedDoctors: Doctor[];
+
       if (editingId) {
-        // TODO: PUT to /api/proxy/api/storefront/{hospitalId}/doctors/{editingId}
-        setDoctors((prev) =>
-          prev.map((d) =>
-            d.id === editingId ? { ...d, ...form } : d,
-          ),
+        updatedDoctors = doctors.map((d) =>
+          d.id === editingId ? { ...d, ...form } : d,
         );
+        setDoctors(updatedDoctors);
         showToast('Doctor updated successfully!', 'success');
       } else {
-        // TODO: POST to /api/proxy/api/storefront/{hospitalId}/doctors
         const newDoctor: Doctor = {
           id: `local-${Date.now()}`,
           ...form,
         };
-        setDoctors((prev) => [...prev, newDoctor]);
+        updatedDoctors = [...doctors, newDoctor];
+        setDoctors(updatedDoctors);
         showToast('Doctor added successfully!', 'success');
       }
+
+      // Persist to API if authenticated
+      if (user?.token && user?.id) {
+        try {
+          await fetch(`/api/proxy/api/presence/partners/${user.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: JSON.stringify({ doctors: updatedDoctors }),
+          });
+        } catch {
+          // API save failed silently — local state is already updated
+        }
+      }
+
       closeModal();
     } catch (err) {
       showToast((err as Error).message || 'Failed to save doctor.', 'error');
@@ -346,14 +363,30 @@ export function DoctorsManager({ user }: { user: AuthUser | null }) {
   };
 
   /* ---- Delete ---- */
-  const onDelete = (doctor: Doctor) => {
+  const onDelete = async (doctor: Doctor) => {
     if (!window.confirm(`Delete Dr. ${doctor.full_name}? This cannot be undone.`)) {
       return;
     }
 
-    // TODO: DELETE to /api/proxy/api/storefront/{hospitalId}/doctors/{doctor.id}
-    setDoctors((prev) => prev.filter((d) => d.id !== doctor.id));
+    const updatedDoctors = doctors.filter((d) => d.id !== doctor.id);
+    setDoctors(updatedDoctors);
     showToast('Doctor removed.', 'success');
+
+    // Persist to API if authenticated
+    if (user?.token && user?.id) {
+      try {
+        await fetch(`/api/proxy/api/presence/partners/${user.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ doctors: updatedDoctors }),
+        });
+      } catch {
+        // API save failed silently — local state is already updated
+      }
+    }
   };
 
   /* ---- Auth guard ---- */

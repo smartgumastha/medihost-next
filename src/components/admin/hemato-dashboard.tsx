@@ -1,3 +1,5 @@
+// TODO: Replace mock data when /api/hemato/dashboard/stats endpoint is built
+// Current mock data serves as UI reference
 "use client";
 
 import { useState } from 'react';

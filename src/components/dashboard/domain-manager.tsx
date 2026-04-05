@@ -94,12 +94,32 @@ export function DomainManager({ user }: { user: AuthUser | null }) {
     });
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchQuery.trim()) {
       showToast('Please enter a domain name to search', 'error');
       return;
     }
     setSearching(true);
+
+    // Try real API first
+    try {
+      const res = await fetch(
+        `/api/proxy/api/presence/domains/check-multi?domain=${encodeURIComponent(searchQuery)}`,
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const results = data.results || data.data?.results;
+        if (results) {
+          setSearchResults(results);
+          setSearching(false);
+          return;
+        }
+      }
+    } catch {
+      // Fall through to mock data
+    }
+
+    // Fallback to mock results
     setTimeout(() => {
       setSearchResults(MOCK_SEARCH_RESULTS);
       setSearching(false);

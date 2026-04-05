@@ -1,6 +1,8 @@
 "use client";
 
-const STATS = [
+import { useState, useEffect } from 'react';
+
+const DEFAULT_STATS = [
   { label: 'Total Partners', value: '127', sub: '+5 today', color: 'bg-red-50 text-red-700' },
   { label: 'Active Trials', value: '34', sub: '8 expiring this week', color: 'bg-amber-50 text-amber-700' },
   { label: 'Revenue', value: '\u20B92,45,000', sub: '12 transactions', color: 'bg-emerald-50 text-emerald-700' },
@@ -39,6 +41,33 @@ const ATTENTION_ROWS = [
 ];
 
 export function AdminOverview() {
+  const [stats, setStats] = useState(DEFAULT_STATS);
+
+  /* ---- Fetch dashboard stats from API with mock fallback ---- */
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/proxy/api/presence/admin/dashboard', {
+          headers: { 'x-admin-key': 'MediHost@2026' },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.total_partners) {
+            setStats([
+              { label: 'Total Partners', value: String(data.total_partners), sub: data.today_signups ? `+${data.today_signups} today` : '+0 today', color: 'bg-red-50 text-red-700' },
+              { label: 'Active Trials', value: String(data.active_trials || 0), sub: data.expiring_this_week ? `${data.expiring_this_week} expiring this week` : '0 expiring', color: 'bg-amber-50 text-amber-700' },
+              { label: 'Revenue', value: data.revenue ? `\u20B9${data.revenue}` : '\u20B90', sub: data.transactions ? `${data.transactions} transactions` : '0 transactions', color: 'bg-emerald-50 text-emerald-700' },
+              { label: "Today's Signups", value: String(data.today_signups || 0), sub: data.never_logged_in ? `${data.never_logged_in} never logged in` : '0 never logged in', color: 'bg-blue-50 text-blue-700' },
+            ]);
+          }
+        }
+      } catch {
+        // Keep mock stats as default
+      }
+    }
+    loadStats();
+  }, []);
+
   const maxSource = Math.max(...SOURCE_DATA.map(s => s.count));
   const maxPlan = Math.max(...PLAN_DATA.map(p => p.count));
   const maxFunnel = FUNNEL_STAGES[0].count;
@@ -52,7 +81,7 @@ export function AdminOverview() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map(stat => (
+        {stats.map(stat => (
           <div key={stat.label} className="bg-white border border-gray-200 rounded-xl p-5">
             <div className="text-sm font-medium text-gray-500">{stat.label}</div>
             <div className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</div>

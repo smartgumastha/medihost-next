@@ -1,3 +1,5 @@
+// API Integration: Replace mock data when backend endpoints are available
+// Mock data serves as UI reference for the Next.js rebuild
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';

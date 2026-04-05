@@ -124,6 +124,29 @@ export function PartnersManager() {
   const [createOpen, setCreateOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
+  /* ---- Fetch partners from API with mock fallback ---- */
+  useEffect(() => {
+    async function loadPartners() {
+      try {
+        const res = await fetch('/api/proxy/api/presence/partners?page=1&limit=50', {
+          headers: { 'x-admin-key': 'MediHost@2026' },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.partners || data.data?.partners || [];
+          if (list.length > 0) {
+            setPartners(list);
+            return;
+          }
+        }
+      } catch {
+        // Fall through to mock data
+      }
+      // Keep MOCK_PARTNERS fallback (already set as initial state)
+    }
+    loadPartners();
+  }, []);
+
   // Create form state
   const [createForm, setCreateForm] = useState({
     business_name: '', owner_name: '', email: '', phone: '', city: '',
