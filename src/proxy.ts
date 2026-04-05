@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function proxy(request: NextRequest) {
-  const hostname = request.headers.get('host') || '';
+  const hostname = request.headers.get('host')?.split(':')[0] || request.nextUrl.hostname || '';
   const { pathname } = request.nextUrl;
 
   // Partner app (partner.hemato.in)
