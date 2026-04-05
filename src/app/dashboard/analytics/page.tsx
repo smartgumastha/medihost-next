@@ -1,10 +1,11 @@
+import { cookies } from 'next/headers';
+import { getAuthFromCookie } from '@/lib/auth';
+import { AnalyticsDashboard } from '@/components/dashboard/analytics-dashboard';
+
 export const metadata = { title: 'Analytics — MediHost' };
 
-export default function AnalyticsPage() {
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6">
-      <h2 className="text-lg font-bold text-gray-900 mb-4">📈 Analytics & Insights</h2>
-      <p className="text-gray-500">Analytics dashboard migrating from HTML reference.</p>
-    </div>
-  );
+export default async function AnalyticsPage() {
+  const cookieStore = await cookies();
+  const user = getAuthFromCookie(cookieStore.get('medihost_auth')?.value);
+  return <AnalyticsDashboard user={user} />;
 }
