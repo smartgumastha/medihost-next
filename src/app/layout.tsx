@@ -21,6 +21,9 @@ const spaceMono = Space_Mono({
 export const metadata: Metadata = {
   title: "MediHost AI™ — Your Clinic's Digital Identity",
   description: "AI-powered website, custom domain, appointments, billing, EMR, and marketing — all in one platform for clinics, labs, pharmacies, and every medical practice.",
+  icons: {
+    icon: "/medihost-favicon.svg",
+  },
 };
 
 export default function RootLayout({
