@@ -27,8 +27,8 @@ import { DomainSearch } from './domain-search';
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'For Labs', href: '#features' },
-  { label: 'For Clinics', href: '#features' },
+  { label: 'For Labs', href: 'https://hemato.in' },
+  { label: 'HMS Software', href: '/signup' },
 ];
 
 const STEPS = [
@@ -274,11 +274,20 @@ export function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [billingYearly, setBillingYearly] = useState(false);
+  const [practiceIndex, setPracticeIndex] = useState(0);
+  const PRACTICE_TYPES = ['Clinic', 'Laboratory', 'Pharmacy', 'Dental Practice', 'Physio Center', 'Ayurvedic Clinic', 'Hospital', 'Nursing Home', 'Eye Clinic'];
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPracticeIndex((prev) => (prev + 1) % PRACTICE_TYPES.length);
+    }, 2500);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -347,7 +356,7 @@ export function LandingPage() {
           <a href="#" className="flex items-center gap-1.5 text-xl font-extrabold" style={{ letterSpacing: '-0.03em' }}>
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
             <span>
-              Medi<span className="text-emerald-400">Host</span>
+              Medi<span className="text-emerald-400">Host</span> <span className="text-emerald-400 text-xs align-super font-bold">AI</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
             </span>
           </a>
 
@@ -449,7 +458,7 @@ export function LandingPage() {
             style={{ animation: 'fadeInUp 0.6s ease-out' }}
           >
             <span className="text-base">{'\uD83D\uDE80'}</span>
-            Trusted by 500+ clinics in Hyderabad
+            AI-Powered SaaS for the Medical Fraternity
           </div>
 
           {/* Headline */}
@@ -457,8 +466,14 @@ export function LandingPage() {
             className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05]"
             style={{ letterSpacing: '-0.03em', animation: 'fadeInUp 0.6s ease-out 0.1s both' }}
           >
-            Your Clinic Deserves a<br />
-            <span className="gradient-text">Digital Identity</span>
+            Your{' '}
+            <span className="inline-block min-w-[280px] sm:min-w-[360px] text-left">
+              <span key={practiceIndex} className="inline-block" style={{ animation: 'fadeInUp 0.4s ease-out' }}>
+                {PRACTICE_TYPES[practiceIndex]}
+              </span>
+            </span>
+            <br />
+            Deserves a <span className="gradient-text">Digital Identity</span>
           </h1>
 
           {/* Subtext */}
@@ -466,7 +481,7 @@ export function LandingPage() {
             className="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed"
             style={{ animation: 'fadeInUp 0.6s ease-out 0.2s both' }}
           >
-            AI-powered website, custom domain, appointments, billing, and marketing &mdash; all in one platform. Go live in 60 seconds.
+            AI-powered website, custom domain, appointments, billing, EMR, and one-click marketing &mdash; for clinics, labs, pharmacies, and every medical practice. Go live in 60 seconds.
           </p>
 
           {/* Domain Search */}
@@ -547,6 +562,55 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ===== No Domain Option ===== */}
+      <AnimateOnScroll>
+        <section className="py-16 px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="relative bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-white/10 rounded-3xl p-8 sm:p-12 overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px]" />
+              <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8">
+                <div className="flex-1">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-400 rounded-full text-xs font-bold mb-4">
+                    ⚡ NO DOMAIN NEEDED
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-3" style={{ letterSpacing: '-0.02em' }}>
+                    Just want clinic software?<br />Start without a domain.
+                  </h3>
+                  <p className="text-slate-400 text-base mb-6 max-w-lg">
+                    Get the full HMS — appointments, billing, EMR, queue management, pharmacy, LIS — without buying a domain. Go online later when you&apos;re ready.
+                  </p>
+                  <div className="flex flex-wrap gap-3 mb-6">
+                    <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-slate-300">✅ AI Marketing</span>
+                    <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-slate-300">✅ One-Click GBP</span>
+                    <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-slate-300">✅ Facebook Setup</span>
+                    <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-slate-300">✅ WhatsApp Automation</span>
+                    <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-slate-300">✅ Full EMR & Billing</span>
+                  </div>
+                  <a href="/signup" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-900 font-bold rounded-full text-sm hover:shadow-lg hover:shadow-white/20 transition-all">
+                    Start Free — No Domain Required <ChevronRight className="w-4 h-4" />
+                  </a>
+                </div>
+                <div className="w-full lg:w-72 flex-shrink-0">
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+                    <div className="text-4xl mb-3">🏥</div>
+                    <div className="text-lg font-bold text-white mb-1">Free Starter Plan</div>
+                    <div className="text-2xl font-extrabold text-emerald-400 mb-2">₹0</div>
+                    <div className="text-xs text-slate-500">forever &bull; no credit card</div>
+                    <div className="mt-4 space-y-2 text-left text-xs text-slate-400">
+                      <div>✓ Appointments & Queue</div>
+                      <div>✓ Billing & Invoicing</div>
+                      <div>✓ EMR & Prescriptions</div>
+                      <div>✓ AI Patient Summaries</div>
+                      <div>✓ Google Business Setup</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </AnimateOnScroll>
 
       {/* ===== Features Grid ===== */}
       <section className="py-24 sm:py-32 bg-gradient-to-b from-[#0F172A] to-[#131C31]" id="features">
@@ -857,7 +921,7 @@ export function LandingPage() {
 
           <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-600 text-center sm:text-left">
-              &copy; 2026 SmartGumastha Technologies &bull; MediHost&trade; &mdash; We Deliver Health
+              &copy; 2026 SmartGumastha Technologies &bull; MediHost AI&trade; &mdash; We Deliver Health
             </p>
             <div className="flex items-center gap-5 text-sm text-slate-500">
               <a href="#" className="hover:text-emerald-400 transition-colors">Twitter</a>
