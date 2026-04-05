@@ -201,7 +201,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
 
       {/* ─── Sidebar ─── */}
       <aside
-        className={`fixed top-14 left-0 bottom-0 w-[240px] z-40 overflow-y-auto transition-transform duration-200 ease-in-out ${
+        className={`fixed top-14 left-0 bottom-0 w-[240px] z-40 overflow-y-auto transition-transform duration-200 ease-in-out pb-14 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
         style={{ background: 'linear-gradient(180deg, #0F172A 0%, #1A2332 100%)' }}
