@@ -81,5 +81,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/api/proxy/:path*', '/storefront/:path*'],
+  matcher: [
+    /*
+     * Match all paths except static files and Next.js internals
+     * This ensures the proxy runs for hemato.in domain routing,
+     * subdomain detection, auth guards, and API proxy
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+  ],
 };
