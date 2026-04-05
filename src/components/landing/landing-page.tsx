@@ -353,7 +353,7 @@ export function LandingPage() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-1.5 text-xl font-extrabold" style={{ letterSpacing: '-0.03em' }}>
+          <a href="/" className="flex items-center gap-1.5 text-xl font-extrabold" style={{ letterSpacing: '-0.03em' }}>
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
             <span>
               Medi<span className="text-emerald-400">Host</span> <span className="text-emerald-400 text-xs align-super font-bold">AI</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
@@ -382,7 +382,7 @@ export function LandingPage() {
               Login
             </a>
             <a
-              href="#pricing"
+              href="/signup"
               className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
             >
               Start Free &rarr;
@@ -420,7 +420,7 @@ export function LandingPage() {
                 Login
               </a>
               <a
-                href="#pricing"
+                href="/signup"
                 className="px-4 py-2.5 text-sm font-bold text-center text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full"
               >
                 Start Free &rarr;
@@ -793,15 +793,16 @@ export function LandingPage() {
                       </li>
                     ))}
                   </ul>
-                  <button
-                    className={`mt-8 w-full py-3.5 rounded-full font-bold text-sm transition-all ${
+                  <a
+                    href="/signup"
+                    className={`mt-8 w-full py-3.5 rounded-full font-bold text-sm transition-all block text-center ${
                       plan.highlight
                         ? 'bg-white text-emerald-700 hover:bg-emerald-50 shadow-lg'
                         : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:shadow-lg hover:shadow-emerald-500/30'
                     }`}
                   >
                     {plan.cta}
-                  </button>
+                  </a>
                 </div>
               </AnimateOnScroll>
             ))}
@@ -881,7 +882,7 @@ export function LandingPage() {
             </p>
             <div className="mt-10">
               <a
-                href="#pricing"
+                href="/signup"
                 className="inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full text-lg hover:shadow-xl hover:shadow-emerald-500/30 transition-all"
                 style={{ animation: 'pulse-glow 3s ease-in-out infinite' }}
               >
