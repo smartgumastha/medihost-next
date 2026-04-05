@@ -1,10 +1,11 @@
+import { cookies } from 'next/headers';
+import { getAuthFromCookie } from '@/lib/auth';
+import { ProductsManager } from '@/components/dashboard/products-manager';
+
 export const metadata = { title: 'Tests & Services — MediHost' };
 
-export default function ProductsPage() {
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6">
-      <h2 className="text-lg font-bold text-gray-900 mb-4">💊 Tests & Services</h2>
-      <p className="text-gray-500">Product catalog migrating from HTML reference.</p>
-    </div>
-  );
+export default async function ProductsPage() {
+  const cookieStore = await cookies();
+  const user = getAuthFromCookie(cookieStore.get('medihost_auth')?.value);
+  return <ProductsManager user={user} />;
 }
