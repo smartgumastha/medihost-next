@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function proxy(request: NextRequest) {
-  // Subdomain routing for clinic storefronts
   const hostname = request.headers.get('host') || '';
+  const { pathname } = request.nextUrl;
+
+  // Hemato.in domain routing
+  const isHemato = hostname === 'hemato.in' || hostname === 'www.hemato.in';
+  if (isHemato) {
+    const url = request.nextUrl.clone();
+    // Map hemato.in paths to /hemato/* routes
+    if (pathname === '/' || pathname === '') {
+      url.pathname = '/hemato';
+    } else {
+      url.pathname = `/hemato${pathname}`;
+    }
+    return NextResponse.rewrite(url);
+  }
+
+  // Subdomain routing for clinic storefronts
   const isSubdomain = hostname.endsWith('.medihost.in') &&
     hostname !== 'medihost.in' &&
     hostname !== 'www.medihost.in' &&
@@ -16,8 +31,6 @@ export function proxy(request: NextRequest) {
     url.pathname = `/storefront/${subdomain}`;
     return NextResponse.rewrite(url);
   }
-
-  const { pathname } = request.nextUrl;
 
   // Get auth cookie
   const authCookie = request.cookies.get('medihost_auth')?.value;
