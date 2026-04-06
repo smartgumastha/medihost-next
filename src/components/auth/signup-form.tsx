@@ -4,26 +4,82 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PRACTICE_TYPES } from '@/lib/constants';
 
+const HEADINGS: Record<string, string> = {
+  dental: 'HMS for Dental Clinics',
+  hospital: 'Enterprise HMS for Hospitals',
+  eye: 'HMS for Eye Clinics',
+  skin: 'HMS for Skin Clinics',
+  multispecialty: 'Multi-Specialty HMS',
+  general: 'Start your Clinic on MediHost',
+};
+
+const PRODUCT_HEADINGS: Record<string, string> = {
+  lis: 'NABL LIS for your Lab',
+  pharmacy: 'Pharmacy POS',
+  physio: 'RightPhysio for Physio Centres',
+};
+
+const PRODUCT_REDIRECTS: Record<string, string> = {
+  hms: 'https://app.hemato.in',
+  lis: 'https://lis.hemato.in',
+  pharmacy: 'https://rx.medihost.in',
+  physio: 'https://physio.hemato.in',
+};
+
+function getHeading(domain: string | null, type: string | null, product: string | null): string {
+  if (domain) return `Get ${domain} + start your clinic`;
+  if (type && HEADINGS[type]) return HEADINGS[type];
+  if (product && PRODUCT_HEADINGS[product]) return PRODUCT_HEADINGS[product];
+  return 'Create your free MediHost account';
+}
+
+function getSelectedProduct(type: string | null, product: string | null): string {
+  if (product === 'lis') return 'lis';
+  if (product === 'pharmacy') return 'pharmacy';
+  if (product === 'physio') return 'physio';
+  return 'hms';
+}
+
+function getDefaultPartnerType(type: string | null, product: string | null): string {
+  if (type === 'dental') return 'dental';
+  if (type === 'hospital') return 'hospital';
+  if (type === 'eye') return 'eye_clinic';
+  if (type === 'multispecialty' || type === 'general') return 'clinic';
+  if (product === 'lis') return 'diagnostic_lab';
+  if (product === 'pharmacy') return 'pharmacy';
+  if (product === 'physio') return 'physiotherapy';
+  return 'clinic';
+}
+
 export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selectedDomain = searchParams.get('domain') || '';
+
+  const domain = searchParams.get('domain') || '';
+  const type = searchParams.get('type') || '';
+  const product = searchParams.get('product') || '';
+  const ref = searchParams.get('ref') || '';
+
+  const selectedProduct = getSelectedProduct(type || null, product || null);
+  const heading = getHeading(domain || null, type || null, product || null);
+
   const [form, setForm] = useState({
     business_name: '',
     owner_name: '',
     email: '',
     phone: '',
     password: '',
-    partner_type: 'clinic',
+    partner_type: getDefaultPartnerType(type || null, product || null),
   });
 
   // Pre-fill business name from domain
   useEffect(() => {
-    if (selectedDomain) {
-      const name = selectedDomain.split('.')[0].replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    if (domain) {
+      const name = domain.split('.')[0].replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       setForm(prev => ({ ...prev, business_name: prev.business_name || name }));
     }
-  }, [selectedDomain]);
+  }, [domain]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -49,12 +105,26 @@ export function SignupForm() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, selected_domain: selectedDomain }),
+        body: JSON.stringify({
+          ...form,
+          selected_domain: domain,
+          selected_product: selectedProduct,
+          ref_code: ref,
+        }),
       });
       const data = await res.json();
 
       if (data.success) {
-        router.push('/onboard');
+        // Redirect based on product
+        const token = data.user?.token || '';
+        const hospitalId = data.user?.hospitalId || '';
+        const baseUrl = PRODUCT_REDIRECTS[selectedProduct] || PRODUCT_REDIRECTS.hms;
+
+        if (token && hospitalId) {
+          window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
+        } else {
+          router.push('/onboard');
+        }
       } else {
         setError(data.error || 'Registration failed. Please try again.');
       }
@@ -69,15 +139,20 @@ export function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {selectedDomain && (
+      {/* Dynamic heading */}
+      <h3 className="text-lg font-bold text-white text-center mb-2">{heading}</h3>
+
+      {/* Domain badge */}
+      {domain && (
         <div className="flex items-center gap-3 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-          <span className="text-emerald-400 text-lg">🌐</span>
-          <div>
-            <div className="text-xs text-emerald-400/70 font-medium">Selected Domain</div>
-            <div className="text-sm font-bold text-emerald-300">{selectedDomain}</div>
+          <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">✓</span>
+          <div className="flex-1">
+            <div className="text-sm font-bold text-emerald-300">Your domain: {domain}</div>
+            <div className="text-xs text-emerald-400/60">Ready to register — included with your plan</div>
           </div>
         </div>
       )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label htmlFor="business_name" className="block text-sm font-medium text-slate-300">
@@ -192,6 +267,23 @@ export function SignupForm() {
       >
         {loading ? 'Creating account...' : 'Create Account'}
       </button>
+
+      {/* No domain path */}
+      {!domain && (
+        <p className="text-center text-xs text-slate-500 mt-2">
+          Want your own domain?{' '}
+          <a href="/" className="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">
+            Search at medihost.in
+          </a>
+        </p>
+      )}
+
+      {/* Ref tracking indicator */}
+      {ref && (
+        <p className="text-center text-xs text-slate-600">
+          Referred by: {ref}
+        </p>
+      )}
 
       <p className="text-center text-sm text-slate-400 mt-4">
         Already have an account?{' '}

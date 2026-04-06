@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
         password: body.password,
         partner_type: body.partner_type,
         selected_domain: body.selected_domain || '',
+        selected_product: body.selected_product || 'hms',
+        ref_code: body.ref_code || '',
         plan_tier: 'starter',
       }),
     });
