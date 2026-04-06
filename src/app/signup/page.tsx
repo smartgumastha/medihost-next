@@ -4,6 +4,12 @@ import { SignupForm } from '@/components/auth/signup-form';
 export const metadata = {
   title: 'Sign Up — MediHost',
   description: 'Create your MediHost account and get your clinic online in 60 seconds.',
+  openGraph: {
+    title: 'Sign Up — MediHost AI',
+    description: 'Create your free clinic account. AI website, domain, HMS, appointments — all included.',
+    url: 'https://medihost.in/signup',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
 };
 
 export default function SignupPage() {

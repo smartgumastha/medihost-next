@@ -4,6 +4,12 @@ import { ResellerRegistration } from '@/components/reseller/registration';
 export const metadata = {
   title: 'Become a MediHost Reseller — Earn 10-20% Ongoing Commission',
   description: 'Join MediHost\'s reseller program. Refer clinics, earn recurring commissions. No investment needed.',
+  openGraph: {
+    title: 'Become a MediHost Reseller — Earn 10-20% Ongoing Commission',
+    description: 'Refer clinics, earn recurring commissions. Free to join, no targets, no pressure.',
+    url: 'https://medihost.in/reseller',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
 };
 
 export default function ResellerPage() {
