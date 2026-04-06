@@ -9,8 +9,9 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        business_name: body.business_name,
-        owner_name: body.owner_name,
+        hospital_name: body.business_name,
+        first_name: (body.owner_name || 'Doctor').split(' ')[0],
+        last_name: (body.owner_name || '').split(' ').slice(1).join(' ') || 'User',
         email: body.email,
         phone: body.phone || '',
         password: body.password,
