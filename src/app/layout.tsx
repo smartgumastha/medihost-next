@@ -20,7 +20,7 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MediHost AI™ — Your Clinic's Digital Identity",
+  title: "MediHost™ AI — Your Clinic's Digital Identity",
   description: "AI-powered website, custom domain, appointments, billing, EMR, and marketing — all in one platform for clinics, labs, pharmacies, and every medical practice.",
   icons: {
     icon: "/medihost-favicon.svg",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: 'https://medihost.in',
     siteName: 'MediHost AI',
-    title: "MediHost AI™ — Your Clinic's Digital Identity",
+    title: "MediHost™ AI — Your Clinic's Digital Identity",
     description: "Get your clinic online in 60 seconds. AI-powered website, custom domain, appointments, billing, EMR & marketing — all in one platform.",
     images: [
       {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "MediHost AI™ — Your Clinic's Digital Identity",
+    title: "MediHost™ AI — Your Clinic's Digital Identity",
     description: "Get your clinic online in 60 seconds. AI website, domain, appointments, billing & more.",
     images: ['/og-image.png'],
   },
