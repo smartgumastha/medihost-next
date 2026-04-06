@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         phone: body.phone,
         password: body.password,
         partner_type: body.partner_type,
-        selected_domain: '',
+        selected_domain: body.selected_domain || '',
         plan_tier: 'starter',
       }),
     });
@@ -54,8 +54,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Account created. Please login.' });
     }
 
+    let errorMessage = data.error || 'Registration failed';
+    if (errorMessage.toLowerCase().includes('selected_domain') || errorMessage.toLowerCase().includes('domain')) {
+      errorMessage = 'Please search and select a domain first, or start without a domain below.';
+    }
+
     return NextResponse.json(
-      { success: false, error: data.error || 'Registration failed' },
+      { success: false, error: errorMessage },
       { status: 400 }
     );
   } catch {
