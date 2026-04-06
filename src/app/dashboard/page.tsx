@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { getAuthFromCookie } from '@/lib/auth';
+import { SetupChecklist } from '@/components/dashboard/setup-checklist';
 
 export const metadata = { title: 'Dashboard — MediHost' };
 
@@ -8,18 +9,6 @@ export default async function DashboardPage() {
   const user = getAuthFromCookie(cookieStore.get('medihost_auth')?.value);
   const name = user?.name || 'Partner';
   const role = user?.role?.replace(/_/g, ' ') || 'Admin';
-
-  // Setup progress simulation (in real app, derive from actual data)
-  const setupSteps = [
-    { label: 'Profile', done: true },
-    { label: 'Website', done: false },
-    { label: 'Domain', done: false },
-    { label: 'Doctors', done: false },
-    { label: 'Go Live', done: false },
-  ];
-  const completedCount = setupSteps.filter(s => s.done).length;
-  const progressPercent = Math.round((completedCount / setupSteps.length) * 100);
-  const setupComplete = completedCount === setupSteps.length;
 
   const stats = [
     { label: 'Profile Views', value: '0', trend: null, note: 'After go-live', color: 'border-l-emerald-500', trendColor: '' },
@@ -85,67 +74,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* ─── Quick Setup Card ─── */}
-      {!setupComplete && (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          {/* Progress bar */}
-          <div className="h-1 bg-gray-100">
-            <div
-              className="h-full bg-emerald-500 transition-all duration-500"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <div className="p-5 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-base font-semibold text-gray-900">
-                  Setup your clinic
-                </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {completedCount} of {setupSteps.length} steps completed
-                </p>
-              </div>
-              <a
-                href="/dashboard/profile"
-                className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
-              >
-                Continue Setup
-              </a>
-            </div>
-
-            {/* Step indicators */}
-            <div className="flex items-center gap-0">
-              {setupSteps.map((step, i) => (
-                <div key={step.label} className="flex items-center">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-colors ${
-                        step.done
-                          ? 'bg-emerald-500 border-emerald-500 text-white'
-                          : 'bg-white border-gray-300 text-gray-400'
-                      }`}
-                    >
-                      {step.done ? (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      ) : (
-                        i + 1
-                      )}
-                    </div>
-                    <span className={`text-[10px] mt-1.5 font-medium ${step.done ? 'text-emerald-600' : 'text-gray-400'}`}>
-                      {step.label}
-                    </span>
-                  </div>
-                  {i < setupSteps.length - 1 && (
-                    <div className={`w-8 sm:w-12 h-0.5 mx-1 mt-[-14px] ${step.done ? 'bg-emerald-500' : 'bg-gray-200'}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <SetupChecklist />
 
       {/* ─── Stats Grid ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
