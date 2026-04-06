@@ -65,5 +65,11 @@ export function getAuthFromClient(): AuthUser | null {
 
 export function getTokenFromClient(): string {
   const auth = getAuthFromClient();
-  return auth?.token || '';
+  if (auth?.token) return auth.token;
+  // Fallback to localStorage
+  try {
+    const stored = localStorage.getItem('mh_token');
+    if (stored) return stored;
+  } catch { /* silent */ }
+  return '';
 }

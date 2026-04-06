@@ -131,11 +131,21 @@ export function SignupForm() {
 
         // HMS flow — save token and go to plan selection
         if (token) {
+          const authObj = JSON.stringify({
+            id: String(data.user?.id || hospitalId),
+            email: form.email,
+            name: form.owner_name,
+            role: 'HOSPITAL_ADMIN',
+            hospitalId: String(hospitalId),
+            token: token
+          });
           localStorage.setItem('mh_token', token);
           localStorage.setItem('mh_hospital_id', String(hospitalId));
           localStorage.setItem('mh_user_name', form.owner_name);
           localStorage.setItem('mh_user_email', form.email);
           localStorage.setItem('mh_user_phone', form.phone);
+          // Write cookie directly from client so payment page can read it
+          document.cookie = 'mh_auth=' + encodeURIComponent(authObj) + '; path=/; max-age=604800; samesite=lax';
         }
 
         const params = new URLSearchParams();
