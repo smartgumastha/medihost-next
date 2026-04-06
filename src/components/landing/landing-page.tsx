@@ -15,8 +15,6 @@ import {
   Check,
   Minus,
   ChevronRight,
-  Star,
-  Quote,
 } from 'lucide-react';
 import { DomainSearch } from './domain-search';
 
@@ -146,7 +144,7 @@ const PLANS = [
     highlight: false,
   },
   {
-    name: 'Professional',
+    name: 'Growth',
     price: '\u20B9999',
     period: '/month',
     badge: null,
@@ -164,12 +162,12 @@ const PLANS = [
     highlight: false,
   },
   {
-    name: 'Business',
-    price: '\u20B92,999',
+    name: 'Professional',
+    price: '\u20B92,499',
     period: '/month',
     badge: 'Most Popular',
     features: [
-      'Everything in Professional',
+      'Everything in Growth',
       'LIS + pharmacy module',
       'AI marketing suite',
       'Unlimited doctors',
@@ -180,27 +178,6 @@ const PLANS = [
     ],
     cta: 'Start 14-Day Trial',
     highlight: true,
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    quote: 'MediHost got my clinic online in literally 60 seconds. The AI website is better than what my web designer made.',
-    name: 'Dr. Sharma',
-    role: 'General Physician',
-    rating: 5,
-  },
-  {
-    quote: "The domain + website + appointment booking \u2014 all for free? I thought there was a catch. There wasn't.",
-    name: 'Dr. Priya',
-    role: 'Dental Clinic',
-    rating: 5,
-  },
-  {
-    quote: 'Hemato marketplace brought us 200+ patients in the first month. The LIS integration is seamless.',
-    name: 'LifeCare Diagnostics',
-    role: 'Diagnostic Lab',
-    rating: 5,
   },
 ];
 
@@ -220,6 +197,7 @@ const FOOTER_COLS = [
   {
     title: 'Legal',
     links: ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'HIPAA Compliance', 'Refund Policy'],
+    hrefs: { 'Privacy Policy': '/privacy', 'Terms of Service': '/terms', 'Cookie Policy': '/privacy#cookies', 'HIPAA Compliance': '/compliance', 'Refund Policy': '/refund' } as Record<string, string>,
   },
 ];
 
@@ -483,10 +461,10 @@ export function LandingPage() {
           <div className="max-w-5xl mx-auto px-4 py-8">
             <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16 text-center">
               {[
-                { value: '500+', label: 'Clinics' },
-                { value: '50+', label: 'Labs' },
-                { value: '10,000+', label: 'Patients' },
-                { value: '4.8\u2605', label: 'Rating' },
+                { value: '3', label: 'Live Products' },
+                { value: '\u2713', label: 'NABL Compliant' },
+                { value: '\u2713', label: 'ABDM Ready' },
+                { value: '\u2713', label: 'HIPAA Aligned' },
               ].map((s, i) => (
                 <div key={s.label} className="flex items-center gap-3">
                   {i > 0 && <span className="hidden sm:block w-px h-8 bg-white/10 -ml-8 sm:-ml-8" />}
@@ -788,49 +766,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ===== Testimonials ===== */}
-      <section className="py-24 sm:py-32 bg-[#0F172A]">
-        <div className="max-w-6xl mx-auto px-4">
-          <AnimateOnScroll className="text-center">
-            <p className="text-emerald-400 font-bold text-sm uppercase tracking-widest mb-3">Testimonials</p>
-            <h2
-              className="text-3xl sm:text-5xl font-extrabold text-white"
-              style={{ letterSpacing: '-0.03em' }}
-            >
-              Loved by Doctors
-            </h2>
-          </AnimateOnScroll>
-
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <AnimateOnScroll key={t.name} delay={i * 150}>
-                <div className="bg-white/[0.04] backdrop-blur-sm rounded-2xl p-7 border border-white/[0.08] hover:border-white/20 hover:-translate-y-1 transition-all duration-300">
-                  {/* Quote icon */}
-                  <Quote className="w-8 h-8 text-emerald-500/30 mb-4" />
-                  {/* Stars */}
-                  <div className="flex gap-0.5 mb-4">
-                    {Array.from({ length: t.rating }).map((_, j) => (
-                      <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-slate-300 text-sm leading-relaxed mb-6">&ldquo;{t.quote}&rdquo;</p>
-                  <div className="flex items-center gap-3">
-                    {/* Avatar placeholder */}
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
-                      {t.name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="font-bold text-white text-sm">{t.name}</div>
-                      <div className="text-slate-500 text-xs">{t.role}</div>
-                    </div>
-                  </div>
-                </div>
-              </AnimateOnScroll>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ===== CTA Section ===== */}
       <section className="relative py-24 sm:py-32 overflow-hidden">
         {/* Dark gradient background */}
@@ -856,7 +791,7 @@ export function LandingPage() {
               Ready to go live?
             </h2>
             <p className="mt-4 text-slate-400 text-lg">
-              Join 500+ clinics already growing with MediHost
+              Join the medical fraternity already growing with MediHost AI
             </p>
             <div className="mt-10">
               <a
@@ -886,7 +821,7 @@ export function LandingPage() {
                   {col.links.map((link) => (
                     <li key={link}>
                       <a
-                        href="#"
+                        href={(col as { hrefs?: Record<string, string> }).hrefs?.[link] || '#'}
                         className="text-sm text-slate-500 hover:text-emerald-400 transition-colors"
                       >
                         {link}
@@ -900,7 +835,7 @@ export function LandingPage() {
 
           <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-600 text-center sm:text-left">
-              &copy; 2026 SmartGumastha Technologies &bull; MediHost AI&trade; &mdash; We Deliver Health
+              &copy; 2026 SmartGumastha Technologies &bull; MediHost AI&trade; &mdash; Clinic Software That Works
             </p>
             <div className="flex items-center gap-5 text-sm text-slate-500">
               <a href="#" className="hover:text-emerald-400 transition-colors">Twitter</a>
