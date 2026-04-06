@@ -51,3 +51,19 @@ export function getAuthFromCookie(cookieValue: string | undefined): AuthUser | n
     return null;
   }
 }
+
+export function getAuthFromClient(): AuthUser | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.split('; ').find(row => row.startsWith('mh_auth='));
+  if (!match) return null;
+  try {
+    return JSON.parse(decodeURIComponent(match.split('=')[1]));
+  } catch {
+    return null;
+  }
+}
+
+export function getTokenFromClient(): string {
+  const auth = getAuthFromClient();
+  return auth?.token || '';
+}

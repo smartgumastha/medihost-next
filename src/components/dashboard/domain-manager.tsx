@@ -57,8 +57,9 @@ interface DomainResult {
 }
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interface Window {
-    Razorpay: new (options: RazorpayOptions) => { open: () => void };
+    Razorpay: new (options: any) => { open: () => void; on: (event: string, handler: (r: any) => void) => void };
   }
 }
 
