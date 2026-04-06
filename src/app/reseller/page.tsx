@@ -2,19 +2,33 @@ import { Suspense } from 'react';
 import { ResellerRegistration } from '@/components/reseller/registration';
 
 export const metadata = {
-  title: 'Become a MediHost Reseller — Earn ₹500+ per Referral',
-  description: 'Join MediHost\'s reseller program. Refer clinics, earn commissions. No investment needed.',
+  title: 'Become a MediHost Reseller — Earn 10-20% Ongoing Commission',
+  description: 'Join MediHost\'s reseller program. Refer clinics, earn recurring commissions. No investment needed.',
 };
 
 export default function ResellerPage() {
   return (
     <div className="min-h-screen bg-[#0F172A]">
-      <nav className="border-b border-white/10 h-14 flex items-center px-6">
-        <a href="/" className="text-lg font-bold text-white">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5" />
-          Medi<span className="text-emerald-400">Host</span> AI<sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
+      {/* Nav bar */}
+      <nav className="border-b border-white/10 h-14 flex items-center justify-between px-6">
+        <a href="/" className="flex items-center gap-2 text-lg font-bold text-white">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+          MediHost <span className="text-emerald-400">AI</span>
+          <sup className="text-[8px] text-slate-500">&trade;</sup>
         </a>
+        <div className="flex items-center gap-6">
+          <a href="/" className="text-sm text-slate-400 hover:text-white transition-colors">
+            Home
+          </a>
+          <a
+            href="/reseller/login"
+            className="text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            Already a reseller? Login →
+          </a>
+        </div>
       </nav>
+
       <Suspense fallback={<div className="text-center py-20 text-slate-500">Loading...</div>}>
         <ResellerRegistration />
       </Suspense>
