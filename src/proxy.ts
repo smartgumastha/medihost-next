@@ -31,11 +31,27 @@ export function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
+  // HMS subdomain (hms.medihost.in) → dashboard with HMS bridge
+  if (hostname === 'hms.medihost.in') {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname === '/' ? '/dashboard' : pathname;
+    return NextResponse.rewrite(url);
+  }
+
+  // LIS subdomain (lis.medihost.in) → dashboard with LIS focus
+  if (hostname === 'lis.medihost.in') {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname === '/' ? '/dashboard' : pathname;
+    return NextResponse.rewrite(url);
+  }
+
   // Subdomain routing for clinic storefronts
   const isSubdomain = hostname.endsWith('.medihost.in') &&
     hostname !== 'medihost.in' &&
     hostname !== 'www.medihost.in' &&
     !hostname.startsWith('app.') &&
+    !hostname.startsWith('hms.') &&
+    !hostname.startsWith('lis.') &&
     !hostname.startsWith('partner.') &&
     !hostname.startsWith('phlebo.');
 
