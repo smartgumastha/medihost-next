@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="100" viewBox="0 0 400 100">
+  <defs>
+    <linearGradient id="dot-grad-w" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#34D399"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="30" cy="50" r="14" fill="url(#dot-grad-w)"/>
+  <rect x="27" y="40" width="6" height="20" rx="2" fill="#ffffff" opacity="0.9"/>
+  <rect x="22" y="47" width="16" height="6" rx="2" fill="#ffffff" opacity="0.9"/>
+
+  <text x="56" y="62" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="800" fill="#ffffff" letter-spacing="-1">MediHost</text>
+  <text x="300" y="62" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="38" font-weight="800" fill="#10B981" letter-spacing="-1">AI</text>
+  <text x="350" y="42" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748B" font-weight="600">TM</text>
+</svg>

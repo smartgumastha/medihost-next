@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MediHost AI — Brand Kit & Social Media Assets</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0F172A; color: #e2e8f0; padding: 40px; }
+    h1 { font-size: 32px; margin-bottom: 8px; }
+    .subtitle { color: #64748b; margin-bottom: 40px; }
+    h2 { font-size: 20px; color: #10B981; margin: 40px 0 8px; }
+    .note { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+    .asset { background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .asset img { width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155; }
+    .asset-info { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px; }
+    .asset-label { font-size: 14px; color: #94a3b8; }
+    .asset-size { font-size: 12px; color: #475569; }
+    .btn { display: inline-block; padding: 10px 20px; background: #10B981; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .btn:hover { background: #059669; }
+    .btn-outline { background: transparent; border: 1px solid #334155; color: #94a3b8; }
+    .btn-outline:hover { border-color: #10B981; color: #10B981; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .brand-colors { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+    .color-swatch { width: 80px; height: 80px; border-radius: 12px; display: flex; align-items: flex-end; padding: 6px; font-size: 11px; font-weight: 600; }
+    .tagline-box { background: #132038; border: 1px solid #1e3a5f; border-radius: 12px; padding: 24px; margin: 12px 0; text-align: center; }
+    .tagline { font-size: 24px; font-weight: 700; color: #fff; }
+    .tagline em { color: #10B981; font-style: normal; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } body { padding: 20px; } }
+    @media print {
+      body { background: white; color: #1a1a2e; padding: 20px; }
+      .asset { border-color: #ddd; background: #f8f8f8; }
+      .btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>MediHost AI — Brand Kit</h1>
+<p class="subtitle">Social media assets, logos, and brand guidelines. Click "Download PNG" on each asset.</p>
+
+<!-- ===== TAGLINE ===== -->
+<h2>Tagline</h2>
+<div class="tagline-box">
+  <div class="tagline">Your Clinic's <em>Digital Identity</em></div>
+  <p style="color: #64748b; font-size: 14px; margin-top: 8px;">AI Website + Domain + HMS + Billing — Live in 60 seconds</p>
+</div>
+
+<!-- ===== BRAND COLORS ===== -->
+<h2>Brand Colors</h2>
+<div class="brand-colors">
+  <div class="color-swatch" style="background:#10B981;color:#fff;">#10B981</div>
+  <div class="color-swatch" style="background:#059669;color:#fff;">#059669</div>
+  <div class="color-swatch" style="background:#0F172A;color:#94a3b8;">#0F172A</div>
+  <div class="color-swatch" style="background:#1E293B;color:#94a3b8;">#1E293B</div>
+  <div class="color-swatch" style="background:#ffffff;color:#334155;border:1px solid #334155;">#FFFFFF</div>
+</div>
+
+<!-- ===== OG IMAGE ===== -->
+<h2>OG Image (Link Preview)</h2>
+<p class="note">1200 x 630px — Used when medihost.in links are shared on LinkedIn, Twitter, WhatsApp, Facebook</p>
+<div class="asset">
+  <img src="/og-image.svg" alt="OG Image" id="og-img">
+  <div class="asset-info">
+    <span class="asset-label">og-image — 1200x630</span>
+    <button class="btn" onclick="downloadPNG('og-img', 'medihost-og-image', 1200, 630)">Download PNG</button>
+  </div>
+</div>
+
+<!-- ===== SOCIAL PROFILE ===== -->
+<h2>Social Media Profile Picture</h2>
+<p class="note">400 x 400px — Use for LinkedIn, Twitter/X, Instagram, Facebook page profile</p>
+<div class="asset" style="max-width: 440px;">
+  <img src="/medihost-social-profile.svg" alt="Profile" id="profile-img">
+  <div class="asset-info">
+    <span class="asset-label">Profile — 400x400</span>
+    <button class="btn" onclick="downloadPNG('profile-img', 'medihost-profile', 400, 400)">Download PNG</button>
+  </div>
+</div>
+
+<!-- ===== SOCIAL BANNER ===== -->
+<h2>Social Media Banner / Cover</h2>
+<p class="note">1500 x 500px — Use for LinkedIn company page cover, Twitter header, Facebook cover</p>
+<div class="asset">
+  <img src="/medihost-social-banner.svg" alt="Banner" id="banner-img">
+  <div class="asset-info">
+    <span class="asset-label">Banner — 1500x500</span>
+    <button class="btn" onclick="downloadPNG('banner-img', 'medihost-banner', 1500, 500)">Download PNG</button>
+  </div>
+</div>
+
+<!-- ===== LOGOS ===== -->
+<h2>Logos</h2>
+<div class="grid-2">
+  <div class="asset">
+    <div style="background:#ffffff;border-radius:8px;padding:20px;">
+      <img src="/medihost-logo.svg" alt="Logo Dark" id="logo-dark">
+    </div>
+    <div class="asset-info">
+      <span class="asset-label">Logo (dark text, light bg)</span>
+      <button class="btn" onclick="downloadPNG('logo-dark', 'medihost-logo-dark', 400, 100)">Download PNG</button>
+    </div>
+  </div>
+  <div class="asset">
+    <div style="background:#0F172A;border-radius:8px;padding:20px;">
+      <img src="/medihost-logo-white.svg" alt="Logo White" id="logo-white">
+    </div>
+    <div class="asset-info">
+      <span class="asset-label">Logo (white text, dark bg)</span>
+      <button class="btn" onclick="downloadPNG('logo-white', 'medihost-logo-white', 400, 100)">Download PNG</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== USAGE TABLE ===== -->
+<h2>Where to Use Each Asset</h2>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;">
+  <tr style="border-bottom:1px solid #334155;">
+    <th style="text-align:left;padding:10px;color:#10B981;">Platform</th>
+    <th style="text-align:left;padding:10px;color:#10B981;">Profile Picture</th>
+    <th style="text-align:left;padding:10px;color:#10B981;">Cover/Banner</th>
+    <th style="text-align:left;padding:10px;color:#10B981;">Link Preview</th>
+  </tr>
+  <tr style="border-bottom:1px solid #1e293b;">
+    <td style="padding:10px;">LinkedIn</td>
+    <td style="padding:10px;">medihost-profile.png</td>
+    <td style="padding:10px;">medihost-banner.png</td>
+    <td style="padding:10px;">og-image (auto from meta tags)</td>
+  </tr>
+  <tr style="border-bottom:1px solid #1e293b;">
+    <td style="padding:10px;">Twitter / X</td>
+    <td style="padding:10px;">medihost-profile.png</td>
+    <td style="padding:10px;">medihost-banner.png</td>
+    <td style="padding:10px;">og-image (auto)</td>
+  </tr>
+  <tr style="border-bottom:1px solid #1e293b;">
+    <td style="padding:10px;">Instagram</td>
+    <td style="padding:10px;">medihost-profile.png</td>
+    <td style="padding:10px;">—</td>
+    <td style="padding:10px;">—</td>
+  </tr>
+  <tr style="border-bottom:1px solid #1e293b;">
+    <td style="padding:10px;">Facebook</td>
+    <td style="padding:10px;">medihost-profile.png</td>
+    <td style="padding:10px;">medihost-banner.png</td>
+    <td style="padding:10px;">og-image (auto)</td>
+  </tr>
+  <tr>
+    <td style="padding:10px;">WhatsApp</td>
+    <td style="padding:10px;">medihost-profile.png</td>
+    <td style="padding:10px;">—</td>
+    <td style="padding:10px;">og-image (auto)</td>
+  </tr>
+</table>
+
+<p style="margin-top: 40px; color: #475569; font-size: 13px; text-align: center; border-top: 1px solid #1e293b; padding-top: 20px;">
+  MediHost AI Brand Kit — April 2026 | medihost.in
+</p>
+
+<script>
+function downloadPNG(imgId, filename, width, height) {
+  const img = document.getElementById(imgId);
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  const svgImg = new Image();
+  svgImg.crossOrigin = 'anonymous';
+  svgImg.onload = function() {
+    ctx.drawImage(svgImg, 0, 0, width, height);
+    const link = document.createElement('a');
+    link.download = filename + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+  svgImg.src = img.src;
+}
+</script>
+
+</body>
+</html>

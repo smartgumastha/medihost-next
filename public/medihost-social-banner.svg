@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500">
+  <defs>
+    <linearGradient id="bg-ban" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A"/>
+      <stop offset="50%" style="stop-color:#132038"/>
+      <stop offset="100%" style="stop-color:#1E293B"/>
+    </linearGradient>
+    <linearGradient id="green-ban" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10B981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <linearGradient id="glow-ban1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#10B981;stop-opacity:0"/>
+    </linearGradient>
+    <linearGradient id="glow-ban2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1500" height="500" fill="url(#bg-ban)"/>
+
+  <!-- Decorative glow -->
+  <circle cx="1200" cy="100" r="300" fill="url(#glow-ban1)"/>
+  <circle cx="200" cy="400" r="250" fill="url(#glow-ban2)"/>
+
+  <!-- Subtle grid -->
+  <pattern id="grid-ban" width="50" height="50" patternUnits="userSpaceOnUse">
+    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
+  </pattern>
+  <rect width="1500" height="500" fill="url(#grid-ban)"/>
+
+  <!-- Left: Logo -->
+  <circle cx="100" cy="190" r="18" fill="url(#green-ban)"/>
+  <rect x="96" y="178" width="8" height="24" rx="3" fill="#ffffff" opacity="0.9"/>
+  <rect x="90" y="186" width="20" height="8" rx="3" fill="#ffffff" opacity="0.9"/>
+
+  <text x="135" y="200" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="32" font-weight="800" fill="#ffffff" letter-spacing="-0.5">MediHost</text>
+  <text x="352" y="200" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="32" font-weight="800" fill="#10B981" letter-spacing="-0.5">AI</text>
+
+  <!-- Main headline -->
+  <text x="80" y="290" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="56" font-weight="800" fill="#ffffff" letter-spacing="-2">Your Clinic's Digital Identity</text>
+
+  <!-- Sub-headline -->
+  <text x="80" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#94A3B8">AI Website  •  Custom Domain  •  HMS  •  Appointments  •  Billing</text>
+
+  <!-- CTA pill -->
+  <rect x="80" y="375" width="280" height="50" rx="25" fill="url(#green-ban)"/>
+  <text x="135" y="407" font-family="system-ui, -apple-system, sans-serif" font-size="19" font-weight="700" fill="#ffffff">Live in 60 seconds →</text>
+
+  <!-- Right side: feature pills floating -->
+  <rect x="960" y="140" width="200" height="44" rx="22" fill="#ffffff" opacity="0.06" stroke="#ffffff" stroke-opacity="0.1"/>
+  <text x="988" y="168" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="#94A3B8">🌐 Domain Registration</text>
+
+  <rect x="1020" y="200" width="200" height="44" rx="22" fill="#ffffff" opacity="0.06" stroke="#ffffff" stroke-opacity="0.1"/>
+  <text x="1048" y="228" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="#94A3B8">✨ AI Website Builder</text>
+
+  <rect x="980" y="260" width="220" height="44" rx="22" fill="#ffffff" opacity="0.06" stroke="#ffffff" stroke-opacity="0.1"/>
+  <text x="1008" y="288" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="#94A3B8">🏥 Hospital Management</text>
+
+  <rect x="1040" y="320" width="180" height="44" rx="22" fill="#ffffff" opacity="0.06" stroke="#ffffff" stroke-opacity="0.1"/>
+  <text x="1068" y="348" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="#94A3B8">🔬 Lab LIS (NABL)</text>
+
+  <rect x="990" y="380" width="210" height="44" rx="22" fill="#ffffff" opacity="0.06" stroke="#ffffff" stroke-opacity="0.1"/>
+  <text x="1018" y="408" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="#94A3B8">📊 Google Business SEO</text>
+
+  <!-- Bottom accent line -->
+  <rect x="0" y="490" width="1500" height="10" fill="url(#green-ban)" opacity="0.6"/>
+
+  <!-- URL -->
+  <text x="1310" y="470" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="600" fill="#10B981" text-anchor="middle">medihost.in</text>
+</svg>
