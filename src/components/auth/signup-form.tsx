@@ -115,16 +115,32 @@ export function SignupForm() {
       const data = await res.json();
 
       if (data.success) {
-        // Redirect based on product
         const token = data.user?.token || '';
         const hospitalId = data.user?.hospitalId || '';
-        const baseUrl = PRODUCT_REDIRECTS[selectedProduct] || PRODUCT_REDIRECTS.hms;
 
-        if (token && hospitalId) {
-          window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
-        } else {
-          router.push('/onboard');
+        // Non-HMS products go directly to their app
+        if (selectedProduct !== 'hms') {
+          const baseUrl = PRODUCT_REDIRECTS[selectedProduct];
+          if (token && hospitalId) {
+            window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
+          } else {
+            router.push('/onboard');
+          }
+          return;
         }
+
+        // HMS flow — save token and go to plan selection
+        if (token) {
+          localStorage.setItem('mh_token', token);
+          localStorage.setItem('mh_hospital_id', String(hospitalId));
+          localStorage.setItem('mh_user_name', form.owner_name);
+          localStorage.setItem('mh_user_email', form.email);
+          localStorage.setItem('mh_user_phone', form.phone);
+        }
+
+        const params = new URLSearchParams();
+        if (domain) params.set('domain', domain);
+        router.push(`/plans${params.toString() ? '?' + params.toString() : ''}`);
       } else {
         setError(data.error || 'Registration failed. Please try again.');
       }

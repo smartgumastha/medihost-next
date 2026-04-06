@@ -45,7 +45,7 @@ export function DomainSearch() {
 
   const checkSingleDomain = useCallback(async (domain: string): Promise<DomainResult> => {
     try {
-      const res = await fetch(`/api/presence/domains/check-multi?domain=${encodeURIComponent(domain.split('.')[0])}`);
+      const res = await fetch(`/api/proxy/api/presence/domains/check-multi?domain=${encodeURIComponent(domain.split('.')[0])}`);
       if (res.ok) {
         const data = await res.json();
         const results = data.results || [];
@@ -86,7 +86,7 @@ export function DomainSearch() {
         : input.toLowerCase().replace(/[^a-z0-9]/g, '');
 
       // Call the batch domain check API
-      const res = await fetch(`/api/presence/domains/check-multi?domain=${encodeURIComponent(name)}`);
+      const res = await fetch(`/api/proxy/api/presence/domains/check-multi?domain=${encodeURIComponent(name)}`);
 
       if (res.ok) {
         const data = await res.json();
@@ -310,7 +310,7 @@ export function DomainSearch() {
                         <button
                           key={prefix}
                           onClick={() => { setQuery(suggestion); setResults([]); setSelected(null); setLoading(true); setError('');
-                            fetch(`/api/presence/domains/check-multi?domain=${encodeURIComponent(suggestion)}`)
+                            fetch(`/api/proxy/api/presence/domains/check-multi?domain=${encodeURIComponent(suggestion)}`)
                               .then(r => r.json())
                               .then(data => {
                                 const res = (data.results || []).map((r: { domain: string; available: boolean; price?: number }) => ({

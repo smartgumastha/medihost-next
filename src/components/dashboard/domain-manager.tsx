@@ -46,16 +46,62 @@ function Toast({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mock data                                                          */
+/*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-const MOCK_SEARCH_RESULTS = [
-  { domain: '.com', price: 699, available: true, bestPick: true },
-  { domain: '.in', price: 399, available: true, bestPick: false },
-  { domain: '.co.in', price: 299, available: true, bestPick: false },
-  { domain: '.org', price: 899, available: false, bestPick: false },
-  { domain: '.clinic', price: 1999, available: true, bestPick: false },
-];
+interface DomainResult {
+  domain: string;
+  price: number;
+  available: boolean;
+  bestPick?: boolean;
+}
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => { open: () => void };
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill: { email: string; name: string };
+  theme: { color: string };
+  modal?: { ondismiss?: () => void };
+}
+
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Razorpay script loader                                             */
+/* ------------------------------------------------------------------ */
+
+function loadRazorpay(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Razorpay'));
+    document.head.appendChild(script);
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/*  DNS records                                                        */
+/* ------------------------------------------------------------------ */
 
 const DNS_RECORDS = [
   { type: 'CNAME', host: 'www', value: 'cname.vercel-dns.com', status: 'verified' as const },
@@ -70,11 +116,13 @@ export function DomainManager({ user }: { user: AuthUser | null }) {
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [activeTab, setActiveTab] = useState<'status' | 'search' | 'connect'>('status');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<typeof MOCK_SEARCH_RESULTS | null>(null);
+  const [searchResults, setSearchResults] = useState<DomainResult[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [connectDomain, setConnectDomain] = useState('');
   const [connected, setConnected] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [selectedDomain, setSelectedDomain] = useState<DomainResult | null>(null);
+  const [ordering, setOrdering] = useState(false);
 
   const showToast = useCallback((message: string, type: ToastType) => {
     setToast({ message, type });
@@ -94,38 +142,166 @@ export function DomainManager({ user }: { user: AuthUser | null }) {
     });
   };
 
+  /* ---- Domain search ---- */
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
       showToast('Please enter a domain name to search', 'error');
       return;
     }
     setSearching(true);
+    setSearchResults(null);
+    setSelectedDomain(null);
 
-    // Try real API first
     try {
       const res = await fetch(
-        `/api/proxy/api/presence/domains/check-multi?domain=${encodeURIComponent(searchQuery)}`,
+        `/api/proxy/api/presence/domains/check-multi?domain=${encodeURIComponent(searchQuery.trim())}`,
       );
       if (res.ok) {
         const data = await res.json();
         const results = data.results || data.data?.results;
-        if (results) {
+        if (results && results.length > 0) {
           setSearchResults(results);
           setSearching(false);
           return;
         }
       }
+      showToast('No results found. Try a different name.', 'error');
     } catch {
-      // Fall through to mock data
+      showToast('Search failed. Please try again.', 'error');
     }
 
-    // Fallback to mock results
-    setTimeout(() => {
-      setSearchResults(MOCK_SEARCH_RESULTS);
-      setSearching(false);
-    }, 1200);
+    setSearching(false);
   };
 
+  /* ---- Domain order + Razorpay payment ---- */
+  const handleOrderDomain = async (domainItem: DomainResult) => {
+    if (!user?.token) {
+      showToast('Session expired. Please log in again.', 'error');
+      return;
+    }
+    if (!domainItem.available) return;
+
+    setSelectedDomain(domainItem);
+    setOrdering(true);
+
+    try {
+      // Step 1: Load Razorpay SDK
+      await loadRazorpay();
+
+      // Step 2: Create Razorpay order via backend
+      const orderRes = await fetch('/api/proxy/api/presence/payments/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          amount: domainItem.price,
+          currency: 'INR',
+          purpose: 'domain',
+          domain: domainItem.domain,
+        }),
+      });
+
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok || !orderData.order_id) {
+        showToast(orderData.error || 'Could not create payment order. Try again.', 'error');
+        setOrdering(false);
+        return;
+      }
+
+      // Step 3: Open Razorpay checkout
+      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY;
+      if (!razorpayKey) {
+        showToast('Payment configuration error. Contact support.', 'error');
+        setOrdering(false);
+        return;
+      }
+
+      const rzp = new window.Razorpay({
+        key: razorpayKey,
+        amount: domainItem.price * 100, // Razorpay expects paise
+        currency: 'INR',
+        name: 'MediHost',
+        description: `Domain: ${domainItem.domain}`,
+        order_id: orderData.order_id,
+        handler: async (response: RazorpayResponse) => {
+          // Step 4: Verify payment
+          try {
+            const verifyRes = await fetch('/api/proxy/api/presence/payments/verify', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.token}`,
+              },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (!verifyRes.ok || verifyData.success === false) {
+              showToast(verifyData.error || 'Payment verification failed. Contact support.', 'error');
+              setOrdering(false);
+              return;
+            }
+
+            // Step 5: Register the domain
+            const registerRes = await fetch('/api/proxy/api/presence/domains/register', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.token}`,
+              },
+              body: JSON.stringify({
+                domain: domainItem.domain,
+                payment_id: response.razorpay_payment_id,
+                order_id: response.razorpay_order_id,
+              }),
+            });
+
+            const registerData = await registerRes.json();
+
+            if (registerRes.ok && registerData.success !== false) {
+              showToast(`Domain ${domainItem.domain} registered successfully!`, 'success');
+              // Reload page to show the new domain status
+              setTimeout(() => window.location.reload(), 1500);
+            } else {
+              showToast(
+                registerData.error || 'Payment successful but domain registration failed. Contact support.',
+                'error',
+              );
+            }
+          } catch {
+            showToast('Payment was successful but domain setup failed. Contact support.', 'error');
+          }
+          setOrdering(false);
+        },
+        prefill: {
+          email: user.email || '',
+          name: user.name || '',
+        },
+        theme: { color: '#059669' },
+        modal: {
+          ondismiss: () => {
+            setOrdering(false);
+            showToast('Payment cancelled.', 'error');
+          },
+        },
+      });
+
+      rzp.open();
+    } catch {
+      showToast('Could not start payment. Please try again.', 'error');
+      setOrdering(false);
+    }
+  };
+
+  /* ---- Connect existing domain ---- */
   const handleConnect = () => {
     if (!connectDomain.trim()) {
       showToast('Please enter your domain name', 'error');
@@ -369,11 +545,12 @@ export function DomainManager({ user }: { user: AuthUser | null }) {
                     {searchResults.map((result) => (
                       <div
                         key={result.domain}
-                        className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-gray-50"
+                        className={`flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-gray-50 ${
+                          selectedDomain?.domain === result.domain ? 'border-emerald-500 bg-emerald-50' : ''
+                        }`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="font-mono font-semibold text-gray-900">
-                            {searchQuery}
                             {result.domain}
                           </span>
                           {result.bestPick && (
@@ -392,9 +569,16 @@ export function DomainManager({ user }: { user: AuthUser | null }) {
                             <Button
                               size="sm"
                               className="bg-emerald-600 text-white hover:bg-emerald-700"
-                              onClick={() => showToast(`Added ${searchQuery}${result.domain} to cart!`, 'success')}
+                              disabled={ordering}
+                              onClick={() => handleOrderDomain(result)}
                             >
-                              Get it
+                              {ordering && selectedDomain?.domain === result.domain ? (
+                                <span className="flex items-center gap-2">
+                                  <Spinner /> Processing...
+                                </span>
+                              ) : (
+                                'Buy Now'
+                              )}
                             </Button>
                           ) : (
                             <Button size="sm" variant="outline" disabled>
@@ -404,6 +588,14 @@ export function DomainManager({ user }: { user: AuthUser | null }) {
                         </div>
                       </div>
                     ))}
+
+                    {/* Payment info note */}
+                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                      <p className="text-xs text-blue-700">
+                        <strong>Secure Payment:</strong> Clicking &ldquo;Buy Now&rdquo; will open Razorpay checkout.
+                        Your domain will be registered automatically after successful payment.
+                      </p>
+                    </div>
                   </div>
                 )}
               </CardContent>
