@@ -31,17 +31,27 @@ export function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  // HMS subdomain (hms.medihost.in) → dashboard with HMS bridge
+  // HMS login subdomain
   if (hostname === 'hms.medihost.in') {
     const url = request.nextUrl.clone();
-    url.pathname = pathname === '/' ? '/dashboard' : pathname;
+    url.pathname = '/login';
+    url.searchParams.set('product', 'hms');
     return NextResponse.rewrite(url);
   }
 
-  // LIS subdomain (lis.medihost.in) → dashboard with LIS focus
+  // LIS login subdomain
   if (hostname === 'lis.medihost.in') {
     const url = request.nextUrl.clone();
-    url.pathname = pathname === '/' ? '/dashboard' : pathname;
+    url.pathname = '/login';
+    url.searchParams.set('product', 'lis');
+    return NextResponse.rewrite(url);
+  }
+
+  // Physio login subdomain
+  if (hostname === 'physio.medihost.in') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    url.searchParams.set('product', 'physio');
     return NextResponse.rewrite(url);
   }
 
@@ -52,6 +62,7 @@ export function proxy(request: NextRequest) {
     !hostname.startsWith('app.') &&
     !hostname.startsWith('hms.') &&
     !hostname.startsWith('lis.') &&
+    !hostname.startsWith('physio.') &&
     !hostname.startsWith('partner.') &&
     !hostname.startsWith('phlebo.');
 
