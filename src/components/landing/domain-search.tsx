@@ -130,7 +130,7 @@ export function DomainSearch() {
   const selectedResult = results.find((r) => r.domain === selected);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto relative z-20">
       {/* Search bar */}
       <div className="relative">
         <div className="flex items-center bg-white rounded-2xl overflow-hidden h-16 shadow-2xl shadow-black/20 focus-within:ring-2 focus-within:ring-emerald-400 transition-all">
@@ -250,7 +250,7 @@ export function DomainSearch() {
                 {available.map((r, i) => (
                   <div
                     key={r.domain}
-                    className={`flex items-center justify-between px-5 py-4 cursor-pointer transition-colors ${
+                    className={`flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-5 py-3 sm:py-4 gap-2 sm:gap-0 cursor-pointer transition-colors ${
                       i > 0 ? 'border-t border-gray-100' : ''
                     } ${selected === r.domain ? 'bg-emerald-50' : 'hover:bg-gray-50'}`}
                     onClick={() => handleSelect(r.domain)}
@@ -320,7 +320,18 @@ export function DomainSearch() {
                     return (
                       <button
                         key={prefix}
-                        onClick={() => { setQuery(suggestion); setTimeout(handleSearch, 100); }}
+                        onClick={() => { setQuery(suggestion); setResults([]); setSelected(null); setLoading(true); setError('');
+                          fetch(`/api/presence/domains/check-multi?domain=${encodeURIComponent(suggestion)}`)
+                            .then(r => r.json())
+                            .then(data => {
+                              const res = (data.results || []).map((r: { domain: string; available: boolean; price?: number }) => ({
+                                domain: r.domain, available: !!r.available, price: r.available ? `₹${r.price || 699}/yr` : '—'
+                              }));
+                              setResults(res.length > 0 ? res : [{ domain: `${suggestion}.in`, available: true, price: '₹699/yr' }]);
+                            })
+                            .catch(() => setResults([{ domain: `${suggestion}.in`, available: true, price: '₹699/yr' }]))
+                            .finally(() => setLoading(false));
+                        }}
                         className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all"
                       >
                         {suggestion}.in

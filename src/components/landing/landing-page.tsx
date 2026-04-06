@@ -412,7 +412,7 @@ export function LandingPage() {
       </nav>
 
       {/* ===== Hero Section ===== */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center">
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A] via-[#131C31] to-[#1E293B]" />
         {/* Animated gradient mesh */}
