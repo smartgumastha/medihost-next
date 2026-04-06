@@ -24,12 +24,35 @@ const nextConfig: NextConfig = {
   },
   // Rewrites to proxy API calls to Railway backend
   async rewrites() {
-    return [
-      {
-        source: '/api/proxy/:path*',
-        destination: 'https://smartgumastha-backend-production.up.railway.app/api/:path*',
-      },
-    ];
+    return {
+      // beforeFiles rewrites run before Next.js checks for pages/API routes
+      // This ensures /api/presence/*, /api/storefront/*, etc. go to Railway
+      // while /api/auth/* (our Next.js API routes) still work
+      beforeFiles: [
+        {
+          source: '/api/proxy/:path*',
+          destination: 'https://smartgumastha-backend-production.up.railway.app/api/:path*',
+        },
+      ],
+      afterFiles: [
+        // Proxy all /api/* calls that aren't handled by Next.js API routes to Railway
+        // Next.js API routes (/api/auth/*, /api/ai/*) are checked first
+        // Anything else (presence, storefront, etc.) goes to Railway
+        {
+          source: '/api/presence/:path*',
+          destination: 'https://smartgumastha-backend-production.up.railway.app/api/presence/:path*',
+        },
+        {
+          source: '/api/storefront/:path*',
+          destination: 'https://smartgumastha-backend-production.up.railway.app/api/storefront/:path*',
+        },
+        {
+          source: '/api/admin/:path*',
+          destination: 'https://smartgumastha-backend-production.up.railway.app/api/admin/:path*',
+        },
+      ],
+      fallback: [],
+    };
   },
 };
 
