@@ -185,14 +185,17 @@ const FOOTER_COLS = [
   {
     title: 'Product',
     links: ['AI Website Builder', 'Custom Domains', 'Appointments', 'Billing & EMR', 'Marketing Suite', 'Hemato Marketplace'],
+    hrefs: { 'AI Website Builder': '/#features', 'Custom Domains': '/#how-it-works', 'Appointments': '/#features', 'Billing & EMR': 'https://hms.medihost.in', 'Marketing Suite': '/#features', 'Hemato Marketplace': 'https://hemato.in' } as Record<string, string>,
   },
   {
     title: 'For Clinics',
     links: ['General Practice', 'Dental Clinics', 'Eye Clinics', 'Skin Clinics', 'Multi-Specialty', 'Hospitals'],
+    hrefs: { 'General Practice': '/signup?type=general', 'Dental Clinics': '/signup?type=dental', 'Eye Clinics': '/signup?type=eye', 'Skin Clinics': '/signup?type=skin', 'Multi-Specialty': '/signup?type=multispecialty', 'Hospitals': '/signup?type=hospital' } as Record<string, string>,
   },
   {
     title: 'Company',
     links: ['About Us', 'Careers', 'Contact', 'Partners', 'Press', 'Blog'],
+    hrefs: { 'About Us': '/about', 'Careers': '/careers', 'Contact': 'mailto:info@medihost.in', 'Partners': 'https://hemato.in#join', 'Press': 'mailto:press@medihost.in', 'Blog': '/blog' } as Record<string, string>,
   },
   {
     title: 'Legal',
@@ -838,10 +841,10 @@ export function LandingPage() {
               &copy; 2026 SmartGumastha Technologies &bull; MediHost AI&trade; &mdash; Clinic Software That Works
             </p>
             <div className="flex items-center gap-5 text-sm text-slate-500">
-              <a href="#" className="hover:text-emerald-400 transition-colors">Twitter</a>
-              <a href="#" className="hover:text-emerald-400 transition-colors">LinkedIn</a>
-              <a href="#" className="hover:text-emerald-400 transition-colors">Instagram</a>
-              <a href="#" className="hover:text-emerald-400 transition-colors">YouTube</a>
+              <a href="https://twitter.com/medihost_in" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">Twitter</a>
+              <a href="https://linkedin.com/company/medihost" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">LinkedIn</a>
+              <a href="https://instagram.com/medihost.in" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">Instagram</a>
+              <a href="https://youtube.com/@medihost" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">YouTube</a>
             </div>
           </div>
         </div>
