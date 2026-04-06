@@ -337,7 +337,7 @@ export function LandingPage() {
           <a href="/" className="flex items-center gap-1.5 text-xl font-extrabold" style={{ letterSpacing: '-0.03em' }}>
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
             <span>
-              Medi<span className="text-emerald-400">Host</span> <span className="text-emerald-400 text-xs align-super font-bold">AI</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
+              Medi<span className="text-emerald-400">Host</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup> <span className="text-emerald-400 text-xs align-super font-bold">AI</span>
             </span>
           </a>
 
@@ -838,7 +838,7 @@ export function LandingPage() {
 
           <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-600 text-center sm:text-left">
-              &copy; 2026 SmartGumastha Technologies &bull; MediHost AI&trade; &mdash; Clinic Software That Works
+              &copy; 2026 SmartGumastha Technologies &bull; MediHost&trade; AI &mdash; Clinic Software That Works
             </p>
             <div className="flex items-center gap-5 text-sm text-slate-500">
               <a href="https://twitter.com/medihost_in" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">Twitter</a>

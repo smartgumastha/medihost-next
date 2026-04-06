@@ -5,7 +5,7 @@ import { DashboardShell } from '@/components/dashboard/shell';
 import { getAuthFromCookie } from '@/lib/auth';
 
 export const metadata: Metadata = {
-  title: 'Dashboard — MediHost AI™',
+  title: 'Dashboard — MediHost™ AI',
   icons: { icon: '/medihost-favicon.svg' },
 };
 

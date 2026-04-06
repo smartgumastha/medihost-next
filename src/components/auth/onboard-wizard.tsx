@@ -158,8 +158,7 @@ export function OnboardWizard({ user }: Props) {
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
             <span className="text-lg font-bold text-white tracking-tight">
-              MediHost <span className="text-emerald-400">AI</span>
-              <sup className="text-[10px] text-slate-400 ml-0.5">TM</sup>
+              MediHost<sup className="text-[10px] text-slate-400 ml-0.5">TM</sup> <span className="text-emerald-400">AI</span>
             </span>
           </div>
           <span className="text-sm text-slate-400">Step {step} of 4</span>

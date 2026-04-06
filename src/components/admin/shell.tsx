@@ -67,7 +67,7 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
             <button className="lg:hidden text-gray-600 text-xl" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
             <a href="/admin" className="flex items-center gap-2.5">
               <span className="text-lg font-extrabold tracking-tight text-gray-900">
-                MediHost AI<span className="text-[10px] align-super font-bold text-gray-400">™</span>
+                MediHost<span className="text-[10px] align-super font-bold text-gray-400">™</span> AI
               </span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md">Admin</span>
             </a>

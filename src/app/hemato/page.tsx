@@ -7,7 +7,7 @@ export const metadata = {
     title: 'Hemato — Book Lab Tests at Home | Compare Labs Near You',
     description: 'NABL-certified labs near you. Compare prices. Home sample collection. Reports on WhatsApp.',
     url: 'https://hemato.in',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    images: [{ url: '/og-image.svg', width: 1200, height: 630 }],
   },
 };
 

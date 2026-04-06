@@ -7,7 +7,7 @@ export const metadata = {
     title: 'MediHost™ AI — Get Your Clinic Online in 60 Seconds',
     description: 'AI-powered website, custom domain, appointments, billing, EMR, Google Business — all in one platform. Start free.',
     url: 'https://medihost.in',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    images: [{ url: '/og-image.svg', width: 1200, height: 630 }],
   },
 };
 

@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     description: "Get your clinic online in 60 seconds. AI-powered website, custom domain, appointments, billing, EMR & marketing — all in one platform.",
     images: [
       {
-        url: '/og-image.png',
+        url: '/og-image.svg',
         width: 1200,
         height: 630,
         alt: 'MediHost AI — Clinic Software Platform',
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "MediHost™ AI — Your Clinic's Digital Identity",
     description: "Get your clinic online in 60 seconds. AI website, domain, appointments, billing & more.",
-    images: ['/og-image.png'],
+    images: ['/og-image.svg'],
   },
 };
 

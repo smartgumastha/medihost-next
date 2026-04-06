@@ -1,4 +1,4 @@
-export const metadata = { title: 'Healthcare Compliance — MediHost AI™' };
+export const metadata = { title: 'Healthcare Compliance — MediHost™ AI' };
 
 export default function CompliancePage() {
   return (
@@ -6,7 +6,7 @@ export default function CompliancePage() {
       <nav className="border-b border-white/10 h-14 flex items-center px-6">
         <a href="/" className="text-lg font-bold text-white">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5" />
-          Medi<span className="text-emerald-400">Host</span> AI<sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
+          Medi<span className="text-emerald-400">Host</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup> AI
         </a>
       </nav>
 
@@ -20,7 +20,7 @@ export default function CompliancePage() {
           {/* Section 1 */}
           <h2 className="text-xl font-bold text-white mt-10 mb-4">1. DPDP Act, 2023 Compliance</h2>
           <p className="mb-4">
-            MediHost AI&trade; is designed to comply with the <strong className="text-white">Digital Personal Data Protection (DPDP)
+            MediHost&trade; AI is designed to comply with the <strong className="text-white">Digital Personal Data Protection (DPDP)
             Act, 2023</strong> of India. As a Data Processor, we implement the following measures:
           </p>
           <ul className="list-disc pl-6 space-y-2 mb-4">
@@ -47,7 +47,7 @@ export default function CompliancePage() {
           <h2 className="text-xl font-bold text-white mt-10 mb-4">3. HIPAA Alignment</h2>
           <p className="mb-4">
             HIPAA (Health Insurance Portability and Accountability Act) is a <strong className="text-white">United States regulation</strong>.
-            MediHost AI&trade; primarily serves clinics in India and is governed by the <strong className="text-white">DPDP Act, 2023</strong> and
+            MediHost&trade; AI primarily serves clinics in India and is governed by the <strong className="text-white">DPDP Act, 2023</strong> and
             the <strong className="text-white">Information Technology Act, 2000</strong> (including the IT Rules, 2011).
           </p>
           <p className="mb-4">
@@ -73,7 +73,7 @@ export default function CompliancePage() {
             (ABDM)</strong> framework. Our planned timeline:
           </p>
           <ul className="list-disc pl-6 space-y-2 mb-4">
-            <li><strong className="text-white">ABHA (Ayushman Bharat Health Account) integration</strong> &mdash; targeted for <strong className="text-white">Q3 2026</strong>, enabling patients to link their ABHA IDs with clinic records on MediHost AI&trade;.</li>
+            <li><strong className="text-white">ABHA (Ayushman Bharat Health Account) integration</strong> &mdash; targeted for <strong className="text-white">Q3 2026</strong>, enabling patients to link their ABHA IDs with clinic records on MediHost&trade; AI.</li>
             <li>Support for Health Information Exchange standards as defined by ABDM.</li>
             <li>Compliance with ABDM&rsquo;s consent framework for health data sharing.</li>
           </ul>
@@ -105,7 +105,7 @@ export default function CompliancePage() {
           {/* Section 7 */}
           <h2 className="text-xl font-bold text-white mt-10 mb-4">7. Vulnerability Disclosure</h2>
           <p className="mb-4">
-            We take security seriously. If you discover a vulnerability in MediHost AI&trade;, please report it
+            We take security seriously. If you discover a vulnerability in MediHost&trade; AI, please report it
             responsibly:
           </p>
           <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-4">
@@ -125,7 +125,7 @@ export default function CompliancePage() {
       </div>
 
       <footer className="border-t border-white/10 py-6 text-center text-xs text-slate-600">
-        &copy; 2026 SmartGumastha Technologies &middot; MediHost AI&trade; &mdash; Clinic Software That Works
+        &copy; 2026 SmartGumastha Technologies &middot; MediHost&trade; AI &mdash; Clinic Software That Works
       </footer>
     </div>
   );

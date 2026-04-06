@@ -8,7 +8,7 @@ export const metadata = {
     title: 'Sign Up — MediHost AI',
     description: 'Create your free clinic account. AI website, domain, HMS, appointments — all included.',
     url: 'https://medihost.in/signup',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    images: [{ url: '/og-image.svg', width: 1200, height: 630 }],
   },
 };
 
@@ -32,8 +32,7 @@ export default function SignupPage() {
           <div className="flex items-center justify-center gap-2 mb-8">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
             <span className="text-lg font-bold text-white tracking-tight">
-              MediHost <span className="text-emerald-400">AI</span>
-              <sup className="text-[10px] text-slate-400 ml-0.5">TM</sup>
+              MediHost<sup className="text-[10px] text-slate-400 ml-0.5">TM</sup> <span className="text-emerald-400">AI</span>
             </span>
           </div>
 

@@ -1,4 +1,4 @@
-export const metadata = { title: 'Blog — MediHost AI™' };
+export const metadata = { title: 'Blog — MediHost™ AI' };
 
 export default function BlogPage() {
   return (
@@ -6,7 +6,7 @@ export default function BlogPage() {
       <nav className="border-b border-white/10 h-14 flex items-center px-6">
         <a href="/" className="text-lg font-bold text-white">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5" />
-          Medi<span className="text-emerald-400">Host</span> AI<sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
+          Medi<span className="text-emerald-400">Host</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup> AI
         </a>
       </nav>
       <div className="max-w-3xl mx-auto px-6 py-16">
@@ -32,7 +32,7 @@ export default function BlogPage() {
         </div>
       </div>
       <footer className="border-t border-white/10 py-6 text-center text-xs text-slate-600">
-        &copy; 2026 SmartGumastha Technologies &middot; MediHost AI&trade; &mdash; Clinic Software That Works
+        &copy; 2026 SmartGumastha Technologies &middot; MediHost&trade; AI &mdash; Clinic Software That Works
       </footer>
     </div>
   );

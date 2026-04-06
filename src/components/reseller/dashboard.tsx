@@ -89,7 +89,7 @@ export function ResellerDashboard() {
       <nav className="border-b border-white/10 h-14 flex items-center px-6 justify-between">
         <a href="/" className="text-lg font-bold text-white">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5" />
-          Medi<span className="text-emerald-400">Host</span> AI<sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
+          Medi<span className="text-emerald-400">Host</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup> AI
         </a>
         <div className="flex items-center gap-3">
           <span className="text-sm text-slate-400">{resellerName}</span>

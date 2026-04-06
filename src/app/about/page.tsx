@@ -1,4 +1,4 @@
-export const metadata = { title: 'About MediHost AI™' };
+export const metadata = { title: 'About MediHost™ AI' };
 
 export default function AboutPage() {
   return (
@@ -6,14 +6,14 @@ export default function AboutPage() {
       <nav className="border-b border-white/10 h-14 flex items-center px-6">
         <a href="/" className="text-lg font-bold text-white">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5" />
-          Medi<span className="text-emerald-400">Host</span> AI<sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
+          Medi<span className="text-emerald-400">Host</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup> AI
         </a>
       </nav>
       <div className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-3xl font-extrabold text-white mb-6">About MediHost</h1>
         <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-slate-400 leading-relaxed space-y-4">
           <p>
-            <strong className="text-white">MediHost AI&trade;</strong> is built by{' '}
+            <strong className="text-white">MediHost&trade; AI</strong> is built by{' '}
             <strong className="text-white">SmartGumastha Technologies</strong>, Hyderabad, Telangana, India.
           </p>
           <p>
@@ -37,7 +37,7 @@ export default function AboutPage() {
         </div>
       </div>
       <footer className="border-t border-white/10 py-6 text-center text-xs text-slate-600">
-        &copy; 2026 SmartGumastha Technologies &middot; MediHost AI&trade; &mdash; Clinic Software That Works
+        &copy; 2026 SmartGumastha Technologies &middot; MediHost&trade; AI &mdash; Clinic Software That Works
       </footer>
     </div>
   );

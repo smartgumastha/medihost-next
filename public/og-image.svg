@@ -31,8 +31,8 @@
   <!-- Logo mark -->
   <circle cx="100" cy="200" r="16" fill="#10B981"/>
   <text x="128" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="800" fill="#ffffff">MediHost</text>
-  <text x="340" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="800" fill="#10B981">AI</text>
-  <text x="387" y="195" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#64748B">TM</text>
+  <text x="340" y="195" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#64748B">TM</text>
+  <text x="365" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="800" fill="#10B981">AI</text>
 
   <!-- Main headline -->
   <text x="80" y="300" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="800" fill="#ffffff">Your Clinic's</text>
@@ -41,6 +41,9 @@
   <!-- Subheadline -->
   <text x="80" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#94A3B8">AI Website + Domain + HMS + Billing</text>
   <text x="80" y="450" font-family="system-ui, -apple-system, sans-serif" font-size="22" fill="#94A3B8">Live in 60 seconds. Start free.</text>
+
+  <!-- Tagline -->
+  <text x="860" y="602" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#475569">Made in India for Indian Healthcare</text>
 
   <!-- CTA pill -->
   <rect x="80" y="485" width="220" height="48" rx="24" fill="url(#green)"/>

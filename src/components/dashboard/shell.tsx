@@ -120,13 +120,12 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
             </button>
             <a href="/dashboard" className="flex items-center gap-1.5">
               <span className="text-[17px] font-bold text-gray-900 tracking-tight">
-                MediHost AI
+                MediHost<span className="text-[10px] font-semibold text-gray-400 align-super">&trade;</span> AI
               </span>
               <span className="relative flex h-2 w-2 -mt-2">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span className="text-[10px] font-semibold text-gray-400 -ml-0.5 mt-0.5">&trade;</span>
             </a>
           </div>
 

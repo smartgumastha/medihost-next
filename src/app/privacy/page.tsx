@@ -1,4 +1,4 @@
-export const metadata = { title: 'Privacy Policy — MediHost AI™' };
+export const metadata = { title: 'Privacy Policy — MediHost™ AI' };
 
 export default function PrivacyPage() {
   return (
@@ -6,7 +6,7 @@ export default function PrivacyPage() {
       <nav className="border-b border-white/10 h-14 flex items-center px-6">
         <a href="/" className="text-lg font-bold text-white">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5" />
-          Medi<span className="text-emerald-400">Host</span> AI<sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
+          Medi<span className="text-emerald-400">Host</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup> AI
         </a>
       </nav>
 
@@ -20,7 +20,7 @@ export default function PrivacyPage() {
           {/* Section 1 */}
           <h2 className="text-xl font-bold text-white mt-10 mb-4">1. Who We Are</h2>
           <p className="mb-4">
-            MediHost AI&trade; is a product of <strong className="text-white">SmartGumastha Technologies</strong>, a
+            MediHost&trade; AI is a product of <strong className="text-white">SmartGumastha Technologies</strong>, a
             technology company registered in Hyderabad, India. We build cloud-based clinic management software
             including website hosting, appointment scheduling, billing, EMR, and laboratory information systems
             for healthcare providers.
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-bold text-white mt-10 mb-4">2. What Data We Collect</h2>
           <p className="mb-4">
             Under the Digital Personal Data Protection (DPDP) Act, 2023, the <strong className="text-white">clinic is the Data Fiduciary</strong> (they
-            decide what patient data to collect and why). <strong className="text-white">MediHost AI&trade; is the Data Processor</strong> (we
+            decide what patient data to collect and why). <strong className="text-white">MediHost&trade; AI is the Data Processor</strong> (we
             process data on the clinic&rsquo;s behalf using our software infrastructure).
           </p>
           <p className="mb-2 text-white font-semibold">We process the following categories of data:</p>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
             collect and process personal data for the following specific, lawful purposes:
           </p>
           <ul className="list-disc pl-6 space-y-2 mb-4">
-            <li>To provide, operate, and maintain the MediHost AI&trade; platform and its features.</li>
+            <li>To provide, operate, and maintain the MediHost&trade; AI platform and its features.</li>
             <li>To create and manage your clinic account and authenticate users.</li>
             <li>To process payments, generate invoices, and manage subscriptions.</li>
             <li>To send transactional communications (appointment reminders, billing receipts, system alerts).</li>
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
           {/* Section 8 */}
           <h2 id="cookies" className="text-xl font-bold text-white mt-10 mb-4">8. Cookies</h2>
           <p className="mb-4">
-            MediHost AI&trade; uses <strong className="text-white">one essential cookie</strong>:
+            MediHost&trade; AI uses <strong className="text-white">one essential cookie</strong>:
           </p>
           <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-4 overflow-x-auto">
             <table className="text-sm w-full">
@@ -151,10 +151,10 @@ export default function PrivacyPage() {
           {/* Section 9 */}
           <h2 className="text-xl font-bold text-white mt-10 mb-4">9. Healthcare Data Disclaimer</h2>
           <p className="mb-4">
-            MediHost AI&trade; is a <strong className="text-white">software platform</strong>, not a healthcare provider, medical
+            MediHost&trade; AI is a <strong className="text-white">software platform</strong>, not a healthcare provider, medical
             device, or diagnostic service. We do not provide medical advice, diagnoses, or treatment
             recommendations. All clinical decisions are the sole responsibility of the licensed healthcare
-            professionals using the platform. The data entered, stored, and managed through MediHost AI&trade; is
+            professionals using the platform. The data entered, stored, and managed through MediHost&trade; AI is
             under the full control and responsibility of the clinic (Data Fiduciary).
           </p>
 
@@ -181,7 +181,7 @@ export default function PrivacyPage() {
       </div>
 
       <footer className="border-t border-white/10 py-6 text-center text-xs text-slate-600">
-        &copy; 2026 SmartGumastha Technologies &middot; MediHost AI&trade; &mdash; Clinic Software That Works
+        &copy; 2026 SmartGumastha Technologies &middot; MediHost&trade; AI &mdash; Clinic Software That Works
       </footer>
     </div>
   );

@@ -23,8 +23,7 @@ export function LoginContent() {
       <div className="flex items-center justify-center gap-2 mb-2">
         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: config.color }} />
         <span className="text-lg font-bold text-white tracking-tight">
-          {config.name} <span style={{ color: config.color }}>AI</span>
-          <sup className="text-[10px] text-slate-400 ml-0.5">TM</sup>
+          {config.name}<sup className="text-[10px] text-slate-400 ml-0.5">TM</sup> <span style={{ color: config.color }}>AI</span>
         </span>
       </div>
 

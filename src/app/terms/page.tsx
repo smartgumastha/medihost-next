@@ -1,4 +1,4 @@
-export const metadata = { title: 'Terms of Service — MediHost AI™' };
+export const metadata = { title: 'Terms of Service — MediHost™ AI' };
 
 export default function TermsPage() {
   return (
@@ -6,7 +6,7 @@ export default function TermsPage() {
       <nav className="border-b border-white/10 h-14 flex items-center px-6">
         <a href="/" className="text-lg font-bold text-white">
           <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block mr-1.5" />
-          Medi<span className="text-emerald-400">Host</span> AI<sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup>
+          Medi<span className="text-emerald-400">Host</span><sup className="text-[8px] text-slate-500 ml-0.5">&trade;</sup> AI
         </a>
       </nav>
 
@@ -20,7 +20,7 @@ export default function TermsPage() {
           {/* Section 1 */}
           <h2 className="text-xl font-bold text-white mt-10 mb-4">1. Acceptance of Terms</h2>
           <p className="mb-4">
-            By accessing or using MediHost AI&trade; (&ldquo;the Service&rdquo;), operated by SmartGumastha Technologies
+            By accessing or using MediHost&trade; AI (&ldquo;the Service&rdquo;), operated by SmartGumastha Technologies
             (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;), you agree to be bound by these Terms of Service.
             If you do not agree, do not use the Service. These terms apply to all users including clinic owners,
             staff members, and any person accessing the platform.
@@ -29,7 +29,7 @@ export default function TermsPage() {
           {/* Section 2 */}
           <h2 className="text-xl font-bold text-white mt-10 mb-4">2. The Service</h2>
           <p className="mb-4">
-            MediHost AI&trade; is a cloud-based clinic management platform that provides website hosting, custom
+            MediHost&trade; AI is a cloud-based clinic management platform that provides website hosting, custom
             domains, appointment scheduling, billing &amp; invoicing, electronic medical records (EMR), laboratory
             information system (LIS), patient communication, and AI-powered features for healthcare providers
             including clinics, labs, pharmacies, and other medical practices.
@@ -60,7 +60,7 @@ export default function TermsPage() {
           <p className="mb-4">
             Under the Digital Personal Data Protection (DPDP) Act, 2023, the <strong className="text-white">clinic is the Data
             Fiduciary</strong> &mdash; you determine what patient data is collected, the purposes for collection, and are
-            responsible for obtaining valid consent from patients. MediHost AI&trade; acts as the <strong className="text-white">Data
+            responsible for obtaining valid consent from patients. MediHost&trade; AI acts as the <strong className="text-white">Data
             Processor</strong>, processing patient data solely on your instructions and as described in our{' '}
             <a href="/privacy" className="text-emerald-400 hover:underline">Privacy Policy</a>.
           </p>
@@ -149,7 +149,7 @@ export default function TermsPage() {
       </div>
 
       <footer className="border-t border-white/10 py-6 text-center text-xs text-slate-600">
-        &copy; 2026 SmartGumastha Technologies &middot; MediHost AI&trade; &mdash; Clinic Software That Works
+        &copy; 2026 SmartGumastha Technologies &middot; MediHost&trade; AI &mdash; Clinic Software That Works
       </footer>
     </div>
   );
