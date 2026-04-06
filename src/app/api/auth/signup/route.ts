@@ -4,68 +4,71 @@ const API_BASE = process.env.API_URL || 'https://smartgumastha-backend-productio
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-
   try {
-    const res = await fetch(`${API_BASE}/api/presence/register-account`, {
+    const res = await fetch(`${API_BASE}/api/signup/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        hospital_name: body.business_name,
+        business_name: body.business_name,
         owner_name: body.owner_name,
         email: body.email,
-        phone: body.phone,
+        phone: body.phone || '',
         password: body.password,
-        partner_type: body.partner_type,
+        partner_type: body.partner_type || 'clinic',
         selected_domain: body.selected_domain || '',
         selected_product: body.selected_product || 'hms',
         ref_code: body.ref_code || '',
-        plan_tier: 'starter',
       }),
     });
+
     const data = await res.json();
 
-    if (data.success || data.partner_id) {
-      // Auto-login after signup
-      const loginRes = await fetch(`${API_BASE}/api/presence/partner-auth/login`, {
+    if (data.success) {
+      const loginRes = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: body.email, password: body.password }),
       });
       const loginData = await loginRes.json();
 
-      if (loginData.success && loginData.token) {
+      // token and hospital_id are nested under loginData.data
+      const d = loginData.data || {};
+      const token = d.token || '';
+      const hospitalId = String(d.hospital_id || '');
+      const name = body.owner_name || body.business_name;
+
+      if (loginData.success && token) {
         const user = {
-          id: String(loginData.partner?.id || data.partner_id || ''),
+          id: String(d.userid || hospitalId),
           email: body.email,
-          name: body.owner_name || body.business_name,
+          name: name,
           role: 'HOSPITAL_ADMIN' as const,
-          hospitalId: String(loginData.partner?.hospital_id || ''),
-          token: loginData.token,
+          hospitalId: hospitalId,
+          token: token,
         };
+
         const response = NextResponse.json({ success: true, user });
-        response.cookies.set('medihost_auth', JSON.stringify(user), {
-          httpOnly: true,
+
+        response.cookies.set('mh_auth', JSON.stringify(user), {
+          httpOnly: false,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           maxAge: 60 * 60 * 24 * 7,
           path: '/',
         });
+
         return response;
       }
 
       return NextResponse.json({ success: true, message: 'Account created. Please login.' });
     }
 
-    let errorMessage = data.error || 'Registration failed';
-    if (errorMessage.toLowerCase().includes('selected_domain') || errorMessage.toLowerCase().includes('domain')) {
-      errorMessage = 'Please search and select a domain first, or start without a domain below.';
-    }
-
     return NextResponse.json(
-      { success: false, error: errorMessage },
+      { success: false, error: data.error || data.message || 'Registration failed' },
       { status: 400 }
     );
-  } catch {
+  } catch (e) {
+    console.error('Signup route error:', e);
     return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
   }
 }
