@@ -52,7 +52,18 @@ export function PaymentContent() {
     setError('');
     setStatusMsg('');
     try {
-      const token = getTokenFromClient();
+      // Read token directly — getTokenFromClient can fail during SSR
+      let token = '';
+      try {
+        const cookieMatch = document.cookie.split('; ').find(r => r.startsWith('mh_auth='));
+        if (cookieMatch) {
+          const parsed = JSON.parse(decodeURIComponent(cookieMatch.split('=')[1]));
+          token = parsed.token || '';
+        }
+        if (!token) {
+          token = localStorage.getItem('mh_token') || '';
+        }
+      } catch { /* silent */ }
       if (!token) {
         router.push('/login');
         return;
