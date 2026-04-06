@@ -218,56 +218,127 @@ export function DomainSearch() {
         </div>
       )}
 
-      {/* Results — horizontal scrollable pill row */}
-      {!loading && results.length > 0 && (
-        <div className="mt-4 overflow-x-auto pb-2 scrollbar-hide">
-          <div className="flex gap-2 min-w-min">
-            {results.map((r) => (
-              <button
-                key={r.domain}
-                onClick={() => r.available && handleSelect(r.domain)}
-                disabled={!r.available}
-                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                  selected === r.domain
-                    ? 'bg-emerald-500 text-white ring-2 ring-emerald-400 ring-offset-2 ring-offset-[#0F172A]'
-                    : r.available
-                    ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 cursor-pointer'
-                    : 'bg-white/5 text-slate-500 border border-white/10 line-through cursor-not-allowed'
-                }`}
-              >
-                <span>{r.domain}</span>
-                {r.available && <span className="text-xs opacity-80">{r.price}</span>}
-                {r.available ? (
-                  <span className="text-xs">✓</span>
-                ) : (
-                  <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-medium no-underline" style={{ textDecoration: 'none' }}>
-                    Taken
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Results */}
+      {!loading && results.length > 0 && (() => {
+        const available = results.filter(r => r.available);
+        const taken = results.filter(r => !r.available);
+        const allTaken = available.length === 0;
 
-      {/* "Try AI suggestions" hint when a single domain is taken */}
-      {!loading && results.length === 1 && !results[0].available && (
-        <div className="mt-2 text-center">
-          <p className="text-xs text-slate-500">
-            This domain is taken. Try describing your practice instead —{' '}
-            <button
-              onClick={() => {
-                setQuery('');
-                setResults([]);
-                inputRef.current?.focus();
-              }}
-              className="text-emerald-400 font-medium hover:text-emerald-300 transition-colors"
-            >
-              Ask AI for suggestions
-            </button>
-          </p>
-        </div>
-      )}
+        return (
+          <div className="mt-4 space-y-3">
+            {/* Celebration when domains available */}
+            {available.length > 0 && (
+              <div className="text-center">
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-sm text-emerald-300 font-medium">
+                  🎉 {available.length} domain{available.length > 1 ? 's' : ''} available — it can be yours!
+                </span>
+              </div>
+            )}
+
+            {/* All taken message */}
+            {allTaken && (
+              <div className="text-center">
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-sm text-red-400 font-medium">
+                  😔 These domains are taken — try a variation below
+                </span>
+              </div>
+            )}
+
+            {/* Available domains first */}
+            {available.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                {available.map((r, i) => (
+                  <div
+                    key={r.domain}
+                    className={`flex items-center justify-between px-5 py-4 cursor-pointer transition-colors ${
+                      i > 0 ? 'border-t border-gray-100' : ''
+                    } ${selected === r.domain ? 'bg-emerald-50' : 'hover:bg-gray-50'}`}
+                    onClick={() => handleSelect(r.domain)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">✓</span>
+                      <span className="font-semibold text-gray-900">{r.domain}</span>
+                      {i === 0 && (
+                        <span className="px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-full uppercase">
+                          Best Pick
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-bold text-emerald-600">{r.price}</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleSelect(r.domain); }}
+                        className={`px-5 py-2 font-bold rounded-xl text-sm transition-all ${
+                          selected === r.domain
+                            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200'
+                            : i === 0
+                            ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                            : 'bg-gray-900 text-white hover:bg-gray-800'
+                        }`}
+                      >
+                        {selected === r.domain ? 'Selected ✓' : 'Select'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Taken domains */}
+            {taken.length > 0 && (
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+                <div className="px-4 py-2 border-b border-white/5">
+                  <span className="text-xs text-slate-500 font-medium">Not Available</span>
+                </div>
+                {taken.map((r, i) => (
+                  <div
+                    key={r.domain}
+                    className={`flex items-center justify-between px-5 py-3 ${
+                      i > 0 ? 'border-t border-white/5' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center text-xs">✕</span>
+                      <span className="text-slate-500 line-through text-sm">{r.domain}</span>
+                    </div>
+                    <span className="text-xs text-red-400/70 bg-red-500/10 px-2 py-1 rounded">Taken</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Suggest variations when all taken */}
+            {allTaken && (
+              <div className="text-center space-y-2">
+                <p className="text-xs text-slate-500">Try these variations:</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {['dr', 'my', 'the', 'clinic', 'lab', 'care'].map(prefix => {
+                    const name = query.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const suggestion = prefix === 'dr' || prefix === 'my' || prefix === 'the'
+                      ? `${prefix}${name}`
+                      : `${name}${prefix}`;
+                    return (
+                      <button
+                        key={prefix}
+                        onClick={() => { setQuery(suggestion); setTimeout(handleSearch, 100); }}
+                        className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all"
+                      >
+                        {suggestion}.in
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-slate-600 mt-2">
+                  Or{' '}
+                  <a href="/signup" className="text-emerald-400 hover:text-emerald-300">
+                    start free with yourname.medihost.in →
+                  </a>
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Confirmation strip after selection */}
       {selectedResult && selectedResult.available && (
