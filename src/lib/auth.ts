@@ -14,11 +14,11 @@ export type UserRole =
 export type DashboardPage =
   | 'dashboard' | 'profile' | 'website' | 'domain'
   | 'doctors' | 'products' | 'marketing' | 'analytics' | 'plan'
-  | 'opd' | 'emr' | 'billing' | 'lis' | 'pharmacy' | 'appointments' | 'staff' | 'settings';
+  | 'opd' | 'emr' | 'billing' | 'lis' | 'pharmacy' | 'appointments' | 'staff' | 'settings' | 'orders';
 
 export const ROLE_PAGES: Record<UserRole, DashboardPage[]> = {
-  SUPER_ADMIN: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy'],
-  HOSPITAL_ADMIN: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy'],
+  SUPER_ADMIN: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy','orders'],
+  HOSPITAL_ADMIN: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy','orders'],
   MANAGER: ['dashboard','profile','doctors','products','analytics','staff','opd','billing'],
   DOCTOR: ['dashboard','profile','opd','emr'],
   RECEPTIONIST: ['dashboard','profile','opd','billing','appointments'],

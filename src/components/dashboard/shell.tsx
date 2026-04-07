@@ -79,6 +79,7 @@ const NAV_SECTIONS: NavSection[] = [
       { page: 'staff', label: 'Staff & Roles', icon: '👥', href: '/dashboard/staff' },
       { page: 'settings', label: 'Settings', icon: '⚙️', href: '/dashboard/settings' },
       { page: 'plan', label: 'Plan & Billing', icon: '💎', href: '/dashboard/plan' },
+      { page: 'orders', label: 'Orders', icon: '🧾', href: '/dashboard/orders' },
     ],
   },
 ];
