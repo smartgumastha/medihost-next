@@ -98,8 +98,9 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
   const currentModule = searchParams.get('module') || '';
   const isHmsPage = pathname === '/dashboard/hms';
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const collapsed = isHmsPage || sidebarCollapsed;
-  const sidebarW = collapsed ? 48 : 240;
+  const collapsed = !isHmsPage && sidebarCollapsed;
+  const hideSidebar = isHmsPage; // HMS gets full width — no MediHost sidebar
+  const sidebarW = hideSidebar ? 0 : (collapsed ? 48 : 240);
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -249,12 +250,50 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         />
       )}
 
+      {/* ─── Floating HMS nav — visible only on HMS pages ─── */}
+      {hideSidebar && (
+        <div className="fixed top-16 left-3 z-50 flex flex-col gap-1.5">
+          <a
+            href="/dashboard"
+            className="w-9 h-9 bg-[#0F172A] border border-white/10 rounded-xl flex items-center justify-center text-emerald-400 text-sm font-bold shadow-lg hover:bg-emerald-500/20 transition-all group relative"
+            title="Back to Dashboard"
+          >
+            M
+            <div className="absolute left-11 top-1/2 -translate-y-1/2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-md whitespace-nowrap z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+              Dashboard
+            </div>
+          </a>
+          {[
+            { mod: 'opd', icon: '🏥', label: 'OPD' },
+            { mod: 'emr', icon: '📋', label: 'EMR' },
+            { mod: 'billing', icon: '🧾', label: 'Billing' },
+            { mod: 'lis', icon: '🔬', label: 'LIS' },
+          ].map(function (item) {
+            var active = currentModule === item.mod;
+            return (
+              <a
+                key={item.mod}
+                href={'/dashboard/hms?module=' + item.mod}
+                className={'w-9 h-9 bg-[#0F172A] border rounded-xl flex items-center justify-center text-sm shadow-lg transition-all group relative ' +
+                  (active ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/10 hover:bg-white/10')}
+                title={item.label}
+              >
+                {item.icon}
+                <div className="absolute left-11 top-1/2 -translate-y-1/2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-md whitespace-nowrap z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+                  {item.label}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+
       {/* ─── Sidebar ─── */}
       <aside
         className={`fixed top-14 left-0 bottom-0 z-40 overflow-y-auto transition-all duration-200 ease-in-out pb-4 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0`}
-        style={{ width: sidebarW, background: 'linear-gradient(180deg, #0F172A 0%, #1A2332 100%)' }}
+          hideSidebar ? '-translate-x-full' : (sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
+        }`}
+        style={{ width: collapsed ? 48 : 240, background: 'linear-gradient(180deg, #0F172A 0%, #1A2332 100%)' }}
       >
         {/* Store name + plan */}
         {collapsed ? (
@@ -286,7 +325,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                   </span>
                 </div>
               )}
-              <ul className={collapsed ? 'space-y-0.5 px-1' : 'space-y-0.5 px-2'}>
+              <ul className={collapsed ? 'space-y-1 px-1' : 'space-y-0.5 px-2'}>
                 {section.items.map(item => {
                   const hrefPath = item.href.split('?')[0];
                   const hrefModule = item.href.includes('module=') ? item.href.split('module=')[1] : '';
@@ -298,7 +337,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                       <a
                         href={item.href}
                         onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center ${collapsed ? 'justify-center px-0 py-2' : 'gap-3 px-3 py-2'} text-[13px] font-medium rounded-lg transition-all relative ${
+                        className={`flex items-center ${collapsed ? 'justify-center w-10 h-10 mx-auto p-0' : 'gap-3 px-3 py-2'} text-[13px] font-medium rounded-lg transition-all relative ${
                           isActive
                             ? 'bg-emerald-500/15 text-emerald-400'
                             : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
@@ -307,7 +346,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                         {isActive && !collapsed && (
                           <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-emerald-400" />
                         )}
-                        <span className="text-base leading-none">{item.icon}</span>
+                        <span className={collapsed ? 'text-lg leading-none' : 'text-base leading-none'}>{item.icon}</span>
                         {!collapsed && <span className="flex-1">{item.label}</span>}
                         {!collapsed && item.badge && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -321,7 +360,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                       </a>
                       {/* Tooltip in collapsed mode */}
                       {collapsed && (
-                        <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-md whitespace-nowrap z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+                        <div className="absolute left-[52px] top-1/2 -translate-y-1/2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-md whitespace-nowrap z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
                           {item.label}
                         </div>
                       )}
@@ -388,8 +427,8 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
       </aside>
 
       {/* ─── Main content ─── */}
-      <main className="pt-14 min-h-screen transition-all duration-200" style={{ marginLeft: `${sidebarW}px` }}>
-        <div className={collapsed ? '' : 'p-6 max-w-[1200px] mx-auto'}>
+      <main className="pt-14 min-h-screen transition-all duration-200" style={{ marginLeft: sidebarW > 0 ? `${sidebarW}px` : '0' }}>
+        <div className={hideSidebar ? '' : collapsed ? 'p-4' : 'p-6 max-w-[1200px] mx-auto'}>
           {children}
         </div>
       </main>
