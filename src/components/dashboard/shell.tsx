@@ -95,6 +95,10 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const currentModule = searchParams.get('module') || '';
+  const isHmsPage = pathname === '/dashboard/hms';
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const collapsed = isHmsPage || sidebarCollapsed;
+  const sidebarW = collapsed ? 48 : 240;
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -246,32 +250,42 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
 
       {/* ─── Sidebar ─── */}
       <aside
-        className={`fixed top-14 left-0 bottom-0 w-[240px] z-40 overflow-y-auto transition-transform duration-200 ease-in-out pb-4 ${
+        className={`fixed top-14 left-0 bottom-0 z-40 overflow-y-auto transition-all duration-200 ease-in-out pb-4 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
-        style={{ background: 'linear-gradient(180deg, #0F172A 0%, #1A2332 100%)' }}
+        style={{ width: sidebarW, background: 'linear-gradient(180deg, #0F172A 0%, #1A2332 100%)' }}
       >
         {/* Store name + plan */}
-        <div className="px-4 py-4 border-b border-white/10">
-          <div className="text-sm font-semibold text-white truncate" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-            {user.name || 'My Clinic'}
+        {collapsed ? (
+          <div className="py-3 border-b border-white/10 flex items-center justify-center">
+            <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400 text-xs font-bold">
+              {(user.name || 'M').charAt(0).toUpperCase()}
+            </div>
           </div>
-          <span className="inline-block mt-1 text-[10px] font-medium text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/20">
-            {user.role?.replace(/_/g, ' ') || 'Admin'}
-          </span>
-        </div>
+        ) : (
+          <div className="px-4 py-4 border-b border-white/10">
+            <div className="text-sm font-semibold text-white truncate" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+              {user.name || 'My Clinic'}
+            </div>
+            <span className="inline-block mt-1 text-[10px] font-medium text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              {user.role?.replace(/_/g, ' ') || 'Admin'}
+            </span>
+          </div>
+        )}
 
         {/* Navigation sections */}
         <nav className="py-2">
           {visibleSections.map((section, sIdx) => (
             <div key={section.title}>
-              {sIdx > 0 && <div className="mx-4 mt-3 mb-1 border-t border-white/5" />}
-              <div className="px-4 mt-3 mb-1">
-                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                  {section.title}
-                </span>
-              </div>
-              <ul className="space-y-0.5 px-2">
+              {sIdx > 0 && <div className={collapsed ? 'mx-1 mt-2 mb-1 border-t border-white/5' : 'mx-4 mt-3 mb-1 border-t border-white/5'} />}
+              {!collapsed && (
+                <div className="px-4 mt-3 mb-1">
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                    {section.title}
+                  </span>
+                </div>
+              )}
+              <ul className={collapsed ? 'space-y-0.5 px-1' : 'space-y-0.5 px-2'}>
                 {section.items.map(item => {
                   const hrefPath = item.href.split('?')[0];
                   const hrefModule = item.href.includes('module=') ? item.href.split('module=')[1] : '';
@@ -279,22 +293,22 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                     ? (pathname === '/dashboard/hms' && currentModule === hrefModule)
                     : (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(hrefPath)));
                   return (
-                    <li key={item.page}>
+                    <li key={item.page} className="relative group">
                       <a
                         href={item.href}
                         onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg transition-all relative ${
+                        className={`flex items-center ${collapsed ? 'justify-center px-0 py-2' : 'gap-3 px-3 py-2'} text-[13px] font-medium rounded-lg transition-all relative ${
                           isActive
                             ? 'bg-emerald-500/15 text-emerald-400'
                             : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
                         }`}
                       >
-                        {isActive && (
+                        {isActive && !collapsed && (
                           <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-emerald-400" />
                         )}
                         <span className="text-base leading-none">{item.icon}</span>
-                        <span className="flex-1">{item.label}</span>
-                        {item.badge && (
+                        {!collapsed && <span className="flex-1">{item.label}</span>}
+                        {!collapsed && item.badge && (
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                             item.badgeColor === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
                             item.badgeColor === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
@@ -304,11 +318,17 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                           </span>
                         )}
                       </a>
+                      {/* Tooltip in collapsed mode */}
+                      {collapsed && (
+                        <div className="absolute left-12 top-1/2 -translate-y-1/2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-md whitespace-nowrap z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+                          {item.label}
+                        </div>
+                      )}
                     </li>
                   );
                 })}
                 {/* Section-specific coming soon items */}
-                {section.comingSoon?.map(item => (
+                {!collapsed && section.comingSoon?.map(item => (
                   <li key={item.label}>
                     <button
                       onClick={showComingSoon}
@@ -326,34 +346,49 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
             </div>
           ))}
 
-          {/* Global coming soon section */}
-          <div className="mx-4 mt-3 mb-1 border-t border-white/5" />
-          <div className="px-4 mt-3 mb-1">
-            <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Coming Soon</span>
+          {/* Global coming soon section — hidden in collapsed */}
+          {!collapsed && (
+            <>
+              <div className="mx-4 mt-3 mb-1 border-t border-white/5" />
+              <div className="px-4 mt-3 mb-1">
+                <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Coming Soon</span>
+              </div>
+              <ul className="space-y-0.5 px-2">
+                {COMING_SOON_GLOBAL.map(item => (
+                  <li key={item.label}>
+                    <button
+                      onClick={showComingSoon}
+                      className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg text-slate-600 hover:bg-white/5 transition-all w-full text-left"
+                    >
+                      <span className="text-base leading-none opacity-40">{item.icon}</span>
+                      <span className="flex-1 opacity-50">{item.label}</span>
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-600 border border-white/10">
+                        Soon
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {/* Collapse/expand toggle */}
+          <div className={collapsed ? 'mx-1 mt-3 border-t border-white/5 pt-2' : 'mx-4 mt-3 border-t border-white/5 pt-2'}>
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="w-full flex items-center justify-center py-1.5 text-slate-500 hover:text-slate-300 hover:bg-white/5 rounded-lg transition-colors text-xs"
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {collapsed ? '»' : '«'}
+            </button>
           </div>
-          <ul className="space-y-0.5 px-2">
-            {COMING_SOON_GLOBAL.map(item => (
-              <li key={item.label}>
-                <button
-                  onClick={showComingSoon}
-                  className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg text-slate-600 hover:bg-white/5 transition-all w-full text-left"
-                >
-                  <span className="text-base leading-none opacity-40">{item.icon}</span>
-                  <span className="flex-1 opacity-50">{item.label}</span>
-                  <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-600 border border-white/10">
-                    Soon
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
         </nav>
 
       </aside>
 
       {/* ─── Main content ─── */}
-      <main className="lg:ml-[240px] pt-14 min-h-screen">
-        <div className="p-6 max-w-[1200px] mx-auto">
+      <main className="pt-14 min-h-screen transition-all duration-200" style={{ marginLeft: `${sidebarW}px` }}>
+        <div className={collapsed ? 'p-2' : 'p-6 max-w-[1200px] mx-auto'}>
           {children}
         </div>
       </main>
