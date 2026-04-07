@@ -17,6 +17,7 @@ export function WelcomeContent() {
   const orderRef = searchParams.get('order') || '';
   const planId = searchParams.get('plan') || 'starter';
   const domain = searchParams.get('domain') || '';
+  const intent = searchParams.get('intent') || 'website';
 
   const [userName, setUserName] = useState('Doctor');
   const [copied, setCopied] = useState(false);
@@ -75,7 +76,7 @@ export function WelcomeContent() {
       </div>
 
       <h1 className="text-2xl font-extrabold text-white mb-1">
-        You&apos;re live, {userName}!
+        {intent === 'hms' ? `Your clinic software is ready, ${userName}!` : `You're live, ${userName}!`}
       </h1>
       <p className="text-sm text-slate-400 mb-6">
         Your MediHost clinic is ready. Receipt sent to your email.
@@ -103,24 +104,43 @@ export function WelcomeContent() {
             <span className="text-xs font-bold text-white">{PLAN_LABELS[planId] || planId}</span>
           </div>
         )}
-        {domain && (
-          <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center">
-            <span className="text-xs text-slate-400">Your domain</span>
-            <span className="text-xs font-bold text-emerald-400">{domain}</span>
+        {intent === 'website' ? (
+          <>
+            {domain && (
+              <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center">
+                <span className="text-xs text-slate-400">Your domain</span>
+                <span className="text-xs font-bold text-emerald-400">{domain}</span>
+              </div>
+            )}
+            <div className="px-4 py-3 flex justify-between items-center">
+              <span className="text-xs text-slate-400">Domain active in</span>
+              <span className="text-xs text-slate-300">~15 minutes (DNS propagation)</span>
+            </div>
+          </>
+        ) : (
+          <div className="px-4 py-3 flex justify-between items-center">
+            <span className="text-xs text-slate-400">Status</span>
+            <span className="text-xs text-slate-300">OPD, billing, EMR &amp; LIS modules ready</span>
           </div>
         )}
-        <div className="px-4 py-3 flex justify-between items-center">
-          <span className="text-xs text-slate-400">Domain active in</span>
-          <span className="text-xs text-slate-300">~15 minutes (DNS propagation)</span>
-        </div>
       </div>
 
       {/* Safety message */}
       {orderRef && (
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 mb-6 text-left">
           <p className="text-xs text-blue-300 leading-relaxed">
-            <span className="font-bold">Your order ID is your proof.</span> If any issue arises with payment or setup,
-            share <span className="font-mono font-bold">{orderRef}</span> with our support team for instant resolution.
+            {intent === 'hms' ? (
+              <>
+                <span className="font-bold">Your OPD, billing, EMR, and LIS modules are ready.</span>{' '}
+                Download the desktop app or open in browser. Order{' '}
+                <span className="font-mono font-bold">{orderRef}</span> is your receipt.
+              </>
+            ) : (
+              <>
+                <span className="font-bold">Your order ID is your proof.</span> If any issue arises with payment or setup,
+                share <span className="font-mono font-bold">{orderRef}</span> with our support team for instant resolution.
+              </>
+            )}
           </p>
         </div>
       )}
@@ -129,50 +149,112 @@ export function WelcomeContent() {
       <p className="text-sm font-bold text-white mb-3">What would you like to do first?</p>
 
       <div className="space-y-3 mb-5">
-        {/* Website builder — primary CTA */}
-        <button
-          onClick={goToWebsiteBuilder}
-          className="w-full flex items-center gap-4 px-5 py-4 bg-emerald-500/10 border-2 border-emerald-500/40 rounded-2xl hover:bg-emerald-500/15 hover:border-emerald-500/60 transition-all text-left group"
-        >
-          <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center shrink-0">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="2" y="3" width="16" height="11" rx="2" stroke="#10b981" strokeWidth="1.5"/>
-              <path d="M6 17h8M10 14v3" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M6 8h8M6 10.5h5" stroke="#10b981" strokeWidth="1.2" strokeLinecap="round"/>
-            </svg>
-          </div>
-          <div className="flex-1">
-            <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
-              Build my clinic website
-            </div>
-            <div className="text-xs text-slate-400 mt-0.5">
-              Add logo, services, doctors — goes live in 10 min
-            </div>
-          </div>
-          <span className="text-emerald-500 text-lg">→</span>
-        </button>
+        {intent === 'hms' ? (
+          <>
+            {/* HMS intent: HMS is primary */}
+            <button
+              onClick={goToHMS}
+              className="w-full flex items-center gap-4 px-5 py-4 bg-emerald-500/10 border-2 border-emerald-500/40 rounded-2xl hover:bg-emerald-500/15 hover:border-emerald-500/60 transition-all text-left group"
+            >
+              <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <rect x="3" y="3" width="14" height="14" rx="2" stroke="#10b981" strokeWidth="1.5"/>
+                  <path d="M10 6v8M6 10h8" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
+                  Open Clinic Software
+                </div>
+                <div className="text-xs text-slate-400 mt-0.5">
+                  Register patients, billing, OPD, LIS
+                </div>
+              </div>
+              <span className="text-emerald-500 text-lg">→</span>
+            </button>
 
-        {/* HMS — secondary CTA */}
+            <button
+              onClick={() => router.push('/dashboard?tab=website&intent=hms')}
+              className="w-full flex items-center gap-4 px-5 py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/8 hover:border-white/20 transition-all text-left group"
+            >
+              <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <rect x="2" y="3" width="16" height="11" rx="2" stroke="#60a5fa" strokeWidth="1.5"/>
+                  <path d="M6 17h8M10 14v3" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M6 8h8M6 10.5h5" stroke="#60a5fa" strokeWidth="1.2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
+                  Set up website later
+                </div>
+                <div className="text-xs text-slate-400 mt-0.5">
+                  Add logo, services, doctors — goes live in 10 min
+                </div>
+              </div>
+              <span className="text-slate-500 text-lg group-hover:text-white transition-colors">→</span>
+            </button>
+          </>
+        ) : (
+          <>
+            {/* Website intent: Website builder is primary */}
+            <button
+              onClick={() => router.push('/dashboard?tab=website&intent=website')}
+              className="w-full flex items-center gap-4 px-5 py-4 bg-emerald-500/10 border-2 border-emerald-500/40 rounded-2xl hover:bg-emerald-500/15 hover:border-emerald-500/60 transition-all text-left group"
+            >
+              <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <rect x="2" y="3" width="16" height="11" rx="2" stroke="#10b981" strokeWidth="1.5"/>
+                  <path d="M6 17h8M10 14v3" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M6 8h8M6 10.5h5" stroke="#10b981" strokeWidth="1.2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
+                  Build my clinic website
+                </div>
+                <div className="text-xs text-slate-400 mt-0.5">
+                  Add logo, services, doctors — goes live in 10 min
+                </div>
+              </div>
+              <span className="text-emerald-500 text-lg">→</span>
+            </button>
+
+            <button
+              onClick={goToHMS}
+              className="w-full flex items-center gap-4 px-5 py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/8 hover:border-white/20 transition-all text-left group"
+            >
+              <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <rect x="3" y="3" width="14" height="14" rx="2" stroke="#60a5fa" strokeWidth="1.5"/>
+                  <path d="M10 6v8M6 10h8" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
+                  Open Hospital Management (HMS)
+                </div>
+                <div className="text-xs text-slate-400 mt-0.5">
+                  Register patients, billing, OPD, LIS
+                </div>
+              </div>
+              <span className="text-slate-500 text-lg group-hover:text-white transition-colors">→</span>
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Next step nudge */}
+      <div className="mb-4">
         <button
-          onClick={goToHMS}
-          className="w-full flex items-center gap-4 px-5 py-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/8 hover:border-white/20 transition-all text-left group"
+          onClick={() => router.push(`/onboard?intent=${intent}`)}
+          className="text-sm text-emerald-400/80 hover:text-emerald-300 transition-colors"
         >
-          <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center shrink-0">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="3" y="3" width="14" height="14" rx="2" stroke="#60a5fa" strokeWidth="1.5"/>
-              <path d="M10 6v8M6 10h8" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </div>
-          <div className="flex-1">
-            <div className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
-              Open Hospital Management (HMS)
-            </div>
-            <div className="text-xs text-slate-400 mt-0.5">
-              Register patients, billing, OPD, LIS
-            </div>
-          </div>
-          <span className="text-slate-500 text-lg group-hover:text-white transition-colors">→</span>
+          Complete your clinic profile →
         </button>
+        <p className="text-[11px] text-slate-500 mt-1">
+          Help us customize your experience — takes 30 seconds
+        </p>
       </div>
 
       <button
