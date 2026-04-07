@@ -118,7 +118,7 @@ function HmsIframe() {
       <iframe
         src={iframeSrc}
         className="w-full border-0"
-        style={{ height: 'calc(100vh - 6rem)', minHeight: '500px' }}
+        style={{ height: 'calc(100vh - 4rem)' }}
         allow="clipboard-write; clipboard-read"
         title={MODULE_LABELS[moduleName] || 'HMS'}
       />

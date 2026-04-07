@@ -246,7 +246,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
 
       {/* ─── Sidebar ─── */}
       <aside
-        className={`fixed top-14 left-0 bottom-0 w-[240px] z-40 overflow-y-auto transition-transform duration-200 ease-in-out pb-14 ${
+        className={`fixed top-14 left-0 bottom-0 w-[240px] z-40 overflow-y-auto transition-transform duration-200 ease-in-out pb-4 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
         style={{ background: 'linear-gradient(180deg, #0F172A 0%, #1A2332 100%)' }}
@@ -265,8 +265,8 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         <nav className="py-2">
           {visibleSections.map((section, sIdx) => (
             <div key={section.title}>
-              {sIdx > 0 && <div className="mx-4 my-2 border-t border-white/5" />}
-              <div className="px-4 pt-3 pb-1.5">
+              {sIdx > 0 && <div className="mx-4 mt-3 mb-1 border-t border-white/5" />}
+              <div className="px-4 mt-3 mb-1">
                 <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                   {section.title}
                 </span>
@@ -327,8 +327,8 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
           ))}
 
           {/* Global coming soon section */}
-          <div className="mx-4 my-2 border-t border-white/5" />
-          <div className="px-4 pt-3 pb-1.5">
+          <div className="mx-4 mt-3 mb-1 border-t border-white/5" />
+          <div className="px-4 mt-3 mb-1">
             <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Coming Soon</span>
           </div>
           <ul className="space-y-0.5 px-2">
@@ -349,16 +349,6 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
           </ul>
         </nav>
 
-        {/* Bottom */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-white/10" style={{ background: 'rgba(15, 23, 42, 0.9)' }}>
-          <button
-            onClick={openClinicSoftware}
-            className="w-full text-left px-4 py-3 text-xs font-medium text-emerald-400 hover:bg-white/5 hover:text-emerald-300 transition-colors flex items-center gap-2"
-          >
-            <span>🏥</span>
-            Open Clinic Software
-          </button>
-        </div>
       </aside>
 
       {/* ─── Main content ─── */}
