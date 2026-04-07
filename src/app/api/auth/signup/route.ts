@@ -50,6 +50,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, requires_verification: true, message: data.message });
     }
 
+    // Pass through existing_user flag for inline login
+    if (data.existing_user) {
+      return NextResponse.json({
+        success: false,
+        existing_user: true,
+        email: data.email || body.email,
+        message: data.message || 'Welcome back! Enter your password to continue.',
+      });
+    }
+
     return NextResponse.json(
       { success: false, error: data.error || data.message || 'Registration failed' },
       { status: 400 }

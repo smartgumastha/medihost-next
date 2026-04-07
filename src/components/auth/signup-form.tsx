@@ -129,21 +129,13 @@ export function SignupForm() {
     var token = user.token || '';
     var hospitalId = user.hospitalId || '';
 
+    // Save to localStorage as backup (httpOnly cookie is set by the API route)
     if (token) {
-      var authObj = JSON.stringify({
-        id: String(user.id || hospitalId),
-        email: user.email || form.email,
-        name: user.name || form.owner_name,
-        role: 'HOSPITAL_ADMIN',
-        hospitalId: String(hospitalId),
-        token: token
-      });
       localStorage.setItem('medihost_token', token);
       localStorage.setItem('mh_hospital_id', String(hospitalId));
       localStorage.setItem('mh_user_name', user.name || form.owner_name);
       localStorage.setItem('mh_user_email', user.email || form.email);
       localStorage.setItem('mh_user_phone', form.phone);
-      document.cookie = 'medihost_auth=' + encodeURIComponent(authObj) + '; path=/; max-age=2592000; samesite=lax';
     }
 
     // Non-HMS products with token go directly to their app

@@ -23,13 +23,15 @@ export function WelcomeContent() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const match = document.cookie.split('; ').find(r => r.startsWith('medihost_auth='));
-    if (match) {
-      try {
-        const auth = JSON.parse(decodeURIComponent(match.split('=')[1]));
-        if (auth?.name) setUserName(auth.name.split(' ')[0]);
-      } catch { /* silent */ }
-    }
+    // Read user name via server-side route (httpOnly cookie)
+    fetch('/api/auth/me')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.success && data.user?.name) {
+          setUserName(data.user.name.split(' ')[0]);
+        }
+      })
+      .catch(function () { /* keep default */ });
   }, []);
 
   function copyOrderRef() {
@@ -41,19 +43,17 @@ export function WelcomeContent() {
   }
 
   function goToHMS() {
-    const match = document.cookie.split('; ').find(r => r.startsWith('medihost_auth='));
-    if (match) {
-      try {
-        const auth = JSON.parse(decodeURIComponent(match.split('=')[1]));
-        const token = auth?.token || '';
-        const hospitalId = auth?.hospitalId || '';
-        if (token && hospitalId) {
-          window.location.href = `https://app.hemato.in?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
-          return;
+    // Get HMS token via server-side route (httpOnly cookie)
+    fetch('/api/auth/hms-token', { method: 'POST' })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.success && data.hms_token) {
+          window.location.href = 'https://app.hemato.in?mw_token=' + encodeURIComponent(data.hms_token) + '&mw_hospital_id=' + encodeURIComponent(data.hospital_id || '');
+        } else {
+          router.push('/dashboard');
         }
-      } catch { /* silent */ }
-    }
-    router.push('/dashboard');
+      })
+      .catch(function () { router.push('/dashboard'); });
   }
 
   // ── Free plan welcome ────────────────────────────────
