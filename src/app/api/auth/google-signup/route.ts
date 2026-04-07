@@ -24,9 +24,10 @@ export async function POST(request: NextRequest) {
         email: data.email || '',
         name: data.name || '',
         role: 'HOSPITAL_ADMIN' as const,
-        hospitalId: '',
+        hospitalId: String(data.hospital_id || ''),
         token: data.token || '',
         authProvider: 'google',
+        existing: !!data.existing,
       };
 
       const response = NextResponse.json({ success: true, user });
@@ -38,14 +39,6 @@ export async function POST(request: NextRequest) {
         path: '/',
       });
       return response;
-    }
-
-    // Handle 409 — already registered
-    if (data.existing) {
-      return NextResponse.json(
-        { success: false, error: data.error || 'Account already exists. Please sign in.' },
-        { status: 409 }
-      );
     }
 
     return NextResponse.json(

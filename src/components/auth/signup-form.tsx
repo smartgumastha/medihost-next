@@ -88,13 +88,83 @@ export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [existingUser, setExistingUser] = useState(false);
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function saveAuthAndRedirect(user: { id?: string; token?: string; hospitalId?: string; email?: string; name?: string }) {
+    const token = user.token || '';
+    const hospitalId = user.hospitalId || '';
+
+    // Non-HMS products go directly to their app
+    if (selectedProduct !== 'hms') {
+      const baseUrl = PRODUCT_REDIRECTS[selectedProduct];
+      if (token && hospitalId) {
+        window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
+      } else {
+        router.push('/onboard');
+      }
+      return;
+    }
+
+    // HMS flow — save token and go to plan selection
+    if (token) {
+      const authObj = JSON.stringify({
+        id: String(user.id || hospitalId),
+        email: user.email || form.email,
+        name: user.name || form.owner_name,
+        role: 'HOSPITAL_ADMIN',
+        hospitalId: String(hospitalId),
+        token: token
+      });
+      localStorage.setItem('medihost_token', token);
+      localStorage.setItem('mh_hospital_id', String(hospitalId));
+      localStorage.setItem('mh_user_name', user.name || form.owner_name);
+      localStorage.setItem('mh_user_email', user.email || form.email);
+      localStorage.setItem('mh_user_phone', form.phone);
+      document.cookie = 'medihost_auth=' + encodeURIComponent(authObj) + '; path=/; max-age=2592000; samesite=lax';
+    }
+
+    const params = new URLSearchParams();
+    params.set('intent', intent);
+    if (domain) params.set('domain', domain);
+    router.push(`/plans?${params.toString()}`);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Existing user mode — login with email + password
+    if (existingUser) {
+      if (!form.email || !form.password) {
+        setError('Please enter your password');
+        return;
+      }
+      setError('');
+      setLoading(true);
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: form.email, password: form.password }),
+        });
+        const data = await res.json();
+        if (data.success && data.user) {
+          saveAuthAndRedirect(data.user);
+        } else {
+          setError(data.error || 'Incorrect password. Please try again.');
+        }
+      } catch {
+        setError('Network error. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Normal signup flow
     if (!form.business_name || !form.owner_name || !form.email || !form.password) {
       setError('Please fill in all required fields');
       return;
@@ -121,43 +191,12 @@ export function SignupForm() {
       const data = await res.json();
 
       if (data.success) {
-        const token = data.user?.token || '';
-        const hospitalId = data.user?.hospitalId || '';
-
-        // Non-HMS products go directly to their app
-        if (selectedProduct !== 'hms') {
-          const baseUrl = PRODUCT_REDIRECTS[selectedProduct];
-          if (token && hospitalId) {
-            window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
-          } else {
-            router.push('/onboard');
-          }
-          return;
-        }
-
-        // HMS flow — save token and go to plan selection
-        if (token) {
-          const authObj = JSON.stringify({
-            id: String(data.user?.id || hospitalId),
-            email: form.email,
-            name: form.owner_name,
-            role: 'HOSPITAL_ADMIN',
-            hospitalId: String(hospitalId),
-            token: token
-          });
-          localStorage.setItem('medihost_token', token);
-          localStorage.setItem('mh_hospital_id', String(hospitalId));
-          localStorage.setItem('mh_user_name', form.owner_name);
-          localStorage.setItem('mh_user_email', form.email);
-          localStorage.setItem('mh_user_phone', form.phone);
-          // Write cookie directly from client so payment page can read it
-          document.cookie = 'medihost_auth=' + encodeURIComponent(authObj) + '; path=/; max-age=2592000; samesite=lax';
-        }
-
-        const params = new URLSearchParams();
-        params.set('intent', intent);
-        if (domain) params.set('domain', domain);
-        router.push(`/plans?${params.toString()}`);
+        saveAuthAndRedirect(data.user || {});
+      } else if (data.existing_user) {
+        // Account exists — switch to inline login mode
+        setExistingUser(true);
+        setError('');
+        update('password', '');
       } else {
         setError(data.error || 'Registration failed. Please try again.');
       }
@@ -287,136 +326,213 @@ export function SignupForm() {
       {/* Email tab — form fields */}
       {authTab === 'email' && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="business_name" className="block text-sm font-medium text-slate-300">
-                Business / Clinic Name *
-              </label>
-              <input
-                id="business_name"
-                type="text"
-                placeholder="e.g. Smile Dental Clinic"
-                value={form.business_name}
-                onChange={(e) => update('business_name', e.target.value)}
-                className={inputClass}
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="owner_name" className="block text-sm font-medium text-slate-300">
-                Owner / Doctor Name *
-              </label>
-              <input
-                id="owner_name"
-                type="text"
-                placeholder="Dr. Sharma"
-                value={form.owner_name}
-                onChange={(e) => update('owner_name', e.target.value)}
-                className={inputClass}
-              />
-            </div>
-          </div>
+          {existingUser ? (
+            <>
+              {/* Inline login for existing user */}
+              <div className="rounded-xl p-4" style={{ background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.1)' }}>
+                <p className="text-sm text-emerald-300 font-semibold">Welcome back!</p>
+                <p className="text-xs text-slate-400 mt-1">Enter your password to continue.</p>
+              </div>
 
-          <div className="space-y-2">
-            <label htmlFor="signup_email" className="block text-sm font-medium text-slate-300">
-              Email *
-            </label>
-            <input
-              id="signup_email"
-              type="email"
-              placeholder="you@clinic.com"
-              value={form.email}
-              onChange={(e) => update('email', e.target.value)}
-              className={inputClass}
-            />
-          </div>
+              <div className="space-y-2">
+                <label htmlFor="existing_email" className="block text-sm font-medium text-slate-300">
+                  Email
+                </label>
+                <input
+                  id="existing_email"
+                  type="email"
+                  value={form.email}
+                  disabled
+                  className={`${inputClass} opacity-60 cursor-not-allowed`}
+                />
+              </div>
 
-          <div className="space-y-2">
-            <label htmlFor="phone" className="block text-sm font-medium text-slate-300">
-              Phone
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500 select-none">+91</span>
-              <input
-                id="phone"
-                type="tel"
-                placeholder="98765 43210"
-                value={form.phone}
-                onChange={(e) => update('phone', e.target.value)}
-                className={`${inputClass} pl-12`}
-              />
-            </div>
-          </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="existing_password" className="block text-sm font-medium text-slate-300">
+                    Password
+                  </label>
+                  <a href="/reset-password" className="text-xs text-emerald-400 hover:text-emerald-300 transition-opacity">
+                    Forgot password?
+                  </a>
+                </div>
+                <div className="relative">
+                  <input
+                    id="existing_password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={form.password}
+                    onChange={(e) => update('password', e.target.value)}
+                    className={`${inputClass} pr-16`}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-300 transition-colors"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <label htmlFor="signup_password" className="block text-sm font-medium text-slate-300">
-              Password *
-            </label>
-            <div className="relative">
-              <input
-                id="signup_password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Min 8 characters"
-                value={form.password}
-                onChange={(e) => update('password', e.target.value)}
-                className={`${inputClass} pr-16`}
-              />
+              {error && (
+                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Signing in...' : 'Log in & continue'}
+              </button>
+
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-300 transition-colors"
+                onClick={() => { setExistingUser(false); setError(''); update('password', ''); }}
+                className="w-full text-center text-xs text-slate-500 hover:text-slate-300 transition-colors"
               >
-                {showPassword ? 'Hide' : 'Show'}
+                Use a different email
               </button>
-            </div>
-          </div>
+            </>
+          ) : (
+            <>
+              {/* Normal signup form */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="business_name" className="block text-sm font-medium text-slate-300">
+                    Business / Clinic Name *
+                  </label>
+                  <input
+                    id="business_name"
+                    type="text"
+                    placeholder="e.g. Smile Dental Clinic"
+                    value={form.business_name}
+                    onChange={(e) => update('business_name', e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="owner_name" className="block text-sm font-medium text-slate-300">
+                    Owner / Doctor Name *
+                  </label>
+                  <input
+                    id="owner_name"
+                    type="text"
+                    placeholder="Dr. Sharma"
+                    value={form.owner_name}
+                    onChange={(e) => update('owner_name', e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <label htmlFor="partner_type" className="block text-sm font-medium text-slate-300">
-              Business Type
-            </label>
-            <select
-              id="partner_type"
-              value={form.partner_type}
-              onChange={(e) => update('partner_type', e.target.value)}
-              className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white outline-none focus:border-emerald-500/50 transition-colors appearance-none"
-            >
-              {PRACTICE_TYPES.map((pt) => (
-                <option key={pt.id} value={pt.id} className="bg-[#1E293B] text-white">
-                  {pt.icon} {pt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div className="space-y-2">
+                <label htmlFor="signup_email" className="block text-sm font-medium text-slate-300">
+                  Email *
+                </label>
+                <input
+                  id="signup_email"
+                  type="email"
+                  placeholder="you@clinic.com"
+                  value={form.email}
+                  onChange={(e) => update('email', e.target.value)}
+                  className={inputClass}
+                />
+              </div>
 
-          {error && (
-            <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-              {error}
-            </div>
-          )}
+              <div className="space-y-2">
+                <label htmlFor="phone" className="block text-sm font-medium text-slate-300">
+                  Phone
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500 select-none">+91</span>
+                  <input
+                    id="phone"
+                    type="tel"
+                    placeholder="98765 43210"
+                    value={form.phone}
+                    onChange={(e) => update('phone', e.target.value)}
+                    className={`${inputClass} pl-12`}
+                  />
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
+              <div className="space-y-2">
+                <label htmlFor="signup_password" className="block text-sm font-medium text-slate-300">
+                  Password *
+                </label>
+                <div className="relative">
+                  <input
+                    id="signup_password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Min 8 characters"
+                    value={form.password}
+                    onChange={(e) => update('password', e.target.value)}
+                    className={`${inputClass} pr-16`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-300 transition-colors"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+              </div>
 
-          {/* No domain path */}
-          {!domain && (
-            <p className="text-center text-xs text-slate-500 mt-2">
-              Want your own domain?{' '}
-              <a href="/" className="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">
-                Search at medihost.in
-              </a>
-            </p>
-          )}
+              <div className="space-y-2">
+                <label htmlFor="partner_type" className="block text-sm font-medium text-slate-300">
+                  Business Type
+                </label>
+                <select
+                  id="partner_type"
+                  value={form.partner_type}
+                  onChange={(e) => update('partner_type', e.target.value)}
+                  className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white outline-none focus:border-emerald-500/50 transition-colors appearance-none"
+                >
+                  {PRACTICE_TYPES.map((pt) => (
+                    <option key={pt.id} value={pt.id} className="bg-[#1E293B] text-white">
+                      {pt.icon} {pt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Ref tracking indicator */}
-          {ref && (
-            <p className="text-center text-xs text-slate-600">
-              Referred by: {ref}
-            </p>
+              {error && (
+                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Creating account...' : 'Create Account'}
+              </button>
+
+              {/* No domain path */}
+              {!domain && (
+                <p className="text-center text-xs text-slate-500 mt-2">
+                  Want your own domain?{' '}
+                  <a href="/" className="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">
+                    Search at medihost.in
+                  </a>
+                </p>
+              )}
+
+              {/* Ref tracking indicator */}
+              {ref && (
+                <p className="text-center text-xs text-slate-600">
+                  Referred by: {ref}
+                </p>
+              )}
+            </>
           )}
         </div>
       )}
