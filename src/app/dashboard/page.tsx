@@ -67,6 +67,16 @@ function AdminDashboard({ name }: { name: string }) {
         <ActionCard label="Create AI Post" icon="📢" href="/dashboard/marketing" desc="Generate social media content" />
         <ActionCard label="Add New Doctor" icon="⚕️" href="/dashboard/doctors" desc="Add a doctor to your clinic" />
       </div>
+
+      {/* Desktop app download */}
+      <a href="/desktop" className="flex items-center gap-4 bg-white rounded-lg border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group">
+        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-xl shrink-0">💻</div>
+        <div className="flex-1">
+          <div className="text-sm font-semibold text-gray-900 group-hover:text-emerald-700 transition-colors">Download Desktop App</div>
+          <p className="text-xs text-gray-500 mt-0.5">Run MediHost HMS natively on Windows — system tray, auto-updates</p>
+        </div>
+        <span className="text-xs text-gray-400 hidden sm:block">96 MB · Windows 10+</span>
+      </a>
     </div>
   );
 }
