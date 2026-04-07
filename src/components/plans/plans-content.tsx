@@ -128,9 +128,13 @@ export function PlansContent() {
       window.location.href = 'mailto:hello@medihost.in?subject=Enterprise Plan Enquiry';
       return;
     }
-    // Starter always goes to dashboard — no payment
+    // Starter always goes to welcome — no payment
     if (plan.monthly === 0) {
-      router.push('/dashboard?intent=' + intent);
+      var starterParams = new URLSearchParams();
+      starterParams.set('plan', 'starter');
+      starterParams.set('intent', intent);
+      if (domain) starterParams.set('domain', domain);
+      router.push('/welcome?' + starterParams.toString());
       return;
     }
     // Paid plans — pass pre-GST subtotal to payment page

@@ -367,14 +367,22 @@ export function DomainSearch() {
                 {selectedResult.domain}
                 <span className="text-sm font-normal text-emerald-400/70">— {selectedResult.price}</span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">Included free with Professional plan</p>
+              <p className="text-xs text-slate-400 mt-1">Included free with Growth plan and above</p>
             </div>
-            <a
-              href={`/signup?domain=${encodeURIComponent(selectedResult.domain)}`}
-              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-xl text-sm hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
-            >
-              Get Started →
-            </a>
+            <div className="flex items-center gap-2">
+              <a
+                href={`/buy-domain?domain=${encodeURIComponent(selectedResult.domain)}`}
+                className="px-4 py-3 bg-white/10 text-white font-bold rounded-xl text-sm hover:bg-white/20 transition-all"
+              >
+                Domain only — ₹825
+              </a>
+              <a
+                href={`/signup?domain=${encodeURIComponent(selectedResult.domain)}`}
+                className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-xl text-sm hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
+              >
+                Get Started →
+              </a>
+            </div>
           </div>
         </div>
       )}
