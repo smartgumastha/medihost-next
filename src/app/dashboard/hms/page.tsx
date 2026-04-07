@@ -97,32 +97,13 @@ function HmsIframe() {
   }
 
   return (
-    <div>
-      {/* Module header */}
-      <div className="flex items-center justify-between px-4 py-1.5 bg-white border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-900">{MODULE_LABELS[moduleName] || 'HMS'}</span>
-          <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Live</span>
-        </div>
-        <a
-          href={iframeSrc}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          Open in new tab →
-        </a>
-      </div>
-
-      {/* HMS iframe */}
-      <iframe
-        src={iframeSrc}
-        className="w-full border-0"
-        style={{ height: 'calc(100vh - 4rem)' }}
-        allow="clipboard-write; clipboard-read"
-        title={MODULE_LABELS[moduleName] || 'HMS'}
-      />
-    </div>
+    <iframe
+      src={iframeSrc}
+      className="w-full border-0 block"
+      style={{ height: 'calc(100vh - 56px)', margin: 0, padding: 0 }}
+      allow="clipboard-write; clipboard-read"
+      title={MODULE_LABELS[moduleName] || 'HMS'}
+    />
   );
 }
 

@@ -388,7 +388,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
 
       {/* ─── Main content ─── */}
       <main className="pt-14 min-h-screen transition-all duration-200" style={{ marginLeft: `${sidebarW}px` }}>
-        <div className={collapsed ? 'p-2' : 'p-6 max-w-[1200px] mx-auto'}>
+        <div className={collapsed ? '' : 'p-6 max-w-[1200px] mx-auto'}>
           {children}
         </div>
       </main>
