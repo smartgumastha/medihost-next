@@ -64,7 +64,7 @@ export function PaymentContent() {
       var res = await fetch('/api/create-payment-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan_id: planId, domain_requested: domain, signup_intent: intent }),
+        body: JSON.stringify({ plan_id: planId, domain_requested: domain, signup_intent: intent, amount: baseAmount }),
       });
       var data = await res.json();
 
