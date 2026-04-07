@@ -458,38 +458,10 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ===== Social Proof Bar ===== */}
-      <section className="relative bg-gradient-to-r from-[#1E293B] via-[#1a2438] to-[#1E293B] border-y border-white/5">
-        <AnimateOnScroll>
-          <div className="max-w-5xl mx-auto px-4 py-8">
-            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16 text-center">
-              {[
-                { value: '3', label: 'Live Products' },
-                { value: '\u2713', label: 'NABL Compliant' },
-                { value: '\u2713', label: 'ABDM Ready' },
-                { value: '\u2713', label: 'HIPAA Aligned' },
-              ].map((s, i) => (
-                <div key={s.label} className="flex items-center gap-3">
-                  {i > 0 && <span className="hidden sm:block w-px h-8 bg-white/10 -ml-8 sm:-ml-8" />}
-                  <div>
-                    <div className="text-2xl sm:text-3xl font-extrabold text-white" style={{ letterSpacing: '-0.03em' }}>
-                      {s.value}
-                    </div>
-                    <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mt-0.5">
-                      {s.label}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </AnimateOnScroll>
-      </section>
-
       {/* ===== Intent Fork — Two Paths ===== */}
-      <section className="py-20 sm:py-28">
+      <section className="pt-12 pb-16 sm:pt-16 sm:pb-20">
         <div className="max-w-5xl mx-auto px-4">
-          <AnimateOnScroll className="text-center mb-14">
+          <AnimateOnScroll className="text-center mb-10">
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white" style={{ letterSpacing: '-0.03em' }}>
               What brings you to MediHost?
             </h2>
@@ -572,6 +544,34 @@ export function LandingPage() {
             </AnimateOnScroll>
           </div>
         </div>
+      </section>
+
+      {/* ===== Social Proof Bar ===== */}
+      <section className="relative bg-gradient-to-r from-[#1E293B] via-[#1a2438] to-[#1E293B] border-y border-white/5">
+        <AnimateOnScroll>
+          <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-16 text-center">
+              {[
+                { value: '3', label: 'Live Products' },
+                { value: '\u2713', label: 'NABL Compliant' },
+                { value: '\u2713', label: 'ABDM Ready' },
+                { value: '\u2713', label: 'HIPAA Aligned' },
+              ].map((s, i) => (
+                <div key={s.label} className="flex items-center gap-3">
+                  {i > 0 && <span className="hidden sm:block w-px h-8 bg-white/10 -ml-8 sm:-ml-8" />}
+                  <div>
+                    <div className="text-2xl sm:text-3xl font-extrabold text-white" style={{ letterSpacing: '-0.03em' }}>
+                      {s.value}
+                    </div>
+                    <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mt-0.5">
+                      {s.label}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </AnimateOnScroll>
       </section>
 
       {/* ===== How It Works ===== */}
