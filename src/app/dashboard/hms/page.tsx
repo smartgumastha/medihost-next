@@ -97,9 +97,9 @@ function HmsIframe() {
   }
 
   return (
-    <div className="-m-6">
+    <div>
       {/* Module header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
+      <div className="flex items-center justify-between px-4 py-1.5 bg-white border-b border-gray-200">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-gray-900">{MODULE_LABELS[moduleName] || 'HMS'}</span>
           <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Live</span>
@@ -118,7 +118,7 @@ function HmsIframe() {
       <iframe
         src={iframeSrc}
         className="w-full border-0"
-        style={{ height: 'calc(100vh - 3.5rem - 2.5rem)' }}
+        style={{ height: 'calc(100vh - 6rem)', minHeight: '500px' }}
         allow="clipboard-write; clipboard-read"
         title={MODULE_LABELS[moduleName] || 'HMS'}
       />
