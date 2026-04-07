@@ -23,6 +23,7 @@ export function PaymentContent() {
   const searchParams = useSearchParams();
   const planId = searchParams.get('plan') || 'growth';
   const domain = searchParams.get('domain') || '';
+  const intent = searchParams.get('intent') || 'website';
 
   const plan = PLAN_DETAILS[planId] || PLAN_DETAILS.growth;
 
@@ -69,7 +70,7 @@ export function PaymentContent() {
         return;
       }
 
-      const data = await apiPost('/api/payment-orders/create', { plan_id: planId, domain_requested: domain }, token);
+      const data = await apiPost('/api/payment-orders/create', { plan_id: planId, domain_requested: domain, signup_intent: intent }, token);
 
       setOrderRef(data.order.order_ref);
       setOrderId(String(data.order.id));
@@ -77,7 +78,7 @@ export function PaymentContent() {
 
       // Free plan — skip Razorpay
       if (plan.total === 0) {
-        router.push(`/welcome?order=${data.order.order_ref}&plan=${planId}&domain=${domain}`);
+        router.push(`/welcome?order=${data.order.order_ref}&plan=${planId}&domain=${domain}&intent=${intent}`);
         return;
       }
 
@@ -109,7 +110,7 @@ export function PaymentContent() {
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
           }, token);
-          router.push(`/welcome?order=${order.order_ref}&plan=${planId}&domain=${domain}`);
+          router.push(`/welcome?order=${order.order_ref}&plan=${planId}&domain=${domain}&intent=${intent}`);
         } catch {
           setError(`Payment received but verification failed. Your order ${order.order_ref} is saved — contact support with this ID.`);
           setStatusMsg('');
