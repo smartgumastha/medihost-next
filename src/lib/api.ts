@@ -54,3 +54,11 @@ export async function adminPost(path: string, body: unknown) {
     body: JSON.stringify(body),
   });
 }
+
+export async function adminPut(path: string, body: unknown) {
+  return apiFetch(path, {
+    method: 'PUT',
+    headers: { 'x-admin-key': process.env.ADMIN_KEY || 'MediHost@2026' },
+    body: JSON.stringify(body),
+  });
+}

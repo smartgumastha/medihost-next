@@ -7,6 +7,7 @@ import { getTokenFromClient } from '@/lib/auth';
 
 var PLAN_NAMES: Record<string, string> = {
   starter: 'Starter', growth: 'Growth', professional: 'Professional', enterprise: 'Enterprise',
+  'domain-only': 'Domain Only',
 };
 
 function fmt(n: number): string {

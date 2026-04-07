@@ -57,6 +57,68 @@ export function WelcomeContent() {
   }
 
   // ── Free plan welcome ────────────────────────────────
+  // ── Domain-only purchase welcome ───────────────────
+  if (planId === 'domain-only') {
+    return (
+      <div className="text-center">
+        <div className="w-16 h-16 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-5">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M6 16L13 23L26 9" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+
+        <h1 className="text-2xl font-extrabold text-white mb-1">
+          Domain being registered!
+        </h1>
+        <p className="text-sm text-slate-400 mb-6">
+          {domain ? domain + ' will be active in ~15 minutes (DNS propagation).' : 'Your domain is being set up.'}
+        </p>
+
+        {orderRef && (
+          <div className="border border-white/10 rounded-2xl overflow-hidden mb-5 text-left">
+            <div className="px-4 py-3 flex justify-between items-center">
+              <span className="text-xs text-slate-400">Order ID</span>
+              <button onClick={copyOrderRef} className="flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+                {orderRef}
+                <span className="text-[10px] text-slate-500">{copied ? '✓ copied' : 'tap to copy'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-3 mb-5">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="w-full flex items-center gap-4 px-5 py-4 bg-emerald-500/10 border-2 border-emerald-500/40 rounded-2xl hover:bg-emerald-500/15 hover:border-emerald-500/60 transition-all text-left group"
+          >
+            <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center shrink-0">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="3" y="3" width="14" height="14" rx="2" stroke="#10b981" strokeWidth="1.5"/>
+                <path d="M7 7h6M7 10h4M7 13h5" stroke="#10b981" strokeWidth="1.2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">Go to dashboard</div>
+              <div className="text-xs text-slate-400 mt-0.5">Manage your domain and website</div>
+            </div>
+            <span className="text-emerald-500 text-lg">→</span>
+          </button>
+        </div>
+
+        <div className="border-t border-white/10 pt-4">
+          <p className="text-xs text-slate-400 mb-2">Want more than just a domain?</p>
+          <button
+            onClick={() => router.push('/plans?domain=' + encodeURIComponent(domain) + '&intent=' + intent)}
+            className="text-sm text-emerald-400 font-bold hover:text-emerald-300 transition-colors"
+          >
+            See our plans — add website + HMS →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Free plan welcome ────────────────────────────────
   if (planId === 'starter') {
     return (
       <div className="text-center">

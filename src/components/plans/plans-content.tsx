@@ -1,7 +1,9 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+
+var API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://smartgumastha-backend-production.up.railway.app';
 
 // ── Plan definitions ────────────────────────────────────────
 var PLAN_DEFS = [
@@ -70,6 +72,19 @@ export function PlansContent() {
 
   var [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
   var [selected, setSelected] = useState(intent === 'hms' ? 'professional' : 'growth');
+  var [domainPrice, setDomainPrice] = useState(699);
+
+  useEffect(function () {
+    if (!domain) return;
+    fetch(API_BASE + '/api/presence/pricing/domain-price?domain=' + encodeURIComponent(domain))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.success && data.pricing && data.pricing.selling_price) {
+          setDomainPrice(data.pricing.selling_price);
+        }
+      })
+      .catch(function () { /* keep 699 fallback */ });
+  }, [domain]);
 
   // Compute prices for selected plan
   var breakdown = useMemo(function () {
@@ -94,13 +109,13 @@ export function PlansContent() {
     var softwareTotal = isYearly ? softwareAnnual - discountAmount : softwareMonthly;
 
     // Domain cost — only Growth monthly charges for domain
-    var domainCost = 0;
+    var dCost = 0;
     var domainFreeOnPlan = plan.domainFree || isYearly;
     if (domain && !domainFreeOnPlan) {
-      domainCost = plan.domainCharge; // Growth monthly: +699
+      dCost = domainPrice;
     }
 
-    var subtotal = softwareTotal + domainCost;
+    var subtotal = softwareTotal + dCost;
     var gst = Math.round(subtotal * 0.18);
     var total = subtotal + gst;
 
@@ -112,15 +127,15 @@ export function PlansContent() {
       isFree: false,
       softwareTotal: softwareTotal,
       discountAmount: discountAmount,
-      domainCost: domainCost,
+      domainCost: dCost,
       domainFreeOnPlan: domainFreeOnPlan,
       subtotal: subtotal,
       gst: gst,
       total: total,
       monthlyEquiv: monthlyEquiv,
-      yearlySavings: Math.round(softwareMonthly * 12 * plan.yearlyDiscount) + ((!plan.domainFree && domain) ? plan.domainCharge : 0),
+      yearlySavings: Math.round(softwareMonthly * 12 * plan.yearlyDiscount) + ((!plan.domainFree && domain) ? domainPrice : 0),
     };
-  }, [selected, billing, domain]);
+  }, [selected, billing, domain, domainPrice]);
 
   function handleCTA() {
     var plan = breakdown.plan;
@@ -228,7 +243,7 @@ export function PlansContent() {
             if (plan.domainFree || isYearly) {
               domainLabel = 'Domain FREE';
             } else {
-              domainLabel = '+ ₹699 domain';
+              domainLabel = '+ ₹' + fmt(domainPrice) + ' domain';
             }
           }
 
