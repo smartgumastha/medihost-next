@@ -77,42 +77,48 @@ export function PlansContent() {
     var isYearly = billing === 'yearly';
     var isFree = plan.monthly === 0;
 
+    // Starter is always free — no domain charge on plans page
+    if (isFree) {
+      return {
+        plan: plan, isYearly: isYearly, isFree: true,
+        softwareTotal: 0, discountAmount: 0, domainCost: 0,
+        domainFreeOnPlan: false, subtotal: 0, gst: 0, total: 0,
+        monthlyEquiv: 0, yearlySavings: 0,
+      };
+    }
+
     // Software cost
     var softwareMonthly = plan.monthly;
     var softwareAnnual = softwareMonthly * 12;
     var discountAmount = isYearly ? Math.round(softwareAnnual * plan.yearlyDiscount) : 0;
     var softwareTotal = isYearly ? softwareAnnual - discountAmount : softwareMonthly;
 
-    // Domain cost
+    // Domain cost — only Growth monthly charges for domain
     var domainCost = 0;
-    if (domain) {
-      if (isFree) {
-        domainCost = plan.domainCharge; // 699 for starter
-      } else if (!plan.domainFree && !isYearly) {
-        domainCost = plan.domainCharge; // Growth monthly: +699
-      }
-      // Growth yearly, Professional, Enterprise: domain free
+    var domainFreeOnPlan = plan.domainFree || isYearly;
+    if (domain && !domainFreeOnPlan) {
+      domainCost = plan.domainCharge; // Growth monthly: +699
     }
 
     var subtotal = softwareTotal + domainCost;
     var gst = Math.round(subtotal * 0.18);
     var total = subtotal + gst;
 
-    var monthlyEquiv = isYearly && !isFree ? Math.round(softwareTotal / 12) : softwareMonthly;
+    var monthlyEquiv = isYearly ? Math.round(softwareTotal / 12) : softwareMonthly;
 
     return {
       plan: plan,
       isYearly: isYearly,
-      isFree: isFree,
+      isFree: false,
       softwareTotal: softwareTotal,
       discountAmount: discountAmount,
       domainCost: domainCost,
-      domainFreeOnPlan: isFree ? false : (plan.domainFree || isYearly),
+      domainFreeOnPlan: domainFreeOnPlan,
       subtotal: subtotal,
       gst: gst,
       total: total,
       monthlyEquiv: monthlyEquiv,
-      yearlySavings: isFree ? 0 : Math.round(softwareMonthly * 12 * plan.yearlyDiscount) + ((!plan.domainFree && domain) ? plan.domainCharge : 0),
+      yearlySavings: Math.round(softwareMonthly * 12 * plan.yearlyDiscount) + ((!plan.domainFree && domain) ? plan.domainCharge : 0),
     };
   }, [selected, billing, domain]);
 
@@ -122,15 +128,17 @@ export function PlansContent() {
       window.location.href = 'mailto:hello@medihost.in?subject=Enterprise Plan Enquiry';
       return;
     }
-    if (plan.monthly === 0 && !domain) {
+    // Starter always goes to dashboard — no payment
+    if (plan.monthly === 0) {
       router.push('/dashboard?intent=' + intent);
       return;
     }
+    // Paid plans — pass pre-GST subtotal to payment page
     var params = new URLSearchParams();
     params.set('plan', plan.id);
     if (domain) params.set('domain', domain);
     params.set('billing', billing);
-    params.set('amount', String(breakdown.total));
+    params.set('amount', String(breakdown.subtotal));
     params.set('intent', intent);
     router.push('/payment?' + params.toString());
   }
@@ -210,10 +218,10 @@ export function PlansContent() {
 
           // Domain label
           var domainLabel = '';
-          if (domain) {
-            if (isFree) {
-              domainLabel = '+ ₹699 domain';
-            } else if (plan.domainFree || isYearly) {
+          if (isFree) {
+            domainLabel = 'Subdomain only';
+          } else if (domain) {
+            if (plan.domainFree || isYearly) {
               domainLabel = 'Domain FREE';
             } else {
               domainLabel = '+ ₹699 domain';
@@ -260,7 +268,7 @@ export function PlansContent() {
                 )}
                 {domainLabel && (
                   <div className={'text-[11px] mt-1 font-medium ' +
-                    (domainLabel === 'Domain FREE' ? 'text-emerald-400' : 'text-slate-500')}>
+                    (domainLabel === 'Domain FREE' ? 'text-emerald-400' : domainLabel === 'Subdomain only' ? 'text-slate-600' : 'text-slate-500')}>
                     {domainLabel}
                   </div>
                 )}
@@ -296,38 +304,60 @@ export function PlansContent() {
 
       {/* ── Compact checkout summary ────────────────────── */}
       <div className="border border-white/10 rounded-2xl bg-white/5 px-4 py-4 mb-5">
-        {/* Compact breakdown: plan + savings/domain on one row, total on second */}
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-bold text-white">{breakdown.plan.name} — {breakdown.isYearly ? 'Yearly' : 'Monthly'}</span>
-          <div className="flex items-center gap-2">
-            {breakdown.isYearly && breakdown.discountAmount > 0 && (
-              <span className="text-[11px] text-emerald-400 font-medium">Save ₹{fmt(breakdown.yearlySavings)}/yr</span>
+        {breakdown.isFree ? (
+          <>
+            {/* Starter summary */}
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-white">Starter — Free forever</span>
+              <span className="text-sm font-extrabold text-white">₹0</span>
+            </div>
+            <p className="text-xs text-slate-400 mb-1">
+              Subdomain: yourname.medihost.in — no custom domain
+            </p>
+            {domain && (
+              <div className="rounded-lg px-3 py-2 mt-2 mb-1 bg-amber-500/10 border border-amber-500/20">
+                <p className="text-[11px] text-amber-300">
+                  Custom domain <span className="font-bold">{domain}</span> requires Growth plan or above.
+                  You&apos;ll get a yourname.medihost.in subdomain on free plan.
+                </p>
+                <button onClick={function () { setSelected('growth'); }} className="mt-1 text-[11px] text-emerald-400 font-bold hover:text-emerald-300 transition-colors">
+                  Switch to Growth for custom domain →
+                </button>
+              </div>
             )}
-            {!breakdown.isYearly && !breakdown.isFree && (
-              <button onClick={function () { setBilling('yearly'); }} className="text-[11px] text-emerald-400 font-medium hover:text-emerald-300 transition-colors">
-                Save {Math.round(breakdown.plan.yearlyDiscount * 100)}% yearly →
-              </button>
+            {!domain && breakdown.plan.missing.length > 0 && (
+              <div className="flex items-center gap-2 mt-2 mb-1 text-[11px] text-amber-300/80">
+                <span>Free plan excludes: {breakdown.plan.missing.join(', ')}</span>
+                <button onClick={function () { setSelected('growth'); }} className="text-emerald-400 font-bold hover:text-emerald-300 shrink-0">Upgrade →</button>
+              </div>
             )}
-          </div>
-        </div>
+          </>
+        ) : (
+          <>
+            {/* Paid plan summary */}
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-white">{breakdown.plan.name} — {breakdown.isYearly ? 'Yearly' : 'Monthly'}</span>
+              <div className="flex items-center gap-2">
+                {breakdown.isYearly && breakdown.discountAmount > 0 && (
+                  <span className="text-[11px] text-emerald-400 font-medium">Save ₹{fmt(breakdown.yearlySavings)}/yr</span>
+                )}
+                {!breakdown.isYearly && (
+                  <button onClick={function () { setBilling('yearly'); }} className="text-[11px] text-emerald-400 font-medium hover:text-emerald-300 transition-colors">
+                    Save {Math.round(breakdown.plan.yearlyDiscount * 100)}% yearly →
+                  </button>
+                )}
+              </div>
+            </div>
 
-        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-          <span>
-            {breakdown.isFree ? 'Free plan' : '₹' + fmt(breakdown.softwareTotal)}
-            {domain ? (breakdown.domainFreeOnPlan ? ' + domain free' : ' + ₹' + fmt(breakdown.domainCost) + ' domain') : ''}
-            {breakdown.total > 0 ? ' + ₹' + fmt(breakdown.gst) + ' GST' : ''}
-          </span>
-          <span className="text-sm font-extrabold text-white">
-            {breakdown.total === 0 ? 'Free' : '₹' + fmt(breakdown.total)}
-          </span>
-        </div>
-
-        {/* Starter missing warning — inline */}
-        {breakdown.isFree && breakdown.plan.missing.length > 0 && (
-          <div className="flex items-center gap-2 mt-2 mb-1 text-[11px] text-amber-300/80">
-            <span>Free plan excludes: {breakdown.plan.missing.join(', ')}</span>
-            <button onClick={function () { setSelected('growth'); }} className="text-emerald-400 font-bold hover:text-emerald-300 shrink-0">Upgrade →</button>
-          </div>
+            <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+              <span>
+                ₹{fmt(breakdown.softwareTotal)}
+                {domain ? (breakdown.domainFreeOnPlan ? ' + domain free' : ' + ₹' + fmt(breakdown.domainCost) + ' domain') : ''}
+                {' + ₹' + fmt(breakdown.gst) + ' GST'}
+              </span>
+              <span className="text-sm font-extrabold text-white">₹{fmt(breakdown.total)}</span>
+            </div>
+          </>
         )}
 
         {/* Big CTA */}
@@ -337,7 +367,7 @@ export function PlansContent() {
         >
           {breakdown.plan.id === 'enterprise'
             ? 'Contact us for Enterprise →'
-            : breakdown.total === 0
+            : breakdown.isFree
               ? 'Start free →'
               : 'Pay ₹' + fmt(breakdown.total) + ' securely →'}
         </button>
