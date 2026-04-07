@@ -54,7 +54,7 @@ export function getAuthFromCookie(cookieValue: string | undefined): AuthUser | n
 
 export function getAuthFromClient(): AuthUser | null {
   if (typeof document === 'undefined') return null;
-  const match = document.cookie.split('; ').find(row => row.startsWith('mh_auth='));
+  const match = document.cookie.split('; ').find(row => row.startsWith('medihost_auth='));
   if (!match) return null;
   try {
     return JSON.parse(decodeURIComponent(match.split('=')[1]));
@@ -68,7 +68,7 @@ export function getTokenFromClient(): string {
   if (auth?.token) return auth.token;
   // Fallback to localStorage
   try {
-    const stored = localStorage.getItem('mh_token');
+    const stored = localStorage.getItem('medihost_token');
     if (stored) return stored;
   } catch { /* silent */ }
   return '';

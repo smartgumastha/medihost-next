@@ -55,7 +55,7 @@ export function SetupChecklist() {
 
   function handleStep(step: SetupStep) {
     if (step.external) {
-      const match = document.cookie.split('; ').find(r => r.startsWith('mh_auth='));
+      const match = document.cookie.split('; ').find(r => r.startsWith('medihost_auth='));
       if (match) {
         try {
           const auth = JSON.parse(decodeURIComponent(match.split('=')[1]));

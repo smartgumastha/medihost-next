@@ -5,7 +5,8 @@ const API_BASE = process.env.API_URL || 'https://smartgumastha-backend-productio
 export async function POST(request: NextRequest) {
   const body = await request.json();
   try {
-    const res = await fetch(`${API_BASE}/api/signup/`, {
+    // Step 1: Register via partner signup
+    const res = await fetch(`${API_BASE}/api/presence/partner-auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -25,42 +26,38 @@ export async function POST(request: NextRequest) {
     const data = await res.json();
 
     if (data.success) {
-      const loginRes = await fetch(`${API_BASE}/api/auth/login`, {
+      // Step 2: Auto-login via partner login to get a PARTNER token
+      const loginRes = await fetch(`${API_BASE}/api/presence/partner-auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: body.email, password: body.password }),
       });
       const loginData = await loginRes.json();
 
-      // token and hospital_id are nested under loginData.data
-      const d = loginData.data || {};
-      const token = d.token || '';
-      const hospitalId = String(d.hospital_id || '');
-      const name = body.owner_name || body.business_name;
-
-      if (loginData.success && token) {
+      if (loginData.success && loginData.token) {
+        const partner = loginData.partner || {};
         const user = {
-          id: String(d.userid || hospitalId),
-          email: body.email,
-          name: name,
-          role: 'HOSPITAL_ADMIN' as const,
-          hospitalId: hospitalId,
-          token: token,
+          id: String(partner.id || ''),
+          email: partner.email || body.email,
+          name: body.owner_name || partner.owner_name || partner.business_name || body.email,
+          role: partner.role || 'HOSPITAL_ADMIN',
+          hospitalId: String(partner.hospital_id || ''),
+          token: loginData.token,
         };
 
         const response = NextResponse.json({ success: true, user });
-
-        response.cookies.set('mh_auth', JSON.stringify(user), {
-          httpOnly: false,
+        response.cookies.set('medihost_auth', JSON.stringify(user), {
+          httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7,
+          maxAge: 30 * 24 * 60 * 60,
           path: '/',
         });
-
         return response;
       }
 
+      // Partner login failed after signup — account created but couldn't auto-login
+      console.error('Signup succeeded but partner login failed:', loginData);
       return NextResponse.json({ success: true, message: 'Account created. Please login.' });
     }
 

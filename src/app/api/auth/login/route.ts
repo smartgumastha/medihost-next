@@ -30,12 +30,14 @@ export async function POST(request: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 30 * 24 * 60 * 60,
         path: '/',
       });
       return response;
     }
-  } catch {}
+  } catch (err) {
+    console.error('Partner login failed:', err);
+  }
 
   // Fallback: try HMS login
   try {
@@ -63,12 +65,14 @@ export async function POST(request: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 30 * 24 * 60 * 60,
         path: '/',
       });
       return response;
     }
-  } catch {}
+  } catch (err) {
+    console.error('HMS login failed:', err);
+  }
 
   return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 });
 }

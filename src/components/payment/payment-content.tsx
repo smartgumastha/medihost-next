@@ -55,13 +55,13 @@ export function PaymentContent() {
       // Read token directly — getTokenFromClient can fail during SSR
       let token = '';
       try {
-        const cookieMatch = document.cookie.split('; ').find(r => r.startsWith('mh_auth='));
+        const cookieMatch = document.cookie.split('; ').find(r => r.startsWith('medihost_auth='));
         if (cookieMatch) {
           const parsed = JSON.parse(decodeURIComponent(cookieMatch.split('=')[1]));
           token = parsed.token || '';
         }
         if (!token) {
-          token = localStorage.getItem('mh_token') || '';
+          token = localStorage.getItem('medihost_token') || '';
         }
       } catch { /* silent */ }
       if (!token) {

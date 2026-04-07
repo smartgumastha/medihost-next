@@ -23,7 +23,7 @@ export function WelcomeContent() {
 
   useEffect(() => {
     // Read user name from cookie
-    const match = document.cookie.split('; ').find(r => r.startsWith('mh_auth='));
+    const match = document.cookie.split('; ').find(r => r.startsWith('medihost_auth='));
     if (match) {
       try {
         const auth = JSON.parse(decodeURIComponent(match.split('=')[1]));
@@ -50,7 +50,7 @@ export function WelcomeContent() {
 
   function goToHMS() {
     // Get token from cookie and redirect to HMS
-    const match = document.cookie.split('; ').find(r => r.startsWith('mh_auth='));
+    const match = document.cookie.split('; ').find(r => r.startsWith('medihost_auth='));
     if (match) {
       try {
         const auth = JSON.parse(decodeURIComponent(match.split('=')[1]));
