@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 var PLAN_NAMES: Record<string, string> = {
   starter: 'Starter', growth: 'Growth', professional: 'Professional', enterprise: 'Enterprise',
@@ -13,7 +13,6 @@ function fmt(n: number): string {
 }
 
 export function PaymentContent() {
-  var router = useRouter();
   var searchParams = useSearchParams();
   var planId = searchParams.get('plan') || 'growth';
   var domain = searchParams.get('domain') || '';
@@ -25,140 +24,112 @@ export function PaymentContent() {
   var total = baseAmount + gst;
   var planName = PLAN_NAMES[planId] || 'Growth';
 
-  var [orderRef, setOrderRef] = useState<string | null>(null);
-  var [orderId, setOrderId] = useState<string | null>(null);
+  var [orderRef, setOrderRef] = useState('');
   var [loading, setLoading] = useState(false);
   var [error, setError] = useState('');
-  var [statusMsg, setStatusMsg] = useState('');
 
   // Set mh_redirect cookie so login returns here
   useEffect(function () {
-    if (typeof window !== 'undefined') {
-      document.cookie = 'mh_redirect=' + encodeURIComponent(window.location.pathname + window.location.search) + '; path=/; max-age=3600; samesite=lax';
-    }
-  }, []);
+    document.cookie = 'mh_redirect=' + encodeURIComponent(window.location.pathname + window.location.search) + '; path=/; max-age=3600; samesite=lax';
 
-  // Redirect free plans with no domain
-  useEffect(function () {
+    // Redirect free plans with no domain
     if (baseAmount === 0 && !domain) {
-      router.push('/dashboard?intent=' + intent);
+      window.location.href = '/dashboard?intent=' + intent;
     }
-  }, [baseAmount, domain, intent, router]);
+  }, [baseAmount, domain, intent]);
 
-  // Load Razorpay SDK
-  function loadRazorpay(): Promise<void> {
-    if (typeof window !== 'undefined' && window.Razorpay) return Promise.resolve();
-    return new Promise(function (resolve, reject) {
-      var s = document.createElement('script');
-      s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      s.onload = function () { resolve(); };
-      s.onerror = function () { reject(new Error('Razorpay SDK failed to load')); };
-      document.head.appendChild(s);
-    });
-  }
-
-  var steps = ['Signup', 'Plan', 'Payment', 'Done'];
-
-  async function createOrder() {
+  async function handlePay() {
     setLoading(true);
     setError('');
-    setStatusMsg('');
+
     try {
-      var res = await fetch('/api/create-payment-order', {
+      // Step 1: Create order via server-side route (reads httpOnly cookie)
+      var orderRes = await fetch('/api/create-payment-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan_id: planId, domain_requested: domain, signup_intent: intent, amount: baseAmount }),
+        body: JSON.stringify({
+          plan_id: planId,
+          domain_requested: domain,
+          signup_intent: intent,
+          amount: baseAmount,
+        }),
       });
-      var data = await res.json();
+      var orderData = await orderRes.json();
 
-      if (res.status === 401) {
-        // Not authenticated — redirect to login, mh_redirect cookie will bring them back
-        router.push('/login?intent=' + encodeURIComponent(intent) + '&domain=' + encodeURIComponent(domain));
+      if (orderRes.status === 401 || (!orderData.success && orderData.error === 'Not authenticated')) {
+        window.location.href = '/login?intent=' + encodeURIComponent(intent) + '&domain=' + encodeURIComponent(domain);
         return;
       }
 
-      if (!data.success || !data.order) {
-        setError(data.error || 'Could not create order. Please try again.');
+      if (!orderData.success || !orderData.order) {
+        setError(orderData.error || 'Failed to create order. Please try again.');
+        setLoading(false);
         return;
       }
 
-      setOrderRef(data.order.order_ref);
-      setOrderId(String(data.order.id));
+      var order = orderData.order;
+      setOrderRef(order.order_ref || '');
 
       // Free plan — skip Razorpay
-      if (total === 0) {
-        router.push('/welcome?order=' + data.order.order_ref + '&plan=' + planId + '&domain=' + encodeURIComponent(domain) + '&intent=' + intent);
+      if (order.total_paise === 0 || total === 0) {
+        window.location.href = '/welcome?order=' + (order.order_ref || '') + '&plan=' + planId + '&domain=' + encodeURIComponent(domain) + '&intent=' + intent;
         return;
       }
 
-      // Load Razorpay SDK + get key
-      await loadRazorpay();
+      // Step 2: Load Razorpay script if not loaded
+      if (typeof window.Razorpay !== 'function') {
+        await new Promise(function (resolve, reject) {
+          var script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      // Step 3: Get Razorpay key
       var configRes = await fetch('/api/payment-config');
       var configData = await configRes.json();
-      var rzpKey = configData.key || '';
 
-      if (!rzpKey || typeof window.Razorpay !== 'function') {
-        setError('Payment gateway not ready. Please refresh and try again.');
-        return;
-      }
-
-      // Open Razorpay checkout
-      var options: Record<string, unknown> = {
-        key: rzpKey,
-        amount: data.order.total_paise,
+      // Step 4: Open Razorpay checkout
+      var rzp = new window.Razorpay({
+        key: configData.key,
+        amount: order.total_paise,
         currency: 'INR',
         name: 'MediHost',
-        description: planName + ' — ' + (domain || 'medihost.in'),
-        order_id: data.order.razorpay_order_id,
-        theme: { color: '#10b981' },
+        description: (planId === 'domain-only' ? 'Domain' : planName) + ' — ' + (domain || 'MediHost Plan'),
+        order_id: order.razorpay_order_id,
         handler: async function (response: Record<string, string>) {
-          setStatusMsg('Verifying payment…');
           try {
-            var verifyRes = await fetch('/api/verify-payment', {
+            await fetch('/api/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                order_id: data.order.id,
+                order_id: order.id,
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
               }),
             });
-            var verifyData = await verifyRes.json();
-            if (verifyData.success) {
-              router.push('/welcome?order=' + data.order.order_ref + '&plan=' + planId + '&domain=' + encodeURIComponent(domain) + '&intent=' + intent);
-            } else {
-              setError('Payment received but verification failed. Order ' + data.order.order_ref + ' is saved — contact support.');
-              setStatusMsg('');
-            }
-          } catch {
-            setError('Payment received but verification failed. Order ' + data.order.order_ref + ' is saved — contact support.');
-            setStatusMsg('');
-          }
+          } catch { /* verification failure — order is still saved */ }
+          window.location.href = '/welcome?order=' + (order.order_ref || '') + '&plan=' + planId + '&domain=' + encodeURIComponent(domain) + '&intent=' + intent;
         },
         modal: {
           ondismiss: function () {
-            setError('Payment cancelled. Order ' + data.order.order_ref + ' is saved — retry below anytime.');
-            setStatusMsg('');
             setLoading(false);
+            setError('Payment cancelled. Click Pay to try again.');
           },
         },
-      };
-
-      var rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', function (response: Record<string, Record<string, string>>) {
-        setError('Payment failed: ' + (response.error?.description || 'Unknown error') + '. Order ' + data.order.order_ref + ' saved — retry below.');
-        setStatusMsg('');
-        setLoading(false);
+        theme: { color: '#10b981' },
       });
-
       rzp.open();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Could not create order. Please try again.');
-    } finally {
+    } catch {
+      setError('Something went wrong. Please try again.');
       setLoading(false);
     }
   }
+
+  var steps = ['Signup', 'Plan', 'Payment', 'Done'];
 
   return (
     <div>
@@ -195,13 +166,13 @@ export function PaymentContent() {
       {/* Order summary */}
       <div className="border border-white/10 rounded-2xl overflow-hidden mb-5">
         <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center">
-          <span className="text-sm text-slate-300">{planName} plan — {billingParam === 'yearly' ? 'Yearly' : 'Monthly'}</span>
+          <span className="text-sm text-slate-300">{planName} — {billingParam === 'yearly' ? 'Yearly' : 'Monthly'}</span>
           <span className="text-sm font-bold text-white">₹{fmt(baseAmount)}</span>
         </div>
         {domain && (
           <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center">
             <span className="text-sm text-slate-400">Domain: {domain}</span>
-            {planId === 'starter' || planId === 'domain-only' ? (
+            {planId === 'domain-only' ? (
               <span className="text-sm text-slate-300">₹{fmt(baseAmount)}</span>
             ) : (
               <span className="text-xs text-emerald-400 font-bold">Included</span>
@@ -222,32 +193,16 @@ export function PaymentContent() {
       {error && (
         <div className="text-sm text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-4 leading-relaxed">
           {error}
-          {orderId && (
-            <button
-              onClick={function () { setError(''); createOrder(); }}
-              className="block mt-2 text-xs text-emerald-400 underline"
-            >
-              Retry payment →
-            </button>
-          )}
         </div>
-      )}
-
-      {/* Status */}
-      {statusMsg && (
-        <div className="text-sm text-slate-300 text-center mb-4 animate-pulse">{statusMsg}</div>
       )}
 
       {/* Pay button */}
       <button
-        onClick={createOrder}
-        disabled={loading || !!statusMsg}
+        onClick={handlePay}
+        disabled={loading}
         className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
       >
-        {loading ? 'Preparing order…' :
-         statusMsg ? statusMsg :
-         total === 0 ? 'Activate free plan →' :
-         'Pay ₹' + fmt(total) + ' securely →'}
+        {loading ? 'Preparing payment…' : total === 0 ? 'Activate free plan →' : 'Pay ₹' + fmt(total) + ' securely →'}
       </button>
 
       <p className="text-center text-xs text-slate-600 mt-3">
