@@ -59,6 +59,7 @@ export function SignupForm() {
   const type = searchParams.get('type') || '';
   const product = searchParams.get('product') || '';
   const ref = searchParams.get('ref') || '';
+  const intent = searchParams.get('intent') || 'website';
 
   const selectedProduct = getSelectedProduct(type || null, product || null);
   const heading = getHeading(domain || null, type || null, product || null);
@@ -110,6 +111,7 @@ export function SignupForm() {
           selected_domain: domain,
           selected_product: selectedProduct,
           ref_code: ref,
+          signup_intent: intent,
         }),
       });
       const data = await res.json();
@@ -149,8 +151,9 @@ export function SignupForm() {
         }
 
         const params = new URLSearchParams();
+        params.set('intent', intent);
         if (domain) params.set('domain', domain);
-        router.push(`/plans${params.toString() ? '?' + params.toString() : ''}`);
+        router.push(`/plans?${params.toString()}`);
       } else {
         setError(data.error || 'Registration failed. Please try again.');
       }
@@ -165,6 +168,23 @@ export function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Intent banner */}
+      {intent === 'hms' ? (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ background: 'rgba(99,102,241,0.08)', borderColor: 'rgba(99,102,241,0.2)' }}>
+          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(99,102,241,0.2)', color: '#818cf8' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          </span>
+          <span className="text-sm text-indigo-300">Setting up your clinic software — OPD, billing, EMR, LIS</span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl border" style={{ background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.2)' }}>
+          <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </span>
+          <span className="text-sm text-emerald-300">Getting your clinic online — domain, website, booking</span>
+        </div>
+      )}
+
       {/* Dynamic heading */}
       <h3 className="text-lg font-bold text-white text-center mb-2">{heading}</h3>
 

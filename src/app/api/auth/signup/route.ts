@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
         password: body.password,
         partner_type: body.partner_type || 'clinic',
         signup_source: body.signup_source || 'medihost-web',
+        signup_intent: body.signup_intent || 'website',
       }),
     });
 
