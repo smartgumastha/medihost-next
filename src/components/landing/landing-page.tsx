@@ -486,6 +486,94 @@ export function LandingPage() {
         </AnimateOnScroll>
       </section>
 
+      {/* ===== Intent Fork — Two Paths ===== */}
+      <section className="py-20 sm:py-28">
+        <div className="max-w-5xl mx-auto px-4">
+          <AnimateOnScroll className="text-center mb-14">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white" style={{ letterSpacing: '-0.03em' }}>
+              What brings you to MediHost?
+            </h2>
+            <p className="mt-4 text-base sm:text-lg" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Choose your path. Both include a free account.
+            </p>
+          </AnimateOnScroll>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Card 1 — Get Online */}
+            <AnimateOnScroll>
+              <div
+                className="rounded-2xl border p-8 sm:p-10 flex flex-col h-full"
+                style={{ background: 'rgba(16,185,129,0.04)', borderColor: 'rgba(16,185,129,0.15)' }}
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: 'rgba(16,185,129,0.1)' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Get my clinic online</h3>
+                <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  Own .in domain, AI-built website, online booking, Google Business presence
+                </p>
+                <ul className="space-y-3 mb-8 flex-1">
+                  {[
+                    'drkumar.in — your own domain',
+                    'Professional website in 2 minutes',
+                    'Patient booking page',
+                    'Upgrade to HMS anytime',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-slate-300">
+                      <span className="mt-0.5 text-emerald-400 font-bold">&#10003;</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href="/signup?intent=website"
+                  className="inline-flex items-center justify-center w-full h-12 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold text-sm hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
+                >
+                  Start free
+                </a>
+                <p className="text-center text-xs mt-3" style={{ color: 'rgba(255,255,255,0.35)' }}>Free forever. Upgrade anytime.</p>
+              </div>
+            </AnimateOnScroll>
+
+            {/* Card 2 — Run Digitally */}
+            <AnimateOnScroll>
+              <div
+                className="rounded-2xl border p-8 sm:p-10 flex flex-col h-full"
+                style={{ background: 'rgba(99,102,241,0.04)', borderColor: 'rgba(99,102,241,0.15)' }}
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: 'rgba(99,102,241,0.1)' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Run my clinic digitally</h3>
+                <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  Full HMS with OPD, billing, EMR, LIS, pharmacy. Desktop app for all staff.
+                </p>
+                <ul className="space-y-3 mb-8 flex-1">
+                  {[
+                    'OPD queue + doctor dashboard',
+                    'Billing — A4, A5, thermal print',
+                    'LIS with NABL compliance',
+                    'Free website + domain included',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-slate-300">
+                      <span className="mt-0.5 text-indigo-400 font-bold">&#10003;</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href="/signup?intent=hms"
+                  className="inline-flex items-center justify-center w-full h-12 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-sm hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
+                >
+                  Download app
+                </a>
+                <p className="text-center text-xs mt-3" style={{ color: 'rgba(255,255,255,0.35)' }}>Windows / Mac / browser</p>
+              </div>
+            </AnimateOnScroll>
+          </div>
+        </div>
+      </section>
+
       {/* ===== How It Works ===== */}
       <section className="py-24 sm:py-32 bg-[#0F172A]" id="how-it-works">
         <div className="max-w-5xl mx-auto px-4">
