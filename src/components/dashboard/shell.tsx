@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -54,12 +54,12 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: 'HMS Modules',
     items: [
-      { page: 'opd', label: 'OPD Queue', icon: '🏥', href: '/dashboard/opd' },
-      { page: 'emr', label: 'EMR', icon: '📋', href: '/dashboard/emr' },
-      { page: 'billing', label: 'Billing', icon: '🧾', href: '/dashboard/billing' },
-      { page: 'lis', label: 'LIS', icon: '🔬', href: '/dashboard/lis', badge: 'NABL', badgeColor: 'blue' },
-      { page: 'pharmacy', label: 'Pharmacy', icon: '💊', href: '/dashboard/pharmacy', badge: 'Pro', badgeColor: 'amber' },
-      { page: 'appointments', label: 'Appointments', icon: '📅', href: '/dashboard/appointments' },
+      { page: 'opd', label: 'OPD Queue', icon: '🏥', href: '/dashboard/hms?module=opd' },
+      { page: 'emr', label: 'EMR', icon: '📋', href: '/dashboard/hms?module=emr' },
+      { page: 'billing', label: 'Billing', icon: '🧾', href: '/dashboard/hms?module=billing' },
+      { page: 'lis', label: 'LIS', icon: '🔬', href: '/dashboard/hms?module=lis', badge: 'NABL', badgeColor: 'blue' },
+      { page: 'pharmacy', label: 'Pharmacy', icon: '💊', href: '/dashboard/hms?module=pharmacy', badge: 'Pro', badgeColor: 'amber' },
+      { page: 'appointments', label: 'Appointments', icon: '📅', href: '/dashboard/hms?module=appointments' },
     ],
     comingSoon: [
       { label: 'IPD Management', icon: '🛏️' },
@@ -84,7 +84,6 @@ const NAV_SECTIONS: NavSection[] = [
 ];
 
 const COMING_SOON_GLOBAL: ComingSoonItem[] = [
-  { label: 'Doctor App', icon: '📱' },
   { label: 'Floor Manager', icon: '🏢' },
   { label: 'Stores & Inventory', icon: '📦' },
   { label: 'HR & Payroll', icon: '💰' },
@@ -92,8 +91,10 @@ const COMING_SOON_GLOBAL: ComingSoonItem[] = [
 
 export function DashboardShell({ user, children }: { user: AuthUser; children: React.ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const currentModule = searchParams.get('module') || '';
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -272,9 +273,11 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
               </div>
               <ul className="space-y-0.5 px-2">
                 {section.items.map(item => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                  const hrefPath = item.href.split('?')[0];
+                  const hrefModule = item.href.includes('module=') ? item.href.split('module=')[1] : '';
+                  const isActive = hrefModule
+                    ? (pathname === '/dashboard/hms' && currentModule === hrefModule)
+                    : (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(hrefPath)));
                   return (
                     <li key={item.page}>
                       <a
