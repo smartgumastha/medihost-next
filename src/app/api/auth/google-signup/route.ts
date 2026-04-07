@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         name: data.name || '',
         role: 'HOSPITAL_ADMIN' as const,
         hospitalId: '',
-        token: '', // Google-authed users don't get a JWT from this endpoint yet
+        token: data.token || '',
         authProvider: 'google',
       };
 
