@@ -45,14 +45,17 @@ export function PaymentContent() {
     }
   }, [baseAmount, domain, intent, router]);
 
-  // Load Razorpay SDK on mount
-  useEffect(function () {
-    if (typeof window !== 'undefined' && !window.Razorpay) {
+  // Load Razorpay SDK
+  function loadRazorpay(): Promise<void> {
+    if (typeof window !== 'undefined' && window.Razorpay) return Promise.resolve();
+    return new Promise(function (resolve, reject) {
       var s = document.createElement('script');
       s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Razorpay SDK failed to load')); };
       document.head.appendChild(s);
-    }
-  }, []);
+    });
+  }
 
   var steps = ['Signup', 'Plan', 'Payment', 'Done'];
 
@@ -88,12 +91,13 @@ export function PaymentContent() {
         return;
       }
 
-      // Get Razorpay key
+      // Load Razorpay SDK + get key
+      await loadRazorpay();
       var configRes = await fetch('/api/payment-config');
       var configData = await configRes.json();
       var rzpKey = configData.key || '';
 
-      if (!rzpKey || !window.Razorpay) {
+      if (!rzpKey || typeof window.Razorpay !== 'function') {
         setError('Payment gateway not ready. Please refresh and try again.');
         return;
       }
