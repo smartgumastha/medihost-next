@@ -5,15 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { apiPost } from '@/lib/api';
 import { getTokenFromClient } from '@/lib/auth';
 
-const PLAN_DETAILS: Record<string, { name: string; amount: number; gst: number; total: number }> = {
-  starter:      { name: 'Starter',      amount: 0,      gst: 0,    total: 0      },
-  growth:       { name: 'Growth',       amount: 99900,  gst: 17982, total: 117882 },
-  professional: { name: 'Professional', amount: 249900, gst: 44982, total: 294882 },
-  enterprise:   { name: 'Enterprise',   amount: 499900, gst: 89982, total: 589882 },
+var PLAN_NAMES: Record<string, string> = {
+  starter: 'Starter', growth: 'Growth', professional: 'Professional', enterprise: 'Enterprise',
 };
 
-function paise(n: number) {
-  return '₹' + (n / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+function fmt(n: number): string {
+  return n.toLocaleString('en-IN');
 }
 
 // Razorpay type declared in domain-manager.tsx global scope
@@ -24,8 +21,18 @@ export function PaymentContent() {
   const planId = searchParams.get('plan') || 'growth';
   const domain = searchParams.get('domain') || '';
   const intent = searchParams.get('intent') || 'website';
+  const billingParam = searchParams.get('billing') || 'monthly';
 
-  const plan = PLAN_DETAILS[planId] || PLAN_DETAILS.growth;
+  // Amount from URL is the pre-GST subtotal from plans page
+  var baseAmount = parseInt(searchParams.get('amount') || '0', 10);
+  var gst = Math.round(baseAmount * 0.18);
+  var total = baseAmount + gst;
+  var planName = PLAN_NAMES[planId] || 'Growth';
+
+  // Starter + no domain = free, skip to dashboard
+  if (baseAmount === 0 && !domain) {
+    // Will redirect in useEffect
+  }
 
   const [orderRef, setOrderRef] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -33,6 +40,13 @@ export function PaymentContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
+
+  // Redirect free plans with no domain straight to dashboard
+  useEffect(function () {
+    if (baseAmount === 0 && !domain) {
+      router.push('/dashboard?intent=' + intent);
+    }
+  }, [baseAmount, domain, intent, router]);
 
   // Progress steps
   const steps = ['Signup', 'Plan', 'Payment', 'Done'];
@@ -77,7 +91,7 @@ export function PaymentContent() {
       setRzpOrderId(data.order.razorpay_order_id);
 
       // Free plan — skip Razorpay
-      if (plan.total === 0) {
+      if (total === 0) {
         router.push(`/welcome?order=${data.order.order_ref}&plan=${planId}&domain=${domain}&intent=${intent}`);
         return;
       }
@@ -179,22 +193,26 @@ export function PaymentContent() {
       {/* Order summary */}
       <div className="border border-white/10 rounded-2xl overflow-hidden mb-5">
         <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center">
-          <span className="text-sm text-slate-300">{plan.name} plan</span>
-          <span className="text-sm font-bold text-white">{paise(plan.amount)}<span className="text-xs text-slate-500">/mo</span></span>
+          <span className="text-sm text-slate-300">{planName} plan — {billingParam === 'yearly' ? 'Yearly' : 'Monthly'}</span>
+          <span className="text-sm font-bold text-white">₹{fmt(baseAmount)}</span>
         </div>
         {domain && (
           <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center">
             <span className="text-sm text-slate-400">Domain: {domain}</span>
-            <span className="text-xs text-emerald-400 font-bold">Free</span>
+            {planId === 'starter' ? (
+              <span className="text-sm text-slate-300">₹699</span>
+            ) : (
+              <span className="text-xs text-emerald-400 font-bold">Included</span>
+            )}
           </div>
         )}
         <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center">
           <span className="text-sm text-slate-400">GST (18%)</span>
-          <span className="text-sm text-slate-300">{paise(plan.gst)}</span>
+          <span className="text-sm text-slate-300">₹{fmt(gst)}</span>
         </div>
         <div className="px-4 py-3 bg-white/5 flex justify-between items-center">
           <span className="text-sm font-bold text-white">Total due today</span>
-          <span className="text-lg font-extrabold text-white">{plan.total === 0 ? 'Free' : paise(plan.total)}</span>
+          <span className="text-lg font-extrabold text-white">{total === 0 ? 'Free' : '₹' + fmt(total)}</span>
         </div>
       </div>
 
@@ -226,8 +244,8 @@ export function PaymentContent() {
       >
         {loading ? 'Preparing order…' :
          statusMsg ? statusMsg :
-         plan.total === 0 ? 'Activate free plan →' :
-         `Pay ${paise(plan.total)} securely →`}
+         total === 0 ? 'Activate free plan →' :
+         `Pay ₹${fmt(total)} securely →`}
       </button>
 
       <p className="text-center text-xs text-slate-600 mt-3">

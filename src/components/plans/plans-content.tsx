@@ -188,7 +188,7 @@ export function PlansContent() {
       </div>
 
       {/* Plan cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {PLAN_DEFS.map(function (plan) {
           var isSelected = selected === plan.id;
           var isFree = plan.monthly === 0;
@@ -294,109 +294,46 @@ export function PlansContent() {
         })}
       </div>
 
-      {/* ── Selected plan summary ────────────────────────── */}
-      <div className="border border-white/10 rounded-2xl bg-white/5 p-5 mb-6">
-        <div className="flex flex-col sm:flex-row gap-5">
-          {/* Left: price breakdown */}
-          <div className="flex-1 space-y-2">
-            <h3 className="text-sm font-bold text-white mb-3">
-              {breakdown.plan.name} plan — {breakdown.isYearly ? 'Yearly' : 'Monthly'}
-            </h3>
-
-            {!breakdown.isFree && (
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400">
-                  Software {breakdown.isYearly ? '(12 months)' : '(1 month)'}
-                </span>
-                <span className="text-slate-300">
-                  ₹{fmt(breakdown.isYearly ? breakdown.plan.monthly * 12 : breakdown.plan.monthly)}
-                </span>
-              </div>
-            )}
-
+      {/* ── Compact checkout summary ────────────────────── */}
+      <div className="border border-white/10 rounded-2xl bg-white/5 px-4 py-4 mb-5">
+        {/* Compact breakdown: plan + savings/domain on one row, total on second */}
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-bold text-white">{breakdown.plan.name} — {breakdown.isYearly ? 'Yearly' : 'Monthly'}</span>
+          <div className="flex items-center gap-2">
             {breakdown.isYearly && breakdown.discountAmount > 0 && (
-              <div className="flex justify-between text-xs">
-                <span className="text-emerald-400">Yearly discount ({Math.round(breakdown.plan.yearlyDiscount * 100)}%)</span>
-                <span className="text-emerald-400">- ₹{fmt(breakdown.discountAmount)}</span>
-              </div>
+              <span className="text-[11px] text-emerald-400 font-medium">Save ₹{fmt(breakdown.yearlySavings)}/yr</span>
             )}
-
-            {domain && (
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Domain ({domain})</span>
-                {breakdown.domainFreeOnPlan ? (
-                  <span className="text-emerald-400 font-medium">FREE</span>
-                ) : (
-                  <span className="text-slate-300">₹{fmt(breakdown.domainCost)}</span>
-                )}
-              </div>
+            {!breakdown.isYearly && !breakdown.isFree && (
+              <button onClick={function () { setBilling('yearly'); }} className="text-[11px] text-emerald-400 font-medium hover:text-emerald-300 transition-colors">
+                Save {Math.round(breakdown.plan.yearlyDiscount * 100)}% yearly →
+              </button>
             )}
-
-            {breakdown.total > 0 && (
-              <>
-                <div className="flex justify-between text-xs border-t border-white/10 pt-2 mt-2">
-                  <span className="text-slate-400">GST (18%)</span>
-                  <span className="text-slate-300">₹{fmt(breakdown.gst)}</span>
-                </div>
-                <div className="flex justify-between text-sm font-bold border-t border-white/10 pt-2 mt-2">
-                  <span className="text-white">Total</span>
-                  <span className="text-white">₹{fmt(breakdown.total)}</span>
-                </div>
-              </>
-            )}
-
-            {breakdown.isFree && !domain && (
-              <div className="text-xs text-slate-400">No payment needed — start building now.</div>
-            )}
-          </div>
-
-          {/* Right: contextual nudge */}
-          <div className="sm:w-52 shrink-0">
-            {breakdown.isFree && !breakdown.isYearly ? (
-              <div className="rounded-xl p-3 bg-amber-500/10 border border-amber-500/20">
-                <p className="text-xs font-bold text-amber-300 mb-1">Missing on Free</p>
-                <ul className="space-y-1">
-                  {breakdown.plan.missing.map(function (f) {
-                    return <li key={f} className="text-[11px] text-amber-300/70">✕ {f}</li>;
-                  })}
-                </ul>
-                <button
-                  onClick={function () { setSelected('growth'); }}
-                  className="mt-2 text-[11px] text-emerald-400 font-bold hover:text-emerald-300 transition-colors"
-                >
-                  Upgrade to Growth →
-                </button>
-              </div>
-            ) : !breakdown.isYearly && !breakdown.isFree ? (
-              <div className="rounded-xl p-3 bg-emerald-500/10 border border-emerald-500/20">
-                <p className="text-xs font-bold text-emerald-300 mb-1">Switch to yearly?</p>
-                <p className="text-[11px] text-emerald-300/70">
-                  Save ₹{fmt(breakdown.yearlySavings)}/yr
-                  {domain && !breakdown.plan.domainFree ? ' — domain included free' : ''}
-                </p>
-                <button
-                  onClick={function () { setBilling('yearly'); }}
-                  className="mt-2 text-[11px] text-emerald-400 font-bold hover:text-emerald-300 transition-colors"
-                >
-                  Switch to yearly →
-                </button>
-              </div>
-            ) : breakdown.isYearly && !breakdown.isFree ? (
-              <div className="rounded-xl p-3 bg-emerald-500/10 border border-emerald-500/20">
-                <p className="text-xs font-bold text-emerald-300 mb-1">You save ₹{fmt(breakdown.yearlySavings)}/yr</p>
-                <p className="text-[11px] text-emerald-300/70">
-                  That&apos;s ₹{fmt(breakdown.monthlyEquiv)}/mo effective
-                  {domain && breakdown.domainFreeOnPlan ? ' + free domain' : ''}
-                </p>
-              </div>
-            ) : null}
           </div>
         </div>
 
-        {/* CTA Button */}
+        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+          <span>
+            {breakdown.isFree ? 'Free plan' : '₹' + fmt(breakdown.softwareTotal)}
+            {domain ? (breakdown.domainFreeOnPlan ? ' + domain free' : ' + ₹' + fmt(breakdown.domainCost) + ' domain') : ''}
+            {breakdown.total > 0 ? ' + ₹' + fmt(breakdown.gst) + ' GST' : ''}
+          </span>
+          <span className="text-sm font-extrabold text-white">
+            {breakdown.total === 0 ? 'Free' : '₹' + fmt(breakdown.total)}
+          </span>
+        </div>
+
+        {/* Starter missing warning — inline */}
+        {breakdown.isFree && breakdown.plan.missing.length > 0 && (
+          <div className="flex items-center gap-2 mt-2 mb-1 text-[11px] text-amber-300/80">
+            <span>Free plan excludes: {breakdown.plan.missing.join(', ')}</span>
+            <button onClick={function () { setSelected('growth'); }} className="text-emerald-400 font-bold hover:text-emerald-300 shrink-0">Upgrade →</button>
+          </div>
+        )}
+
+        {/* Big CTA */}
         <button
           onClick={handleCTA}
-          className="w-full mt-5 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
+          className="w-full mt-3 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-base font-bold rounded-full hover:shadow-xl hover:shadow-emerald-500/30 transition-all active:scale-[0.98]"
         >
           {breakdown.plan.id === 'enterprise'
             ? 'Contact us for Enterprise →'
@@ -405,7 +342,7 @@ export function PlansContent() {
               : 'Pay ₹' + fmt(breakdown.total) + ' securely →'}
         </button>
 
-        <p className="text-center text-[11px] text-slate-600 mt-2">
+        <p className="text-center text-[11px] text-slate-500 mt-2">
           7-day free trial on Growth &amp; Professional. Cancel anytime. GST invoice provided.
         </p>
       </div>
