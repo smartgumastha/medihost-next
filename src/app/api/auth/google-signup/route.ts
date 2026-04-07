@@ -5,7 +5,7 @@ const API_BASE = process.env.API_URL || 'https://smartgumastha-backend-productio
 export async function POST(request: NextRequest) {
   const body = await request.json();
   try {
-    const res = await fetch(`${API_BASE}/api/presence/payment-landing/register-google`, {
+    const res = await fetch(`${API_BASE}/api/presence/register-google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
