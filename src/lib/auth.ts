@@ -13,20 +13,21 @@ export type UserRole =
 
 export type DashboardPage =
   | 'dashboard' | 'profile' | 'website' | 'domain'
-  | 'doctors' | 'products' | 'marketing' | 'analytics' | 'plan';
+  | 'doctors' | 'products' | 'marketing' | 'analytics' | 'plan'
+  | 'opd' | 'emr' | 'billing' | 'lis' | 'pharmacy' | 'appointments' | 'staff' | 'settings';
 
 export const ROLE_PAGES: Record<UserRole, DashboardPage[]> = {
-  SUPER_ADMIN: ['dashboard', 'profile', 'website', 'domain', 'doctors', 'products', 'marketing', 'analytics', 'plan'],
-  HOSPITAL_ADMIN: ['dashboard', 'profile', 'website', 'domain', 'doctors', 'products', 'marketing', 'analytics', 'plan'],
-  MANAGER: ['dashboard', 'profile', 'doctors', 'products', 'analytics', 'plan'],
-  DOCTOR: ['dashboard', 'profile', 'doctors'],
-  RECEPTIONIST: ['dashboard', 'profile'],
-  NURSE: ['dashboard', 'profile'],
-  IPD_NURSE: ['dashboard', 'profile'],
-  PHARMACIST: ['dashboard', 'profile', 'products'],
-  BILLING: ['dashboard', 'profile', 'analytics'],
-  LAB_TECHNICIAN: ['dashboard', 'profile', 'products'],
-  PATIENT: ['dashboard', 'profile'],
+  SUPER_ADMIN: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy'],
+  HOSPITAL_ADMIN: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy'],
+  MANAGER: ['dashboard','profile','doctors','products','analytics','staff','opd','billing'],
+  DOCTOR: ['dashboard','profile','opd','emr'],
+  RECEPTIONIST: ['dashboard','profile','opd','billing','appointments'],
+  NURSE: ['dashboard','profile','opd'],
+  IPD_NURSE: ['dashboard','profile'],
+  PHARMACIST: ['dashboard','profile','pharmacy'],
+  BILLING: ['dashboard','profile','billing','analytics'],
+  LAB_TECHNICIAN: ['dashboard','profile','lis'],
+  PATIENT: ['dashboard','profile'],
 };
 
 export function canAccess(role: UserRole, page: DashboardPage): boolean {

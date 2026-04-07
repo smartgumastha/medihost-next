@@ -9,10 +9,27 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { canAccess, type AuthUser, type DashboardPage } from '@/lib/auth';
 
-const NAV_SECTIONS: {
+interface NavItem {
+  page: DashboardPage;
+  label: string;
+  icon: string;
+  href: string;
+  badge?: string;
+  badgeColor?: string;
+}
+
+interface ComingSoonItem {
+  label: string;
+  icon: string;
+}
+
+interface NavSection {
   title: string;
-  items: { page: DashboardPage; label: string; icon: string; href: string }[];
-}[] = [
+  items: NavItem[];
+  comingSoon?: ComingSoonItem[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
   {
     title: 'General',
     items: [
@@ -35,22 +52,43 @@ const NAV_SECTIONS: {
     ],
   },
   {
+    title: 'HMS Modules',
+    items: [
+      { page: 'opd', label: 'OPD Queue', icon: '🏥', href: '/dashboard/opd' },
+      { page: 'emr', label: 'EMR', icon: '📋', href: '/dashboard/emr' },
+      { page: 'billing', label: 'Billing', icon: '🧾', href: '/dashboard/billing' },
+      { page: 'lis', label: 'LIS', icon: '🔬', href: '/dashboard/lis', badge: 'NABL', badgeColor: 'blue' },
+      { page: 'pharmacy', label: 'Pharmacy', icon: '💊', href: '/dashboard/pharmacy', badge: 'Pro', badgeColor: 'amber' },
+      { page: 'appointments', label: 'Appointments', icon: '📅', href: '/dashboard/appointments' },
+    ],
+    comingSoon: [
+      { label: 'IPD Management', icon: '🛏️' },
+      { label: 'Nursing Station', icon: '👩‍⚕️' },
+    ],
+  },
+  {
     title: 'Growth',
     items: [
-      { page: 'marketing', label: 'Marketing', icon: '📢', href: '/dashboard/marketing' },
+      { page: 'marketing', label: 'Marketing (AI)', icon: '📢', href: '/dashboard/marketing' },
       { page: 'analytics', label: 'Analytics', icon: '📈', href: '/dashboard/analytics' },
     ],
   },
   {
-    title: 'Account',
+    title: 'Admin',
     items: [
+      { page: 'staff', label: 'Staff & Roles', icon: '👥', href: '/dashboard/staff' },
+      { page: 'settings', label: 'Settings', icon: '⚙️', href: '/dashboard/settings' },
       { page: 'plan', label: 'Plan & Billing', icon: '💎', href: '/dashboard/plan' },
     ],
   },
 ];
 
-// Flat list for backward compat
-const NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items);
+const COMING_SOON_GLOBAL: ComingSoonItem[] = [
+  { label: 'Doctor App', icon: '📱' },
+  { label: 'Floor Manager', icon: '🏢' },
+  { label: 'Stores & Inventory', icon: '📦' },
+  { label: 'HR & Payroll', icon: '💰' },
+];
 
 export function DashboardShell({ user, children }: { user: AuthUser; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -94,11 +132,18 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
     }
   }
 
+  const [comingSoonToast, setComingSoonToast] = useState('');
+
+  function showComingSoon() {
+    setComingSoonToast('This module is coming soon. We\u2019ll notify you when it\u2019s ready.');
+    setTimeout(function() { setComingSoonToast(''); }, 3000);
+  }
+
   // Filter sections to only include items the user can access
   const visibleSections = NAV_SECTIONS.map(section => ({
     ...section,
     items: section.items.filter(item => canAccess(user.role, item.page)),
-  })).filter(section => section.items.length > 0);
+  })).filter(section => section.items.length > 0 || (section.comingSoon && section.comingSoon.length > 0));
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F6F6F7' }}>
@@ -245,14 +290,60 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                           <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-emerald-400" />
                         )}
                         <span className="text-base leading-none">{item.icon}</span>
-                        {item.label}
+                        <span className="flex-1">{item.label}</span>
+                        {item.badge && (
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                            item.badgeColor === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                            item.badgeColor === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                            'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        )}
                       </a>
                     </li>
                   );
                 })}
+                {/* Section-specific coming soon items */}
+                {section.comingSoon?.map(item => (
+                  <li key={item.label}>
+                    <button
+                      onClick={showComingSoon}
+                      className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg text-slate-600 hover:bg-white/5 transition-all w-full text-left"
+                    >
+                      <span className="text-base leading-none opacity-40">{item.icon}</span>
+                      <span className="flex-1 opacity-50">{item.label}</span>
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-600 border border-white/10">
+                        Soon
+                      </span>
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           ))}
+
+          {/* Global coming soon section */}
+          <div className="mx-4 my-2 border-t border-white/5" />
+          <div className="px-4 pt-3 pb-1.5">
+            <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Coming Soon</span>
+          </div>
+          <ul className="space-y-0.5 px-2">
+            {COMING_SOON_GLOBAL.map(item => (
+              <li key={item.label}>
+                <button
+                  onClick={showComingSoon}
+                  className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg text-slate-600 hover:bg-white/5 transition-all w-full text-left"
+                >
+                  <span className="text-base leading-none opacity-40">{item.icon}</span>
+                  <span className="flex-1 opacity-50">{item.label}</span>
+                  <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-600 border border-white/10">
+                    Soon
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
         </nav>
 
         {/* Bottom */}
@@ -273,6 +364,13 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
           {children}
         </div>
       </main>
+
+      {/* Coming soon toast */}
+      {comingSoonToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-sm px-5 py-3 rounded-xl shadow-lg border border-white/10 animate-[fadeInUp_0.2s_ease-out]">
+          {comingSoonToast}
+        </div>
+      )}
     </div>
   );
 }
