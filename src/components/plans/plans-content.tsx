@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
-const PLANS = [
+var PLANS = [
   {
     id: 'starter',
     name: 'Starter',
@@ -13,8 +13,8 @@ const PLANS = [
     total: 0,
     tagline: 'Try MediHost with no commitment',
     features: ['Clinic website', 'Online appointments', 'Basic OPD', '1 branch'],
-    highlight: false,
     cta: 'Start free',
+    isFree: true,
   },
   {
     id: 'growth',
@@ -25,7 +25,6 @@ const PLANS = [
     total: 1179,
     tagline: 'Best for growing clinics',
     features: ['Everything in Starter', 'LIS — lab reports', 'Billing + GST invoices', 'WhatsApp notifications', '2 branches'],
-    highlight: true,
     cta: 'Get Growth',
   },
   {
@@ -37,7 +36,6 @@ const PLANS = [
     total: 2949,
     tagline: 'For clinics ready to scale',
     features: ['Everything in Growth', 'Pharmacy POS', 'Home care module', 'AI marketing tools', '5 branches'],
-    highlight: false,
     cta: 'Get Professional',
   },
   {
@@ -49,7 +47,6 @@ const PLANS = [
     total: 5899,
     tagline: 'Chain clinics & hospitals',
     features: ['Everything in Professional', 'Unlimited branches', 'Dedicated account manager', 'Custom integrations', 'SLA support'],
-    highlight: false,
     cta: 'Contact us',
     contactOnly: true,
   },
@@ -59,17 +56,26 @@ export function PlansContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const domain = searchParams.get('domain') || '';
-  const [selected, setSelected] = useState('growth');
+  const intent = searchParams.get('intent') || 'website';
+  const [selected, setSelected] = useState(intent === 'hms' ? 'professional' : 'growth');
 
-  function handleSelect(planId: string, contactOnly?: boolean) {
+  var highlightId = intent === 'hms' ? 'professional' : 'growth';
+  var highlightBadge = intent === 'hms' ? 'Recommended for HMS' : 'Most popular';
+
+  function handleSelect(planId: string, contactOnly?: boolean, isFree?: boolean) {
     if (contactOnly) {
       window.location.href = 'mailto:hello@medihost.in?subject=Enterprise Plan Enquiry';
+      return;
+    }
+    if (isFree) {
+      router.push(`/dashboard?intent=${intent}`);
       return;
     }
     setSelected(planId);
     const params = new URLSearchParams();
     params.set('plan', planId);
     if (domain) params.set('domain', domain);
+    params.set('intent', intent);
     router.push(`/payment?${params.toString()}`);
   }
 
@@ -105,51 +111,61 @@ export function PlansContent() {
         ))}
       </div>
 
+      {/* Intent hint */}
+      <p className="text-xs text-slate-500 text-center mb-4">
+        {intent === 'hms'
+          ? 'All HMS plans include OPD, billing, EMR. Professional adds LIS + Pharmacy.'
+          : 'All paid plans include a free .in domain and AI-built website.'}
+      </p>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {PLANS.map((plan) => (
-          <div
-            key={plan.id}
-            onClick={() => handleSelect(plan.id, plan.contactOnly)}
-            className={`relative rounded-2xl border p-4 cursor-pointer transition-all
-              ${plan.highlight
-                ? 'border-emerald-500/60 bg-emerald-500/10 ring-1 ring-emerald-500/30'
-                : selected === plan.id
-                  ? 'border-white/30 bg-white/10'
-                  : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/8'
-              }`}
-          >
-            {plan.highlight && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full whitespace-nowrap">
-                Most popular
-              </div>
-            )}
-            <div className="mb-2">
-              <div className="text-xs text-slate-400 font-medium mb-0.5">{plan.name}</div>
-              <div className="text-xl font-extrabold text-white">{plan.priceLabel}</div>
-              {plan.price > 0 && (
-                <div className="text-[10px] text-slate-500 mt-0.5">+ ₹{plan.gst} GST = ₹{plan.total}/mo</div>
-              )}
-            </div>
-            <p className="text-xs text-slate-400 mb-3">{plan.tagline}</p>
-            <ul className="space-y-1.5 mb-4">
-              {plan.features.map((f) => (
-                <li key={f} className="flex items-start gap-1.5 text-xs text-slate-300">
-                  <span className="text-emerald-400 mt-0.5 shrink-0">✓</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <button
-              className={`w-full py-2 rounded-xl text-xs font-bold transition-all
-                ${plan.highlight
-                  ? 'bg-emerald-500 text-white hover:bg-emerald-400'
-                  : 'bg-white/10 text-white hover:bg-white/20'
+        {PLANS.map((plan) => {
+          var isHighlight = plan.id === highlightId;
+          return (
+            <div
+              key={plan.id}
+              onClick={() => handleSelect(plan.id, plan.contactOnly, plan.isFree)}
+              className={`relative rounded-2xl border p-4 cursor-pointer transition-all
+                ${isHighlight
+                  ? 'border-emerald-500/60 bg-emerald-500/10 ring-1 ring-emerald-500/30'
+                  : selected === plan.id
+                    ? 'border-white/30 bg-white/10'
+                    : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/8'
                 }`}
             >
-              {plan.cta} →
-            </button>
-          </div>
-        ))}
+              {isHighlight && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full whitespace-nowrap">
+                  {highlightBadge}
+                </div>
+              )}
+              <div className="mb-2">
+                <div className="text-xs text-slate-400 font-medium mb-0.5">{plan.name}</div>
+                <div className="text-xl font-extrabold text-white">{plan.priceLabel}</div>
+                {plan.price > 0 && (
+                  <div className="text-[10px] text-slate-500 mt-0.5">+ ₹{plan.gst} GST = ₹{plan.total}/mo</div>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mb-3">{plan.tagline}</p>
+              <ul className="space-y-1.5 mb-4">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-start gap-1.5 text-xs text-slate-300">
+                    <span className="text-emerald-400 mt-0.5 shrink-0">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                className={`w-full py-2 rounded-xl text-xs font-bold transition-all
+                  ${isHighlight
+                    ? 'bg-emerald-500 text-white hover:bg-emerald-400'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+              >
+                {plan.cta} →
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       <p className="text-center text-xs text-slate-600 mt-4">
