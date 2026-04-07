@@ -3,8 +3,6 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-var API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://smartgumastha-backend-production.up.railway.app';
-
 function fmt(n: number): string {
   return n.toLocaleString('en-IN');
 }
@@ -21,31 +19,20 @@ export function BuyDomainContent() {
   var router = useRouter();
   var domain = searchParams.get('domain') || '';
 
-  var [isLoggedIn, setIsLoggedIn] = useState(false);
   var [loading, setLoading] = useState(true);
   var [available, setAvailable] = useState<boolean | null>(null);
   var [pricing, setPricing] = useState<DomainPricing>({ selling_price: 699, gst: 126, total_with_gst: 825, gst_percent: 18 });
 
   useEffect(function () {
-    var match = document.cookie.split('; ').find(function (r) { return r.startsWith('medihost_auth='); });
-    if (match) {
-      try {
-        var auth = JSON.parse(decodeURIComponent(match.split('=')[1]));
-        if (auth?.token) setIsLoggedIn(true);
-      } catch { /* silent */ }
-    }
-  }, []);
-
-  useEffect(function () {
     if (!domain) { setLoading(false); return; }
-    fetch(API_BASE + '/api/presence/pricing/domain-price?domain=' + encodeURIComponent(domain))
+    fetch('/api/domain-price?domain=' + encodeURIComponent(domain))
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data.success && data.pricing) {
           setPricing({
-            selling_price: data.pricing.selling_price,
-            gst: data.pricing.gst,
-            total_with_gst: data.pricing.total_with_gst,
+            selling_price: data.pricing.selling_price || 699,
+            gst: data.pricing.gst || 126,
+            total_with_gst: data.pricing.total_with_gst || 825,
             gst_percent: data.pricing.gst_percent || 18,
           });
           setAvailable(data.available);
@@ -57,11 +44,7 @@ export function BuyDomainContent() {
 
   function handleBuy() {
     if (!domain) return;
-    if (isLoggedIn) {
-      router.push('/payment?plan=domain-only&domain=' + encodeURIComponent(domain) + '&amount=' + pricing.selling_price + '&intent=website');
-    } else {
-      router.push('/signup?intent=website&domain=' + encodeURIComponent(domain));
-    }
+    router.push('/signup?intent=domain-only&domain=' + encodeURIComponent(domain) + '&amount=' + pricing.selling_price);
   }
 
   if (!domain) {
@@ -69,9 +52,7 @@ export function BuyDomainContent() {
       <div className="text-center">
         <h2 className="text-xl font-extrabold text-white mb-2">No domain selected</h2>
         <p className="text-sm text-slate-400 mb-4">Search for a domain on our homepage first.</p>
-        <a href="/" className="text-sm text-emerald-400 font-bold hover:text-emerald-300 transition-colors">
-          Search domains →
-        </a>
+        <a href="/" className="text-sm text-emerald-400 font-bold hover:text-emerald-300 transition-colors">Search domains →</a>
       </div>
     );
   }
@@ -88,22 +69,17 @@ export function BuyDomainContent() {
     return (
       <div className="text-center">
         <div className="w-14 h-14 bg-red-500/20 border border-red-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M18 6L6 18M6 6l12 12" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/></svg>
         </div>
         <h2 className="text-xl font-extrabold text-white mb-1">{domain} is taken</h2>
         <p className="text-sm text-slate-400 mb-4">This domain is already registered. Try a different name.</p>
-        <a href="/" className="text-sm text-emerald-400 font-bold hover:text-emerald-300 transition-colors">
-          Search another domain →
-        </a>
+        <a href="/" className="text-sm text-emerald-400 font-bold hover:text-emerald-300 transition-colors">Search another domain →</a>
       </div>
     );
   }
 
   return (
     <div className="text-center">
-      {/* Domain icon */}
       <div className="w-14 h-14 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="9" stroke="#10b981" strokeWidth="1.5"/>
@@ -114,7 +90,6 @@ export function BuyDomainContent() {
       <h2 className="text-xl font-extrabold text-white mb-1">Get {domain}</h2>
       <p className="text-sm text-slate-400 mb-5">Your custom domain for your clinic</p>
 
-      {/* Price card */}
       <div className="border border-white/10 rounded-2xl overflow-hidden mb-5 text-left">
         <div className="px-4 py-3 border-b border-white/10 flex justify-between items-center">
           <span className="text-sm text-slate-300">Domain: {domain}</span>
@@ -130,30 +105,16 @@ export function BuyDomainContent() {
         </div>
       </div>
 
-      {/* CTA */}
       <button
         onClick={handleBuy}
         className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-base font-bold rounded-full hover:shadow-xl hover:shadow-emerald-500/30 transition-all active:scale-[0.98] mb-3"
       >
-        {isLoggedIn ? 'Buy domain — ₹' + fmt(pricing.total_with_gst) + ' →' : 'Sign up to buy domain →'}
+        Buy {domain} — ₹{fmt(pricing.total_with_gst)} →
       </button>
 
-      {!isLoggedIn && (
-        <p className="text-[11px] text-slate-500 mb-4">
-          Already have an account?{' '}
-          <a href="/login" className="text-emerald-400 font-medium hover:text-emerald-300 transition-colors">
-            Log in
-          </a>
-        </p>
-      )}
-
-      {/* Plans upsell */}
       <div className="border-t border-white/10 pt-4 mt-4">
         <p className="text-xs text-slate-400 mb-2">Want more than just a domain?</p>
-        <a
-          href={'/plans?domain=' + encodeURIComponent(domain)}
-          className="text-sm text-emerald-400 font-bold hover:text-emerald-300 transition-colors"
-        >
+        <a href={'/plans?domain=' + encodeURIComponent(domain)} className="text-sm text-emerald-400 font-bold hover:text-emerald-300 transition-colors">
           See our plans — domain included free with Growth →
         </a>
       </div>

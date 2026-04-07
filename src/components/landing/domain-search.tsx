@@ -123,8 +123,19 @@ export function DomainSearch() {
     }
   }, [query, checkSingleDomain]);
 
+  const [domainOnlyTotal, setDomainOnlyTotal] = useState(825);
+
   const handleSelect = (domain: string) => {
     setSelected(domain);
+    setDomainOnlyTotal(825); // reset
+    fetch('/api/domain-price?domain=' + encodeURIComponent(domain))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.success && data.pricing) {
+          setDomainOnlyTotal(data.pricing.total_with_gst || 825);
+        }
+      })
+      .catch(function () { /* keep 825 fallback */ });
   };
 
   const selectedResult = results.find((r) => r.domain === selected);
@@ -374,7 +385,7 @@ export function DomainSearch() {
                 href={`/buy-domain?domain=${encodeURIComponent(selectedResult.domain)}`}
                 className="px-4 py-3 bg-white/10 text-white font-bold rounded-xl text-sm hover:bg-white/20 transition-all"
               >
-                Domain only — ₹825
+                Domain only — ₹{domainOnlyTotal.toLocaleString('en-IN')}
               </a>
               <a
                 href={`/signup?domain=${encodeURIComponent(selectedResult.domain)}`}

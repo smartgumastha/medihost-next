@@ -98,18 +98,7 @@ export function SignupForm() {
     const token = user.token || '';
     const hospitalId = user.hospitalId || '';
 
-    // Non-HMS products go directly to their app
-    if (selectedProduct !== 'hms') {
-      const baseUrl = PRODUCT_REDIRECTS[selectedProduct];
-      if (token && hospitalId) {
-        window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
-      } else {
-        router.push('/onboard');
-      }
-      return;
-    }
-
-    // HMS flow — save token and go to plan selection
+    // Save auth cookie + localStorage for all flows
     if (token) {
       const authObj = JSON.stringify({
         id: String(user.id || hospitalId),
@@ -127,6 +116,25 @@ export function SignupForm() {
       document.cookie = 'medihost_auth=' + encodeURIComponent(authObj) + '; path=/; max-age=2592000; samesite=lax';
     }
 
+    // Domain-only purchase — go straight to payment
+    if (intent === 'domain-only' && domain) {
+      const domainAmount = searchParams.get('amount') || '699';
+      router.push('/payment?plan=domain-only&domain=' + encodeURIComponent(domain) + '&amount=' + domainAmount + '&billing=yearly&intent=domain-only');
+      return;
+    }
+
+    // Non-HMS products go directly to their app
+    if (selectedProduct !== 'hms') {
+      const baseUrl = PRODUCT_REDIRECTS[selectedProduct];
+      if (token && hospitalId) {
+        window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
+      } else {
+        router.push('/onboard');
+      }
+      return;
+    }
+
+    // HMS flow — go to plan selection
     const params = new URLSearchParams();
     params.set('intent', intent);
     if (domain) params.set('domain', domain);
