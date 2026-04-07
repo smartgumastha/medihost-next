@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
@@ -48,19 +48,34 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const hasRedirected = useRef(false);
 
-  // If login was initiated from a domain-only or plan flow, redirect there instead of default
-  function getIntentRedirect(): string | null {
+  // Store intended redirect in cookie if URL has intent params
+  useEffect(function () {
+    if (!loginIntent) return;
+    var redirectUrl = '';
     if (loginIntent === 'domain-only' && loginDomain) {
-      return '/payment?plan=domain-only&domain=' + encodeURIComponent(loginDomain) + '&amount=' + loginAmount + '&billing=yearly&intent=domain-only';
+      redirectUrl = '/payment?plan=domain-only&domain=' + encodeURIComponent(loginDomain) + '&amount=' + loginAmount + '&billing=yearly&intent=domain-only';
+    } else if (loginDomain) {
+      redirectUrl = '/plans?intent=' + encodeURIComponent(loginIntent) + '&domain=' + encodeURIComponent(loginDomain);
+    } else {
+      redirectUrl = '/plans?intent=' + encodeURIComponent(loginIntent);
     }
-    if (loginIntent && loginDomain) {
-      return '/plans?intent=' + encodeURIComponent(loginIntent) + '&domain=' + encodeURIComponent(loginDomain);
+    document.cookie = 'mh_redirect=' + encodeURIComponent(redirectUrl) + '; path=/; max-age=3600; samesite=lax';
+  }, [loginIntent, loginDomain, loginAmount]);
+
+  function redirectAfterAuth(defaultUrl: string) {
+    if (hasRedirected.current) return;
+    hasRedirected.current = true;
+
+    var match = document.cookie.split('; ').find(function (r) { return r.startsWith('mh_redirect='); });
+    if (match) {
+      var url = decodeURIComponent(match.split('=')[1]);
+      document.cookie = 'mh_redirect=; path=/; max-age=0';
+      router.push(url);
+      return;
     }
-    if (loginIntent && loginIntent !== 'website') {
-      return '/plans?intent=' + encodeURIComponent(loginIntent);
-    }
-    return null;
+    router.push(defaultUrl);
   }
 
   async function handleGoogleSuccess(credentialResponse: { credential?: string }) {
@@ -78,32 +93,29 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
       });
       const data = await res.json();
       if (data.success && data.user) {
-        // Check for intent-based redirect (domain-only, plans flow)
-        const intentUrl = getIntentRedirect();
-        if (intentUrl) { router.push(intentUrl); return; }
+        var role = data.user.role || 'HOSPITAL_ADMIN';
+        var defaultUrl = getRedirectUrl(role, product);
 
-        const role = data.user.role || 'HOSPITAL_ADMIN';
-        const redirectUrl = getRedirectUrl(role, product);
-        if (redirectUrl.startsWith('http')) {
-          const token = data.user.hmsToken || data.user.token;
-          if (token) {
-            const loginData = encodeURIComponent(JSON.stringify({
-              token,
-              hospitalId: String(data.user.hospitalId || ''),
-              userid: String(data.user.id || ''),
-              first_name: data.user.name?.split(' ')[0] || '',
-              last_name: data.user.name?.split(' ').slice(1).join(' ') || '',
-              email: data.user.email || '',
-              role,
-              role_id: 2,
-            }));
-            window.location.href = `${redirectUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(data.user.hospitalId || '')}&mw_login_data=${loginData}`;
-          } else {
-            window.location.href = redirectUrl;
+        // External redirects (HMS/LIS/Physio) — only when no mh_redirect cookie
+        if (defaultUrl.startsWith('http')) {
+          var hasMhRedirect = document.cookie.split('; ').some(function (r) { return r.startsWith('mh_redirect='); });
+          if (!hasMhRedirect) {
+            var token = data.user.hmsToken || data.user.token;
+            if (token) {
+              var ld = encodeURIComponent(JSON.stringify({
+                token: token, hospitalId: String(data.user.hospitalId || ''),
+                userid: String(data.user.id || ''), first_name: data.user.name?.split(' ')[0] || '',
+                last_name: data.user.name?.split(' ').slice(1).join(' ') || '',
+                email: data.user.email || '', role: role, role_id: 2,
+              }));
+              window.location.href = defaultUrl + '?mw_token=' + encodeURIComponent(token) + '&mw_hospital_id=' + encodeURIComponent(data.user.hospitalId || '') + '&mw_login_data=' + ld;
+            } else {
+              window.location.href = defaultUrl;
+            }
+            return;
           }
-        } else {
-          router.push(redirectUrl);
         }
+        redirectAfterAuth(defaultUrl);
       } else {
         setError(data.error || 'Google sign-in failed. Please try again.');
       }
@@ -121,41 +133,36 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
+      var res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
+      var data = await res.json();
 
       if (data.success && data.user) {
-        // Check for intent-based redirect (domain-only, plans flow)
-        const intentUrl = getIntentRedirect();
-        if (intentUrl) { router.push(intentUrl); return; }
+        var role = data.user.role || 'HOSPITAL_ADMIN';
+        var defaultUrl = getRedirectUrl(role, product);
 
-        const role = data.user.role || 'HOSPITAL_ADMIN';
-        const redirectUrl = getRedirectUrl(role, product);
-
-        if (redirectUrl.startsWith('http')) {
-          if (data.user.hmsToken || data.user.token) {
-            const loginData = encodeURIComponent(JSON.stringify({
-              token: data.user.hmsToken || data.user.token,
-              hospitalId: String(data.user.hospitalId || ''),
-              userid: String(data.user.id || ''),
-              first_name: data.user.name?.split(' ')[0] || '',
-              last_name: data.user.name?.split(' ').slice(1).join(' ') || '',
-              email: data.user.email || email,
-              role: role,
-              role_id: 2,
-            }));
-            const token = data.user.hmsToken || data.user.token;
-            window.location.href = `${redirectUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(data.user.hospitalId || '')}&mw_login_data=${loginData}`;
-          } else {
-            window.location.href = redirectUrl;
+        if (defaultUrl.startsWith('http')) {
+          var hasMhRedirect = document.cookie.split('; ').some(function (r) { return r.startsWith('mh_redirect='); });
+          if (!hasMhRedirect) {
+            if (data.user.hmsToken || data.user.token) {
+              var token = data.user.hmsToken || data.user.token;
+              var ld = encodeURIComponent(JSON.stringify({
+                token: data.user.hmsToken || data.user.token, hospitalId: String(data.user.hospitalId || ''),
+                userid: String(data.user.id || ''), first_name: data.user.name?.split(' ')[0] || '',
+                last_name: data.user.name?.split(' ').slice(1).join(' ') || '',
+                email: data.user.email || email, role: role, role_id: 2,
+              }));
+              window.location.href = defaultUrl + '?mw_token=' + encodeURIComponent(token) + '&mw_hospital_id=' + encodeURIComponent(data.user.hospitalId || '') + '&mw_login_data=' + ld;
+            } else {
+              window.location.href = defaultUrl;
+            }
+            return;
           }
-        } else {
-          router.push(redirectUrl);
         }
+        redirectAfterAuth(defaultUrl);
       } else {
         setError(data.error || 'Invalid email or password');
       }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { PRACTICE_TYPES } from '@/lib/constants';
@@ -89,29 +89,48 @@ export function SignupForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [existingUser, setExistingUser] = useState(false);
+  const hasRedirected = useRef(false);
+
+  // Store intended redirect in cookie BEFORE auth starts
+  useEffect(function () {
+    var redirectUrl = '';
+    var i = intent;
+    var d = domain;
+    var a = searchParams.get('amount') || '';
+
+    if (i === 'domain-only' && d) {
+      redirectUrl = '/payment?plan=domain-only&domain=' + encodeURIComponent(d) + '&amount=' + (a || '699') + '&billing=yearly&intent=domain-only';
+    } else {
+      redirectUrl = '/plans?intent=' + encodeURIComponent(i);
+      if (d) redirectUrl += '&domain=' + encodeURIComponent(d);
+    }
+
+    document.cookie = 'mh_redirect=' + encodeURIComponent(redirectUrl) + '; path=/; max-age=3600; samesite=lax';
+  }, [intent, domain, searchParams]);
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  const amount = searchParams.get('amount') || '699';
+  function redirectAfterAuth() {
+    if (hasRedirected.current) return;
+    hasRedirected.current = true;
 
-  function getRedirectUrl(): string {
-    if (intent === 'domain-only' && domain) {
-      return '/payment?plan=domain-only&domain=' + encodeURIComponent(domain) + '&amount=' + amount + '&billing=yearly&intent=domain-only';
+    var match = document.cookie.split('; ').find(function (r) { return r.startsWith('mh_redirect='); });
+    var url = '/dashboard';
+    if (match) {
+      url = decodeURIComponent(match.split('=')[1]);
+      document.cookie = 'mh_redirect=; path=/; max-age=0';
     }
-    var params = new URLSearchParams();
-    params.set('intent', intent);
-    if (domain) params.set('domain', domain);
-    return '/plans?' + params.toString();
+    router.push(url);
   }
 
   function saveAuthAndRedirect(user: { id?: string; token?: string; hospitalId?: string; email?: string; name?: string }) {
-    const token = user.token || '';
-    const hospitalId = user.hospitalId || '';
+    var token = user.token || '';
+    var hospitalId = user.hospitalId || '';
 
     if (token) {
-      const authObj = JSON.stringify({
+      var authObj = JSON.stringify({
         id: String(user.id || hospitalId),
         email: user.email || form.email,
         name: user.name || form.owner_name,
@@ -129,12 +148,12 @@ export function SignupForm() {
 
     // Non-HMS products with token go directly to their app
     if (selectedProduct !== 'hms' && token && hospitalId) {
-      const baseUrl = PRODUCT_REDIRECTS[selectedProduct];
-      window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
+      var baseUrl = PRODUCT_REDIRECTS[selectedProduct];
+      window.location.href = baseUrl + '?mw_token=' + encodeURIComponent(token) + '&mw_hospital_id=' + encodeURIComponent(hospitalId);
       return;
     }
 
-    router.push(getRedirectUrl());
+    redirectAfterAuth();
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -232,7 +251,7 @@ export function SignupForm() {
       });
       const data = await res.json();
       if (data.success) {
-        router.push(getRedirectUrl());
+        redirectAfterAuth();
       } else {
         setError(data.error || 'Google signup failed. Please try again.');
       }
