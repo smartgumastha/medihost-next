@@ -94,11 +94,22 @@ export function SignupForm() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  const amount = searchParams.get('amount') || '699';
+
+  function getRedirectUrl(): string {
+    if (intent === 'domain-only' && domain) {
+      return '/payment?plan=domain-only&domain=' + encodeURIComponent(domain) + '&amount=' + amount + '&billing=yearly&intent=domain-only';
+    }
+    var params = new URLSearchParams();
+    params.set('intent', intent);
+    if (domain) params.set('domain', domain);
+    return '/plans?' + params.toString();
+  }
+
   function saveAuthAndRedirect(user: { id?: string; token?: string; hospitalId?: string; email?: string; name?: string }) {
     const token = user.token || '';
     const hospitalId = user.hospitalId || '';
 
-    // Save auth cookie + localStorage for all flows
     if (token) {
       const authObj = JSON.stringify({
         id: String(user.id || hospitalId),
@@ -116,29 +127,14 @@ export function SignupForm() {
       document.cookie = 'medihost_auth=' + encodeURIComponent(authObj) + '; path=/; max-age=2592000; samesite=lax';
     }
 
-    // Domain-only purchase — go straight to payment
-    if (intent === 'domain-only' && domain) {
-      const domainAmount = searchParams.get('amount') || '699';
-      router.push('/payment?plan=domain-only&domain=' + encodeURIComponent(domain) + '&amount=' + domainAmount + '&billing=yearly&intent=domain-only');
-      return;
-    }
-
-    // Non-HMS products go directly to their app
-    if (selectedProduct !== 'hms') {
+    // Non-HMS products with token go directly to their app
+    if (selectedProduct !== 'hms' && token && hospitalId) {
       const baseUrl = PRODUCT_REDIRECTS[selectedProduct];
-      if (token && hospitalId) {
-        window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
-      } else {
-        router.push('/onboard');
-      }
+      window.location.href = `${baseUrl}?mw_token=${encodeURIComponent(token)}&mw_hospital_id=${encodeURIComponent(hospitalId)}`;
       return;
     }
 
-    // HMS flow — go to plan selection
-    const params = new URLSearchParams();
-    params.set('intent', intent);
-    if (domain) params.set('domain', domain);
-    router.push(`/plans?${params.toString()}`);
+    router.push(getRedirectUrl());
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -236,10 +232,7 @@ export function SignupForm() {
       });
       const data = await res.json();
       if (data.success) {
-        const params = new URLSearchParams();
-        params.set('intent', intent);
-        if (domain) params.set('domain', domain);
-        router.push(`/plans?${params.toString()}`);
+        router.push(getRedirectUrl());
       } else {
         setError(data.error || 'Google signup failed. Please try again.');
       }

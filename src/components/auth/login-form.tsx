@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 const GOOGLE_CLIENT_ID = '645434958645-adj9plpl6m1blipo06fv17ioiqjjbftt.apps.googleusercontent.com';
@@ -38,12 +38,30 @@ function getRedirectUrl(role: string, product: string): string {
 
 export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const loginIntent = searchParams.get('intent') || '';
+  const loginDomain = searchParams.get('domain') || '';
+  const loginAmount = searchParams.get('amount') || '699';
   const [authTab, setAuthTab] = useState<'google' | 'email'>('google');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  // If login was initiated from a domain-only or plan flow, redirect there instead of default
+  function getIntentRedirect(): string | null {
+    if (loginIntent === 'domain-only' && loginDomain) {
+      return '/payment?plan=domain-only&domain=' + encodeURIComponent(loginDomain) + '&amount=' + loginAmount + '&billing=yearly&intent=domain-only';
+    }
+    if (loginIntent && loginDomain) {
+      return '/plans?intent=' + encodeURIComponent(loginIntent) + '&domain=' + encodeURIComponent(loginDomain);
+    }
+    if (loginIntent && loginIntent !== 'website') {
+      return '/plans?intent=' + encodeURIComponent(loginIntent);
+    }
+    return null;
+  }
 
   async function handleGoogleSuccess(credentialResponse: { credential?: string }) {
     if (!credentialResponse.credential) {
@@ -60,6 +78,10 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
       });
       const data = await res.json();
       if (data.success && data.user) {
+        // Check for intent-based redirect (domain-only, plans flow)
+        const intentUrl = getIntentRedirect();
+        if (intentUrl) { router.push(intentUrl); return; }
+
         const role = data.user.role || 'HOSPITAL_ADMIN';
         const redirectUrl = getRedirectUrl(role, product);
         if (redirectUrl.startsWith('http')) {
@@ -107,11 +129,14 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
       const data = await res.json();
 
       if (data.success && data.user) {
+        // Check for intent-based redirect (domain-only, plans flow)
+        const intentUrl = getIntentRedirect();
+        if (intentUrl) { router.push(intentUrl); return; }
+
         const role = data.user.role || 'HOSPITAL_ADMIN';
         const redirectUrl = getRedirectUrl(role, product);
 
         if (redirectUrl.startsWith('http')) {
-          // External redirect — for HMS/LIS/Physio apps, pass token
           if (data.user.hmsToken || data.user.token) {
             const loginData = encodeURIComponent(JSON.stringify({
               token: data.user.hmsToken || data.user.token,
