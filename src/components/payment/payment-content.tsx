@@ -41,6 +41,14 @@ export function PaymentContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
+  const [needsAuth, setNeedsAuth] = useState(false);
+
+  // Set mh_redirect cookie so login pages return here
+  useEffect(function () {
+    if (typeof window !== 'undefined') {
+      document.cookie = 'mh_redirect=' + encodeURIComponent(window.location.pathname + window.location.search) + '; path=/; max-age=3600; samesite=lax';
+    }
+  }, []);
 
   // Redirect free plans with no domain straight to dashboard
   useEffect(function () {
@@ -68,12 +76,12 @@ export function PaymentContent() {
     setError('');
     setStatusMsg('');
     try {
-      // Read token directly — getTokenFromClient can fail during SSR
-      let token = '';
+      // Read token from cookie or localStorage
+      var token = '';
       try {
-        const cookieMatch = document.cookie.split('; ').find(r => r.startsWith('medihost_auth='));
+        var cookieMatch = document.cookie.split('; ').find(function(r) { return r.startsWith('medihost_auth='); });
         if (cookieMatch) {
-          const parsed = JSON.parse(decodeURIComponent(cookieMatch.split('=')[1]));
+          var parsed = JSON.parse(decodeURIComponent(cookieMatch.split('=')[1]));
           token = parsed.token || '';
         }
         if (!token) {
@@ -81,7 +89,8 @@ export function PaymentContent() {
         }
       } catch { /* silent */ }
       if (!token) {
-        router.push('/login');
+        setNeedsAuth(true);
+        setLoading(false);
         return;
       }
 
@@ -237,20 +246,44 @@ export function PaymentContent() {
         <div className="text-sm text-slate-300 text-center mb-4 animate-pulse">{statusMsg}</div>
       )}
 
+      {/* Auth required notice */}
+      {needsAuth && (
+        <div className="border border-amber-500/20 bg-amber-500/10 rounded-xl p-4 mb-4">
+          <p className="text-sm text-amber-300 font-semibold mb-2">Please sign in to complete payment</p>
+          <p className="text-xs text-amber-300/70 mb-3">Your order details are saved — sign in and come back to pay.</p>
+          <div className="flex gap-2">
+            <a
+              href={'/login?intent=' + encodeURIComponent(intent) + '&domain=' + encodeURIComponent(domain)}
+              className="flex-1 text-center py-2 bg-emerald-500 text-white text-sm font-bold rounded-lg hover:bg-emerald-400 transition-colors"
+            >
+              Sign in
+            </a>
+            <button
+              onClick={function () { setNeedsAuth(false); createOrder(); }}
+              className="flex-1 text-center py-2 bg-white/10 text-white text-sm font-medium rounded-lg hover:bg-white/20 transition-colors"
+            >
+              I&apos;ve signed in, retry
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Pay button */}
-      <button
-        onClick={createOrder}
-        disabled={loading || !!statusMsg}
-        className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-      >
-        {loading ? 'Preparing order…' :
-         statusMsg ? statusMsg :
-         total === 0 ? 'Activate free plan →' :
-         `Pay ₹${fmt(total)} securely →`}
-      </button>
+      {!needsAuth && (
+        <button
+          onClick={createOrder}
+          disabled={loading || !!statusMsg}
+          className="w-full h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-full hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        >
+          {loading ? 'Preparing order…' :
+           statusMsg ? statusMsg :
+           total === 0 ? 'Activate free plan →' :
+           `Pay ₹${fmt(total)} securely →`}
+        </button>
+      )}
 
       <p className="text-center text-xs text-slate-600 mt-3">
-        🔒 256-bit SSL · Razorpay certified · GST invoice auto-generated
+        256-bit SSL · Razorpay certified · GST invoice auto-generated
       </p>
 
       <p className="text-center text-xs text-slate-500 mt-2">
