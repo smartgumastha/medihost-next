@@ -43,6 +43,13 @@ const SECTIONS: SidebarSection[] = [
     ],
   },
   {
+    title: 'EARN',
+    items: [
+      { label: 'Refer & earn', letter: 'R', href: '/dashboard/referral', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
+      { label: 'My commissions', letter: '$', href: '/dashboard/commissions', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
+    ],
+  },
+  {
     title: 'CLINIC (HMS)',
     items: [
       { label: 'OPD', letter: 'O', external: 'https://app.hemato.in', iconBg: '#E6F1FB', iconColor: '#185FA5' },
