@@ -9,49 +9,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { type AuthUser } from '@/lib/auth';
 
-const NAV_SECTIONS = [
-  {
-    title: 'OVERVIEW',
-    items: [
-      { label: 'Dashboard', icon: '📊', href: '/admin' },
-    ]
-  },
-  {
-    title: 'PARTNERS',
-    items: [
-      { label: 'All Partners', icon: '👥', href: '/admin/partners' },
-    ]
-  },
-  {
-    title: 'PRESENCE',
-    items: [
-      { label: 'Websites', icon: '🌐', href: '/admin/websites' },
-      { label: 'Domains', icon: '🔗', href: '/admin/domains' },
-      { label: 'Domain Settings', icon: '⚙️', href: '/admin/domain-settings' },
-    ]
-  },
-  {
-    title: 'BUSINESS',
-    items: [
-      { label: 'Pricing', icon: '💰', href: '/admin/pricing' },
-      { label: 'Offers & Coupons', icon: '🎟️', href: '/admin/offers' },
-    ]
-  },
-  {
-    title: 'RESELLERS',
-    items: [
-      { label: 'Resellers', icon: '🤝', href: '/admin/resellers' },
-      { label: 'Reseller Settings', icon: '⚙️', href: '/admin/reseller-settings' },
-    ]
-  },
-  {
-    title: 'HEMATO',
-    items: [
-      { label: 'Dashboard', icon: '🩸', href: '/admin/hemato' },
-      { label: 'Phlebos', icon: '🏍️', href: '/admin/hemato/phlebos' },
-      { label: 'Labs', icon: '🔬', href: '/admin/hemato/labs' },
-    ]
-  },
+const NAV_ITEMS = [
+  { label: 'Dashboard', href: '/admin' },
+  { label: 'Partners', href: '/admin/partners' },
+  { label: 'Pricing', href: '/admin/pricing' },
+  { label: 'Offers & Coupons', href: '/admin/offers' },
+  { label: 'Conversion Triggers', href: '/admin/triggers' },
+  { label: 'Domains', href: '/admin/domains' },
+  { label: 'Domain Settings', href: '/admin/domain-settings' },
+  { label: 'Resellers', href: '/admin/resellers' },
+  { label: 'Reseller Settings', href: '/admin/reseller-settings' },
+  { label: 'Email Logs', href: '/admin/email-logs' },
+  { label: 'Revenue', href: '/admin/revenue' },
 ];
 
 export function AdminShell({ user, children }: { user: AuthUser; children: React.ReactNode }) {
@@ -67,15 +36,15 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Top Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 h-14">
+      <nav className="fixed top-0 left-0 right-0 z-50 h-14" style={{ backgroundColor: '#26215C' }}>
         <div className="flex items-center justify-between h-full px-4">
           <div className="flex items-center gap-3">
-            <button className="lg:hidden text-gray-600 text-xl" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
+            <button className="lg:hidden text-white/70 text-xl" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
             <a href="/admin" className="flex items-center gap-2.5">
-              <span className="text-lg font-extrabold tracking-tight text-gray-900">
-                MediHost<span className="text-[10px] align-super font-bold text-gray-400">™</span> AI
+              <span className="text-lg font-extrabold tracking-tight text-white">
+                MediHost<span className="text-[10px] align-super font-bold text-white/40">™</span> AI
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md">Admin</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-white/90 px-2 py-0.5 rounded-md" style={{ backgroundColor: '#534AB7' }}>Super admin</span>
             </a>
           </div>
           <div className="flex items-center gap-3">
@@ -83,18 +52,18 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
               variant="ghost"
               size="sm"
               onClick={() => router.push('/dashboard')}
-              className="hidden sm:flex gap-1.5 text-xs text-gray-500 hover:text-gray-900"
+              className="hidden sm:flex gap-1.5 text-xs text-white/50 hover:text-white hover:bg-white/10"
             >
-              <span>←</span> View Dashboard
+              <span>←</span> Dashboard
             </Button>
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1 cursor-pointer">
+              <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-white/10 rounded-lg px-2 py-1 cursor-pointer">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-purple-600 text-white text-xs font-bold">
+                  <AvatarFallback style={{ backgroundColor: '#534AB7' }} className="text-white text-xs font-bold">
                     {user.name?.charAt(0)?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-semibold text-gray-700 hidden sm:block">{user.name}</span>
+                <span className="text-sm font-semibold text-white/80 hidden sm:block">{user.name}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>My Profile</DropdownMenuItem>
@@ -109,59 +78,33 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
       {/* Mobile overlay */}
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Sidebar — Dark with purple accent */}
-      <aside className={`fixed top-14 left-0 bottom-0 w-[260px] z-40 overflow-y-auto transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`} style={{ backgroundColor: '#1A1A2E' }}>
-        {/* User info header */}
-        <div className="px-5 pt-5 pb-4 border-b border-white/10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center text-white text-sm font-extrabold shadow-lg shadow-purple-600/30">
-              {user.name?.charAt(0)?.toUpperCase() || 'M'}
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm font-bold text-white tracking-tight truncate">{user.name || 'Admin'}</div>
-              <div className="text-[10px] text-gray-400 truncate">{user.email}</div>
-            </div>
-          </div>
-          <span className="inline-block mt-2 text-[9px] font-bold uppercase tracking-widest text-purple-300 bg-purple-500/15 px-1.5 py-0.5 rounded">Super Admin</span>
-        </div>
-
-        <nav className="py-3">
-          {NAV_SECTIONS.map(section => (
-            <div key={section.title} className="mb-1">
-              <div className="px-5 py-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'rgba(139,92,246,0.5)' }}>{section.title}</div>
-              <ul className="space-y-0.5">
-                {section.items.map(item => {
-                  const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
-                  return (
-                    <li key={item.href}>
-                      <a
-                        href={item.href}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-3 px-5 py-2.5 text-sm font-medium transition-all ${
-                          isActive
-                            ? 'text-white border-l-[3px] border-l-purple-500 bg-white/10'
-                            : 'text-gray-300 border-l-[3px] border-l-transparent hover:bg-white/[0.06] hover:text-white'
-                        }`}
-                      >
-                        <span className="text-base">{item.icon}</span>
-                        {item.label}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+      {/* Sidebar — flat list, purple theme */}
+      <aside
+        className={`fixed top-14 left-0 bottom-0 w-[240px] z-40 overflow-y-auto transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+        style={{ backgroundColor: '#3C3489' }}
+      >
+        <nav className="py-2">
+          {NAV_ITEMS.map(item => {
+            const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setSidebarOpen(false)}
+                style={isActive ? { backgroundColor: 'rgba(255,255,255,0.08)', borderLeft: '2px solid #fff', fontWeight: 500 } : { borderLeft: '2px solid transparent' }}
+                className={`block px-5 py-2.5 text-[13px] transition-colors ${
+                  isActive ? 'text-white' : 'hover:bg-white/[0.05]'
+                }`}
+              >
+                <span style={{ color: isActive ? '#fff' : '#AFA9EC' }}>{item.label}</span>
+              </a>
+            );
+          })}
         </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
-          <div className="text-[10px] uppercase font-semibold tracking-wider" style={{ color: 'rgba(139,92,246,0.4)' }}>Plan</div>
-          <div className="text-xs font-semibold text-gray-300 mt-0.5">{user.plan_tier || 'N/A'}</div>
-        </div>
       </aside>
 
       {/* Main content */}
-      <main className="lg:ml-[260px] pt-14 min-h-screen">
+      <main className="lg:ml-[240px] pt-14 min-h-screen">
         <div className="p-6 max-w-[1400px]">
           {children}
         </div>
