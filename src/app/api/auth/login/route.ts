@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const { email, password } = body;
 
+  console.log('[LOGIN ROUTE] Received:', JSON.stringify({ email, passLength: password?.length, passStart: password?.substring(0, 2) }));
+
   // Try partner login first
   try {
     const partnerRes = await fetch(`${API_BASE}/api/presence/partner-auth/login`, {
@@ -14,6 +16,8 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ email, password }),
     });
     const partnerData = await partnerRes.json();
+
+    console.log('[LOGIN ROUTE] Partner backend:', partnerRes.status, JSON.stringify({ success: partnerData.success, error: partnerData.error, hasToken: !!partnerData.token }));
 
     if (partnerData.success && partnerData.token) {
       const partner = partnerData.partner || {};
@@ -40,7 +44,7 @@ export async function POST(request: NextRequest) {
       return response;
     }
   } catch (err) {
-    console.error('Partner login failed:', err);
+    console.error('[LOGIN ROUTE] Partner login fetch error:', err);
   }
 
   // Fallback: try HMS login
@@ -52,6 +56,8 @@ export async function POST(request: NextRequest) {
     });
     const hmsResp = await hmsRes.json();
     const hmsData = hmsResp.data || hmsResp;
+
+    console.log('[LOGIN ROUTE] HMS backend:', hmsRes.status, JSON.stringify({ hasToken: !!hmsData.token, error: hmsData.error }));
 
     if (hmsData.token) {
       const user = {
