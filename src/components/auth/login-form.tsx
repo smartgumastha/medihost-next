@@ -50,32 +50,32 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
   const [googleLoading, setGoogleLoading] = useState(false);
   const hasRedirected = useRef(false);
 
-  // Store intended redirect in cookie if URL has intent params
-  useEffect(function () {
-    if (!loginIntent) return;
-    var redirectUrl = '';
+  var redirectParam = searchParams.get('redirect') || '';
+
+  function buildRedirectUrl(): string {
+    // Explicit redirect param takes priority
+    if (redirectParam) return redirectParam;
+    // Build from intent params
     if (loginIntent === 'domain-only' && loginDomain) {
-      redirectUrl = '/payment?plan=domain-only&domain=' + encodeURIComponent(loginDomain) + '&amount=' + loginAmount + '&billing=yearly&intent=domain-only';
-    } else if (loginDomain) {
-      redirectUrl = '/plans?intent=' + encodeURIComponent(loginIntent) + '&domain=' + encodeURIComponent(loginDomain);
-    } else {
-      redirectUrl = '/plans?intent=' + encodeURIComponent(loginIntent);
+      return '/payment?plan=domain-only&domain=' + encodeURIComponent(loginDomain) + '&amount=' + loginAmount + '&billing=yearly&intent=domain-only';
     }
-    document.cookie = 'mh_redirect=' + encodeURIComponent(redirectUrl) + '; path=/; max-age=3600; samesite=lax';
-  }, [loginIntent, loginDomain, loginAmount]);
+    if (loginIntent) {
+      var url = '/dashboard?intent=' + encodeURIComponent(loginIntent);
+      if (loginDomain) url += '&domain=' + encodeURIComponent(loginDomain);
+      return url;
+    }
+    return '';
+  }
 
   function redirectAfterAuth(defaultUrl: string) {
     if (hasRedirected.current) return;
     hasRedirected.current = true;
-
-    var match = document.cookie.split('; ').find(function (r) { return r.startsWith('mh_redirect='); });
-    if (match) {
-      var url = decodeURIComponent(match.split('=')[1]);
-      document.cookie = 'mh_redirect=; path=/; max-age=0';
+    var url = buildRedirectUrl() || defaultUrl;
+    if (url.startsWith('http')) {
+      window.location.href = url;
+    } else {
       router.push(url);
-      return;
     }
-    router.push(defaultUrl);
   }
 
   async function handleGoogleSuccess(credentialResponse: { credential?: string }) {
@@ -96,10 +96,10 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
         var role = data.user.role || 'HOSPITAL_ADMIN';
         var defaultUrl = getRedirectUrl(role, product);
 
-        // External redirects (HMS/LIS/Physio) — only when no mh_redirect cookie
+        // External redirects (HMS/LIS/Physio) — only when no intent redirect
         if (defaultUrl.startsWith('http')) {
-          var hasMhRedirect = document.cookie.split('; ').some(function (r) { return r.startsWith('mh_redirect='); });
-          if (!hasMhRedirect) {
+          var hasIntentRedirect = !!buildRedirectUrl();
+          if (!hasIntentRedirect) {
             var token = data.user.hmsToken || data.user.token;
             if (token) {
               var ld = encodeURIComponent(JSON.stringify({
@@ -145,8 +145,8 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
         var defaultUrl = getRedirectUrl(role, product);
 
         if (defaultUrl.startsWith('http')) {
-          var hasMhRedirect = document.cookie.split('; ').some(function (r) { return r.startsWith('mh_redirect='); });
-          if (!hasMhRedirect) {
+          var hasIntentRedirect2 = !!buildRedirectUrl();
+          if (!hasIntentRedirect2) {
             if (data.user.hmsToken || data.user.token) {
               var token = data.user.hmsToken || data.user.token;
               var ld = encodeURIComponent(JSON.stringify({

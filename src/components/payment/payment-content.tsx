@@ -28,11 +28,8 @@ export function PaymentContent() {
   var [loading, setLoading] = useState(false);
   var [error, setError] = useState('');
 
-  // Set mh_redirect cookie so login returns here
+  // Redirect free plans with no domain
   useEffect(function () {
-    document.cookie = 'mh_redirect=' + encodeURIComponent(window.location.pathname + window.location.search) + '; path=/; max-age=3600; samesite=lax';
-
-    // Redirect free plans with no domain
     if (baseAmount === 0 && !domain) {
       window.location.href = '/dashboard?intent=' + intent;
     }
