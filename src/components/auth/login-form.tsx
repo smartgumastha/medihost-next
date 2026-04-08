@@ -133,40 +133,35 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
     setLoading(true);
 
     try {
+      console.log('[LOGIN] Sending:', JSON.stringify({ email, password: password.length + ' chars: ' + password.substring(0, 2) + '***' }));
       var res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
       var data = await res.json();
+      console.log('[LOGIN] Response:', res.status, data.success, data.error || '');
 
       if (data.success && data.user) {
-        // Super admin goes to /admin unless there's an intent redirect
-        var defaultUrl = data.user.is_super_admin ? '/admin' : getRedirectUrl(data.user.role || 'HOSPITAL_ADMIN', product);
+        // Set cookie client-side as backup
+        document.cookie = 'medihost_auth=' + encodeURIComponent(JSON.stringify(data.user)) + '; path=/; max-age=2592000; samesite=lax';
+        localStorage.setItem('mh_token', data.user.token || '');
+        localStorage.setItem('mh_partner_id', data.user.partnerId || data.user.id || '');
 
-        if (defaultUrl.startsWith('http')) {
-          var hasIntentRedirect2 = !!buildRedirectUrl();
-          if (!hasIntentRedirect2) {
-            if (data.user.hmsToken || data.user.token) {
-              var token = data.user.hmsToken || data.user.token;
-              var ld = encodeURIComponent(JSON.stringify({
-                token: data.user.hmsToken || data.user.token, hospitalId: String(data.user.hospitalId || ''),
-                userid: String(data.user.id || ''), first_name: data.user.name?.split(' ')[0] || '',
-                last_name: data.user.name?.split(' ').slice(1).join(' ') || '',
-                email: data.user.email || email, role: data.user.role || 'PARTNER', role_id: 2,
-              }));
-              window.location.href = defaultUrl + '?mw_token=' + encodeURIComponent(token) + '&mw_hospital_id=' + encodeURIComponent(data.user.hospitalId || '') + '&mw_login_data=' + ld;
-            } else {
-              window.location.href = defaultUrl;
-            }
-            return;
-          }
+        // Super admin goes to /admin unless there's an intent redirect
+        var intentUrl = buildRedirectUrl();
+        if (intentUrl) {
+          window.location.href = intentUrl;
+          return;
         }
-        redirectAfterAuth(defaultUrl);
+
+        var defaultUrl = data.user.is_super_admin ? '/admin' : '/dashboard';
+        window.location.href = defaultUrl;
       } else {
         setError(data.error || 'Invalid email or password');
       }
-    } catch {
+    } catch (err) {
+      console.error('[LOGIN] Error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
