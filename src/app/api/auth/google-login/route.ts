@@ -20,16 +20,17 @@ export async function POST(request: NextRequest) {
         id: String(data.partner_id || ''),
         email: data.email || '',
         name: data.name || '',
-        role: 'HOSPITAL_ADMIN' as const,
+        role: 'PARTNER' as const,
         hospitalId: String(data.hospital_id || ''),
+        partnerId: String(data.partner_id || ''),
         token: data.token || '',
-        hmsToken: data.hms_token || data.token || '',
-        authProvider: 'google',
+        plan_tier: String(data.plan_tier || 'starter'),
+        is_super_admin: Boolean(data.is_super_admin),
       };
 
       const response = NextResponse.json({ success: true, user });
       response.cookies.set('medihost_auth', JSON.stringify(user), {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60,
