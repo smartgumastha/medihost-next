@@ -46,10 +46,7 @@ const nextConfig: NextConfig = {
           source: '/api/storefront/:path*',
           destination: 'https://smartgumastha-backend-production.up.railway.app/api/storefront/:path*',
         },
-        {
-          source: '/api/admin/:path*',
-          destination: 'https://smartgumastha-backend-production.up.railway.app/api/admin/:path*',
-        },
+        // /api/admin/* routes are handled by Next.js API routes in src/app/api/admin/
       ],
       fallback: [],
     };
