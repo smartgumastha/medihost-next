@@ -35,7 +35,7 @@ export function PlanBilling({ user }: { user: AuthUser | null }) {
 
   return (
     <div style={{ maxWidth: 800 }} className="space-y-6">
-      <h2 style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>Plan & Billing</h2>
+      <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111827' }}>Plan & Billing</h2>
 
       {/* Section 1: Current plan */}
       <div className="bg-white rounded-xl p-5" style={{ border: '1.5px solid #0F6E56' }}>

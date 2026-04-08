@@ -78,12 +78,12 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
       {/* Mobile overlay */}
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Sidebar — flat list, purple theme */}
+      {/* Sidebar — premium purple */}
       <aside
         className={`fixed top-14 left-0 bottom-0 w-[240px] z-40 overflow-y-auto transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
-        style={{ backgroundColor: '#3C3489' }}
+        style={{ backgroundColor: '#2E1065' }}
       >
-        <nav className="py-2">
+        <nav style={{ padding: '12px 0' }}>
           {NAV_ITEMS.map(item => {
             const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
             return (
@@ -91,12 +91,17 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                style={isActive ? { backgroundColor: 'rgba(255,255,255,0.08)', borderLeft: '2px solid #fff', fontWeight: 500 } : { borderLeft: '2px solid transparent' }}
-                className={`block px-5 py-2.5 text-[13px] transition-colors ${
-                  isActive ? 'text-white' : 'hover:bg-white/[0.05]'
-                }`}
+                className="block transition-all"
+                style={{
+                  padding: '10px 20px', margin: '0 8px 2px 8px', borderRadius: 8,
+                  fontSize: 14, fontWeight: isActive ? 600 : 450,
+                  color: isActive ? '#fff' : '#C4B5FD',
+                  backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
+                  borderLeft: isActive ? '3px solid #A78BFA' : '3px solid transparent',
+                  textDecoration: 'none',
+                }}
               >
-                <span style={{ color: isActive ? '#fff' : '#AFA9EC' }}>{item.label}</span>
+                {item.label}
               </a>
             );
           })}
@@ -104,8 +109,8 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
       </aside>
 
       {/* Main content */}
-      <main className="lg:ml-[240px] pt-14 min-h-screen">
-        <div className="p-6 max-w-[1400px]">
+      <main className="lg:ml-[240px] pt-14 min-h-screen" style={{ backgroundColor: '#FAFAFA' }}>
+        <div className="p-6 lg:p-8 max-w-[1400px]">
           {children}
         </div>
       </main>

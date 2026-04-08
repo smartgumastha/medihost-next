@@ -8,8 +8,8 @@ const LANGUAGES = ['English', 'Hindi', 'Telugu', 'Tamil', 'Bengali', 'Marathi', 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '0.5px solid #E5E5E3' }}>
-      <span style={{ fontSize: 12, color: '#78776F' }}>{label}</span>
-      <div style={{ fontSize: 12, color: '#1A1A1A', fontWeight: 500 }}>{children}</div>
+      <span style={{ fontSize: 14, color: '#6B7280' }}>{label}</span>
+      <div style={{ fontSize: 14, color: '#111827', fontWeight: 500 }}>{children}</div>
     </div>
   );
 }
@@ -26,11 +26,11 @@ export function SettingsContent({ user }: { user: AuthUser | null }) {
 
   return (
     <div style={{ maxWidth: 560 }} className="space-y-6">
-      <h2 style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>Account Settings</h2>
+      <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111827' }}>Account Settings</h2>
 
       {/* Section 1: Login credentials */}
       <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 8 }}>Login credentials</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 12 }}>Login credentials</h3>
         <Row label="Email">{user?.email || '—'}</Row>
         <Row label="Password">
           {showPasswordForm ? (
@@ -51,7 +51,7 @@ export function SettingsContent({ user }: { user: AuthUser | null }) {
 
       {/* Section 2: Preferences */}
       <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 8 }}>Preferences</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 12 }}>Preferences</h3>
         <Row label="Language">
           <select value={language} onChange={e => setLanguage(e.target.value)}
             className="border border-gray-300 rounded-md px-2 py-1 text-xs bg-transparent outline-none">
@@ -65,7 +65,7 @@ export function SettingsContent({ user }: { user: AuthUser | null }) {
 
       {/* Section 3: Notifications */}
       <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 8 }}>Notifications</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 12 }}>Notifications</h3>
         <Row label="Email notifications">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={notifAppointments} onChange={e => setNotifAppointments(e.target.checked)} className="rounded border-gray-300 text-emerald-600" />

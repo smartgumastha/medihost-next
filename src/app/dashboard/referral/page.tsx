@@ -20,7 +20,7 @@ export default function ReferralPage() {
 
   return (
     <div style={{ maxWidth: 600 }} className="space-y-5">
-      <h2 style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>Refer &amp; Earn</h2>
+      <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111827' }}>Refer &amp; Earn</h2>
 
       <div className="bg-white border border-gray-200 rounded-xl p-5">
         <h3 style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 8 }}>Share your unique link</h3>

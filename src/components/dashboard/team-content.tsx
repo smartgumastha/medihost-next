@@ -34,7 +34,7 @@ export function TeamContent({ user }: { user: AuthUser | null }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>Team</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111827' }}>Team</h2>
           <p style={{ fontSize: 11, color: '#78776F', marginTop: 2 }}>1 of {maxSlots} staff slots used ({planName} plan)</p>
         </div>
         <button className="text-xs font-medium text-white rounded-md px-3 py-1.5 transition-colors" style={{ backgroundColor: '#0F6E56' }}>

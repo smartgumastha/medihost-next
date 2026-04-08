@@ -4,7 +4,7 @@
 export default function CommissionsPage() {
   return (
     <div style={{ maxWidth: 700 }} className="space-y-5">
-      <h2 style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>My Commissions</h2>
+      <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111827' }}>My Commissions</h2>
       <div className="grid grid-cols-3 gap-3">
         {[{ label: 'This month', value: 'Rs.0' }, { label: 'Total earned', value: 'Rs.0' }, { label: 'Pending payout', value: 'Rs.0' }].map(s => (
           <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4">
