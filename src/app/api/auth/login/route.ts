@@ -16,18 +16,22 @@ export async function POST(request: NextRequest) {
     const partnerData = await partnerRes.json();
 
     if (partnerData.success && partnerData.token) {
+      const partner = partnerData.partner || {};
       const user = {
-        id: String(partnerData.partner?.id || ''),
-        email: partnerData.partner?.email || email,
-        name: partnerData.partner?.owner_name || partnerData.partner?.business_name || email,
-        role: partnerData.partner?.role || 'HOSPITAL_ADMIN',
-        hospitalId: String(partnerData.partner?.hospital_id || ''),
+        id: String(partner.id || ''),
+        email: partner.email || email,
+        name: partner.owner_name || partner.business_name || email,
+        role: partner.role || 'PARTNER',
+        hospitalId: String(partner.hospital_id || ''),
+        partnerId: String(partner.id || ''),
         token: partnerData.token,
+        plan_tier: String(partner.plan_tier || 'starter'),
+        is_super_admin: Boolean(partner.is_super_admin),
       };
 
       const response = NextResponse.json({ success: true, user });
       response.cookies.set('medihost_auth', JSON.stringify(user), {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60,
@@ -62,7 +66,7 @@ export async function POST(request: NextRequest) {
 
       const response = NextResponse.json({ success: true, user });
       response.cookies.set('medihost_auth', JSON.stringify(user), {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60,

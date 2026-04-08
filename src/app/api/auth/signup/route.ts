@@ -4,68 +4,100 @@ const API_BASE = process.env.API_URL || 'https://smartgumastha-backend-productio
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
+
   try {
-    const res = await fetch(`${API_BASE}/api/presence/partner-auth/signup`, {
+    // Step 1: Try signup via partner-auth
+    const signupRes = await fetch(`${API_BASE}/api/presence/partner-auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        business_name: body.business_name,
-        owner_name: body.owner_name || [body.first_name, body.last_name].filter(Boolean).join(' ') || '',
-        email: body.email,
-        phone: body.phone || '',
+        first_name: body.owner_name?.split(' ')[0] || body.owner_name || '',
+        last_name: body.owner_name?.split(' ').slice(1).join(' ') || '',
+        email: (body.email || '').toLowerCase().trim(),
         password: body.password,
-        partner_type: body.partner_type || 'clinic',
-        signup_source: body.signup_source || 'medihost-web',
-        signup_intent: body.signup_intent || 'website',
+        phone: body.phone || '',
+        clinic_name: body.business_name || body.clinic_name || '',
+        city: body.city || '',
+        plan_tier: body.plan_tier || 'starter',
+        signup_source: body.signup_source || 'website',
+        signup_intent: body.intent || '',
+        selected_domain: body.selected_domain || '',
       }),
     });
 
-    const data = await res.json();
+    const signupData = await signupRes.json();
 
-    if (data.success && data.token) {
-      // Direct signup with password — token returned immediately
-      const partner = data.partner || {};
-      const user = {
-        id: String(partner.id || ''),
-        email: partner.email || body.email,
-        name: partner.owner_name || partner.business_name || body.owner_name || body.email,
-        role: 'HOSPITAL_ADMIN' as const,
-        hospitalId: '',
-        token: data.token,
-      };
+    // Step 2: Determine if this is new signup or existing user
+    let token = '';
+    let partnerId = '';
+    let partnerData: Record<string, unknown> = {};
 
-      const response = NextResponse.json({ success: true, user });
-      response.cookies.set('medihost_auth', JSON.stringify(user), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60,
-        path: '/',
+    if (signupData.success && signupData.token) {
+      // New signup succeeded
+      token = signupData.token;
+      partnerId = String(signupData.partner?.id || '');
+      partnerData = signupData.partner || {};
+    } else if (signupData.error?.includes('already') || signupData.error?.includes('exists') || signupRes.status === 409) {
+      // Email exists — try login instead (handle existing users gracefully)
+      const loginRes = await fetch(`${API_BASE}/api/presence/partner-auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: (body.email || '').toLowerCase().trim(),
+          password: body.password,
+        }),
       });
-      return response;
+
+      const loginData = await loginRes.json();
+
+      if (loginData.success && loginData.token) {
+        token = loginData.token;
+        partnerId = String(loginData.partner?.id || '');
+        partnerData = loginData.partner || {};
+      } else {
+        // Password wrong for existing account
+        return NextResponse.json(
+          { success: false, error: 'Account exists. Check your password or use Google login.', existing: true },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Genuine error
+      console.error('Signup error:', signupData.error);
+      return NextResponse.json(
+        { success: false, error: signupData.error || 'Registration failed. Please try again.' },
+        { status: 400 }
+      );
     }
 
-    if (data.success && data.requires_verification) {
-      // No-password flow — email verification required
-      return NextResponse.json({ success: true, requires_verification: true, message: data.message });
-    }
+    // Step 3: Build user object and set cookie
+    const user = {
+      id: partnerId,
+      email: body.email,
+      name: body.owner_name || body.business_name || '',
+      role: 'PARTNER' as const,
+      hospitalId: String(partnerData.hospital_id || ''),
+      partnerId: partnerId,
+      token: token,
+      plan_tier: String(partnerData.plan_tier || 'starter'),
+      is_super_admin: Boolean(partnerData.is_super_admin),
+    };
 
-    // Pass through existing_user flag for inline login
-    if (data.existing_user) {
-      return NextResponse.json({
-        success: false,
-        existing_user: true,
-        email: data.email || body.email,
-        message: data.message || 'Welcome back! Enter your password to continue.',
-      });
-    }
+    const response = NextResponse.json({ success: true, user, existing: !signupData.success });
 
-    return NextResponse.json(
-      { success: false, error: data.error || data.message || 'Registration failed' },
-      { status: 400 }
-    );
-  } catch (e) {
-    console.error('Signup route error:', e);
-    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
+    // Set medihost_auth cookie — client-readable for dashboard/payment pages
+    response.cookies.set('medihost_auth', JSON.stringify(user), {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+      path: '/',
+    });
+
+    return response;
+
+  } catch (error) {
+    console.error('Signup route error:', error);
+    return NextResponse.json({ success: false, error: 'Server error. Please try again.' }, { status: 500 });
   }
 }

@@ -91,46 +91,36 @@ export function SignupForm() {
   const [existingUser, setExistingUser] = useState(false);
   const hasRedirected = useRef(false);
 
-  // Store intended redirect in cookie BEFORE auth starts
-  useEffect(function () {
-    var redirectUrl = '';
-    var i = intent;
-    var d = domain;
-    var a = searchParams.get('amount') || '';
-
-    if (i === 'domain-only' && d) {
-      redirectUrl = '/payment?plan=domain-only&domain=' + encodeURIComponent(d) + '&amount=' + (a || '699') + '&billing=yearly&intent=domain-only';
-    } else {
-      redirectUrl = '/plans?intent=' + encodeURIComponent(i);
-      if (d) redirectUrl += '&domain=' + encodeURIComponent(d);
-    }
-
-    document.cookie = 'mh_redirect=' + encodeURIComponent(redirectUrl) + '; path=/; max-age=3600; samesite=lax';
-  }, [intent, domain, searchParams]);
+  const plan = searchParams.get('plan') || '';
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function buildRedirectUrl() {
+    var params = new URLSearchParams();
+    if (intent) params.set('intent', intent);
+    if (domain) params.set('domain', domain);
+    if (plan) params.set('plan', plan);
+    var qs = params.toString();
+    return '/dashboard' + (qs ? '?' + qs : '');
+  }
+
   function redirectAfterAuth() {
     if (hasRedirected.current) return;
     hasRedirected.current = true;
-
-    var match = document.cookie.split('; ').find(function (r) { return r.startsWith('mh_redirect='); });
-    var url = '/dashboard';
-    if (match) {
-      url = decodeURIComponent(match.split('=')[1]);
-      document.cookie = 'mh_redirect=; path=/; max-age=0';
-    }
-    router.push(url);
+    router.push(buildRedirectUrl());
   }
 
-  function saveAuthAndRedirect(user: { id?: string; token?: string; hospitalId?: string; email?: string; name?: string }) {
+  function saveAuthAndRedirect(user: { id?: string; partnerId?: string; token?: string; hospitalId?: string; email?: string; name?: string }) {
     var token = user.token || '';
     var hospitalId = user.hospitalId || '';
 
-    // Save to localStorage as backup (httpOnly cookie is set by the API route)
+    // Client-side cookie backup (API route sets it server-side too)
     if (token) {
+      document.cookie = 'medihost_auth=' + encodeURIComponent(JSON.stringify(user)) + '; path=/; max-age=2592000; samesite=lax';
+      localStorage.setItem('mh_token', token);
+      localStorage.setItem('mh_partner_id', user.partnerId || user.id || '');
       localStorage.setItem('medihost_token', token);
       localStorage.setItem('mh_hospital_id', String(hospitalId));
       localStorage.setItem('mh_user_name', user.name || form.owner_name);
@@ -200,17 +190,22 @@ export function SignupForm() {
           selected_domain: domain,
           selected_product: selectedProduct,
           ref_code: ref,
-          signup_intent: intent,
+          intent: intent,
+          plan_tier: plan || 'starter',
         }),
       });
       const data = await res.json();
 
-      if (data.success) {
+      if (data.success && !data.existing) {
+        // New signup succeeded
         saveAuthAndRedirect(data.user || {});
-      } else if (data.existing_user) {
-        // Account exists — switch to inline login mode
+      } else if (data.success && data.existing) {
+        // Existing user logged in via signup
+        saveAuthAndRedirect(data.user || {});
+      } else if (data.existing) {
+        // Account exists, wrong password — switch to inline login mode
         setExistingUser(true);
-        setError('');
+        setError('Account exists. Enter your password to continue.');
         update('password', '');
       } else {
         setError(data.error || 'Registration failed. Please try again.');

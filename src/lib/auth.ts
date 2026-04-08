@@ -1,6 +1,7 @@
 export type UserRole =
   | 'SUPER_ADMIN'
   | 'HOSPITAL_ADMIN'
+  | 'PARTNER'
   | 'MANAGER'
   | 'DOCTOR'
   | 'RECEPTIONIST'
@@ -18,6 +19,7 @@ export type DashboardPage =
 
 export const ROLE_PAGES: Record<UserRole, DashboardPage[]> = {
   SUPER_ADMIN: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy','orders'],
+  PARTNER: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy','orders'],
   HOSPITAL_ADMIN: ['dashboard','profile','website','domain','doctors','products','marketing','analytics','plan','staff','settings','opd','emr','billing','lis','pharmacy','orders'],
   MANAGER: ['dashboard','profile','doctors','products','analytics','staff','opd','billing'],
   DOCTOR: ['dashboard','profile','opd','emr'],
@@ -40,8 +42,11 @@ export interface AuthUser {
   name: string;
   role: UserRole;
   hospitalId?: string;
+  partnerId?: string;
   token: string;
   hmsToken?: string;
+  plan_tier?: string;
+  is_super_admin?: boolean;
 }
 
 export function getAuthFromCookie(cookieValue: string | undefined): AuthUser | null {
@@ -69,7 +74,7 @@ export function getTokenFromClient(): string {
   if (auth?.token) return auth.token;
   // Fallback to localStorage
   try {
-    const stored = localStorage.getItem('medihost_token');
+    const stored = localStorage.getItem('mh_token') || localStorage.getItem('medihost_token');
     if (stored) return stored;
   } catch { /* silent */ }
   return '';
