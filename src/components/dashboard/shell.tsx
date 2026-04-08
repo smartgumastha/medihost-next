@@ -2,105 +2,69 @@
 
 import { useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { canAccess, type AuthUser, type DashboardPage } from '@/lib/auth';
+import { type AuthUser } from '@/lib/auth';
 
-interface NavItem {
-  page: DashboardPage;
+interface SidebarItem {
   label: string;
-  icon: string;
-  href: string;
-  badge?: string;
-  badgeColor?: string;
+  letter: string;
+  href?: string;
+  external?: string;
+  badge?: 'soon' | 'pro';
+  iconBg: string;
+  iconColor: string;
 }
 
-interface ComingSoonItem {
-  label: string;
-  icon: string;
-}
-
-interface NavSection {
+interface SidebarSection {
   title: string;
-  items: NavItem[];
-  comingSoon?: ComingSoonItem[];
+  items: SidebarItem[];
 }
 
-const NAV_SECTIONS: NavSection[] = [
+const SECTIONS: SidebarSection[] = [
   {
-    title: 'General',
+    title: 'PRESENCE',
     items: [
-      { page: 'dashboard', label: 'Dashboard', icon: '📊', href: '/dashboard' },
-      { page: 'profile', label: 'My Profile', icon: '👤', href: '/dashboard/profile' },
+      { label: 'My website', letter: 'W', href: '/dashboard/website', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
+      { label: 'My domain', letter: 'D', href: '/dashboard/domain', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
+      { label: 'Google Business', letter: 'G', badge: 'soon', iconBg: '#F1EFE8', iconColor: '#5F5E5A' },
+      { label: 'Reviews', letter: 'R', badge: 'soon', iconBg: '#F1EFE8', iconColor: '#5F5E5A' },
     ],
   },
   {
-    title: 'Online Presence',
+    title: 'CLINIC (HMS)',
     items: [
-      { page: 'website', label: 'My Website', icon: '⭐', href: '/dashboard/website' },
-      { page: 'domain', label: 'Domain', icon: '🌐', href: '/dashboard/domain' },
+      { label: 'OPD', letter: 'O', external: 'https://app.hemato.in', iconBg: '#E6F1FB', iconColor: '#185FA5' },
+      { label: 'Billing', letter: 'B', external: 'https://app.hemato.in', iconBg: '#E6F1FB', iconColor: '#185FA5' },
+      { label: 'EMR', letter: 'E', external: 'https://app.hemato.in', iconBg: '#E6F1FB', iconColor: '#185FA5' },
+      { label: 'LIS', letter: 'L', badge: 'pro', iconBg: '#E6F1FB', iconColor: '#185FA5' },
     ],
   },
   {
-    title: 'Clinic',
+    title: 'ACCOUNT',
     items: [
-      { page: 'doctors', label: 'My Doctors', icon: '⚕️', href: '/dashboard/doctors' },
-      { page: 'products', label: 'Tests & Services', icon: '💊', href: '/dashboard/products' },
-    ],
-  },
-  {
-    title: 'HMS Modules',
-    items: [
-      { page: 'opd', label: 'OPD Queue', icon: '🏥', href: '/dashboard/hms?module=opd' },
-      { page: 'emr', label: 'EMR', icon: '📋', href: '/dashboard/hms?module=emr' },
-      { page: 'billing', label: 'Billing', icon: '🧾', href: '/dashboard/hms?module=billing' },
-      { page: 'lis', label: 'LIS', icon: '🔬', href: '/dashboard/hms?module=lis', badge: 'NABL', badgeColor: 'blue' },
-      { page: 'pharmacy', label: 'Pharmacy', icon: '💊', href: '/dashboard/hms?module=pharmacy', badge: 'Pro', badgeColor: 'amber' },
-      { page: 'appointments', label: 'Appointments', icon: '📅', href: '/dashboard/hms?module=appointments' },
-    ],
-    comingSoon: [
-      { label: 'IPD Management', icon: '🛏️' },
-      { label: 'Nursing Station', icon: '👩‍⚕️' },
-    ],
-  },
-  {
-    title: 'Growth',
-    items: [
-      { page: 'marketing', label: 'Marketing (AI)', icon: '📢', href: '/dashboard/marketing' },
-      { page: 'analytics', label: 'Analytics', icon: '📈', href: '/dashboard/analytics' },
-    ],
-  },
-  {
-    title: 'Admin',
-    items: [
-      { page: 'staff', label: 'Staff & Roles', icon: '👥', href: '/dashboard/staff' },
-      { page: 'settings', label: 'Settings', icon: '⚙️', href: '/dashboard/settings' },
-      { page: 'plan', label: 'Plan & Billing', icon: '💎', href: '/dashboard/plan' },
-      { page: 'orders', label: 'Orders', icon: '🧾', href: '/dashboard/orders' },
+      { label: 'Plan & billing', letter: 'P', href: '/dashboard/plan', iconBg: '#EEEDFE', iconColor: '#534AB7' },
+      { label: 'My profile', letter: 'M', href: '/dashboard/profile', iconBg: '#EEEDFE', iconColor: '#534AB7' },
+      { label: 'Team', letter: 'T', href: '/dashboard/team', iconBg: '#EEEDFE', iconColor: '#534AB7' },
+      { label: 'Settings', letter: 'S', href: '/dashboard/settings', iconBg: '#EEEDFE', iconColor: '#534AB7' },
     ],
   },
 ];
 
-const COMING_SOON_GLOBAL: ComingSoonItem[] = [
-  { label: 'Floor Manager', icon: '🏢' },
-  { label: 'Stores & Inventory', icon: '📦' },
-  { label: 'HR & Payroll', icon: '💰' },
-];
+function getPlanBadge(tier?: string): { bg: string; color: string; label: string } {
+  if (!tier || tier === 'starter') return { bg: '#E1F5EE', color: '#0F6E56', label: 'Free' };
+  if (tier === 'growth' || tier === 'professional' || tier === 'enterprise') return { bg: '#E6F1FB', color: '#185FA5', label: tier.charAt(0).toUpperCase() + tier.slice(1) };
+  return { bg: '#FAEEDA', color: '#854F0B', label: 'Trial' };
+}
 
 export function DashboardShell({ user, children }: { user: AuthUser; children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const currentModule = searchParams.get('module') || '';
   const isHmsPage = pathname === '/dashboard/hms';
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const collapsed = !isHmsPage && sidebarCollapsed;
-  const hideSidebar = isHmsPage; // HMS gets full width — no MediHost sidebar
-  const sidebarW = hideSidebar ? 0 : (collapsed ? 48 : 240);
+  const currentModule = searchParams.get('module') || '';
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -112,24 +76,17 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
   async function openClinicSoftware() {
     setHmsLoading(true);
     try {
-      const res = await fetch('/api/auth/hms-token', { method: 'POST' });
-      const data = await res.json();
-
+      var res = await fetch('/api/auth/hms-token', { method: 'POST' });
+      var data = await res.json();
       if (data.success && data.hms_token) {
-        const loginData = encodeURIComponent(JSON.stringify({
-          token: data.hms_token,
-          hospitalId: String(data.hospital_id || ''),
-          userid: String(data.user_id || ''),
-          first_name: data.first_name || '',
-          last_name: data.last_name || '',
-          email: data.email || '',
-          role: data.role || 'HOSPITAL_ADMIN',
-          role_id: 2,
+        var loginData = encodeURIComponent(JSON.stringify({
+          token: data.hms_token, hospitalId: String(data.hospital_id || ''),
+          userid: String(data.user_id || ''), first_name: data.first_name || '',
+          last_name: data.last_name || '', email: data.email || '',
+          role: data.role || 'HOSPITAL_ADMIN', role_id: 2,
         }));
-        const hmsUrl = `https://app.hemato.in?mw_token=${encodeURIComponent(data.hms_token)}&mw_hospital_id=${encodeURIComponent(data.hospital_id || '')}&mw_login_data=${loginData}`;
-        window.open(hmsUrl, '_blank');
+        window.open('https://app.hemato.in?mw_token=' + encodeURIComponent(data.hms_token) + '&mw_hospital_id=' + encodeURIComponent(data.hospital_id || '') + '&mw_login_data=' + loginData, '_blank');
       } else {
-        // No HMS token — open HMS directly, user will need to login there
         window.open('https://app.hemato.in', '_blank');
       }
     } catch {
@@ -139,150 +96,74 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
     }
   }
 
-  const [comingSoonToast, setComingSoonToast] = useState('');
-
-  function showComingSoon() {
-    setComingSoonToast('This module is coming soon. We\u2019ll notify you when it\u2019s ready.');
-    setTimeout(function() { setComingSoonToast(''); }, 3000);
-  }
-
-  // Filter sections to only include items the user can access
-  const visibleSections = NAV_SECTIONS.map(section => ({
-    ...section,
-    items: section.items.filter(item => canAccess(user.role, item.page)),
-  })).filter(section => section.items.length > 0 || (section.comingSoon && section.comingSoon.length > 0));
+  var planBadge = getPlanBadge(user.plan_tier);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F6F6F7' }}>
       {/* ─── Top Nav ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 h-14">
+      <nav className="fixed top-0 left-0 right-0 z-50 h-12" style={{ backgroundColor: '#085041' }}>
         <div className="flex items-center justify-between h-full px-4">
-          {/* Left: hamburger + logo */}
           <div className="flex items-center gap-3">
             <button
-              className="lg:hidden text-gray-500 hover:text-gray-700 p-1"
+              className="lg:hidden text-white/60 hover:text-white p-1"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label="Toggle sidebar"
             >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <line x1="3" y1="5" x2="17" y2="5" />
-                <line x1="3" y1="10" x2="17" y2="10" />
-                <line x1="3" y1="15" x2="17" y2="15" />
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="3" y1="5" x2="17" y2="5" /><line x1="3" y1="10" x2="17" y2="10" /><line x1="3" y1="15" x2="17" y2="15" />
               </svg>
             </button>
-            <a href="/dashboard" className="flex items-center gap-1.5">
-              <span className="text-[17px] font-bold text-gray-900 tracking-tight">
-                MediHost<span className="text-[10px] font-semibold text-gray-400 align-super">&trade;</span> AI
-              </span>
-              <span className="relative flex h-2 w-2 -mt-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
+            <a href="/dashboard" className="flex items-center gap-2">
+              <span style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>MediHost</span>
+              <span style={{ fontSize: 11, color: '#9FE1CB' }}>{user.name || 'My Clinic'}</span>
             </a>
+            <span style={{ fontSize: 9, fontWeight: 600, backgroundColor: planBadge.bg, color: planBadge.color, padding: '2px 6px', borderRadius: 4 }}>
+              {planBadge.label}
+            </span>
           </div>
-
-          {/* Right: actions */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={openClinicSoftware}
-              disabled={hmsLoading}
-              className="hidden sm:flex text-xs font-medium h-8 px-3 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              {hmsLoading ? 'Opening...' : '🏥 Clinic Software'}
-            </Button>
-
-            {/* Bell */}
-            <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-            </button>
-
-            {/* User dropdown */}
+            {user.is_super_admin && (
+              <a href="/admin" style={{ fontSize: 10, color: '#9FE1CB', padding: '3px 8px', borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden sm:block hover:bg-white/20 transition-colors">
+                Admin Panel
+              </a>
+            )}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1.5 transition-colors cursor-pointer">
-                <Avatar className="h-7 w-7">
-                  <AvatarFallback className="bg-emerald-50 text-emerald-700 text-xs font-semibold">
-                    {user.name?.charAt(0)?.toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium text-gray-700 hidden sm:block max-w-[120px] truncate">
-                  {user.name}
-                </span>
-                <svg className="w-3.5 h-3.5 text-gray-400 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <div className="px-3 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 hover:bg-white/10 rounded-lg px-2 py-1 cursor-pointer">
+                <div style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: '#fff' }}>
+                  {(user.name || 'U').charAt(0).toUpperCase()}
                 </div>
-                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} className="text-sm">
-                  My Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/dashboard/plan')} className="text-sm">
-                  Plan & Billing
-                </DropdownMenuItem>
-                {(user.is_super_admin || user.role === 'SUPER_ADMIN' || user.role === 'HOSPITAL_ADMIN') && (
-                  <DropdownMenuItem onClick={() => router.push('/admin')} className="text-sm">
-                    Admin Panel
-                  </DropdownMenuItem>
+                <span style={{ fontSize: 11, color: '#9FE1CB' }} className="hidden sm:block">{user.name}</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <div className="px-3 py-2 border-b border-gray-100">
+                  <p className="text-xs font-medium text-gray-900 truncate">{user.name}</p>
+                  <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
+                </div>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} className="text-xs">My Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/plan')} className="text-xs">Plan & Billing</DropdownMenuItem>
+                {user.is_super_admin && (
+                  <DropdownMenuItem onClick={() => router.push('/admin')} className="text-xs">Admin Panel</DropdownMenuItem>
                 )}
                 <div className="border-t border-gray-100" />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600 text-sm">
-                  Log out
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600 text-xs">Log out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </nav>
 
-      {/* ─── Mobile overlay ─── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden backdrop-blur-sm"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {/* Mobile overlay */}
+      {sidebarOpen && <div className="fixed inset-0 bg-black/20 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* ─── Floating HMS nav — visible only on HMS pages ─── */}
-      {hideSidebar && (
+      {/* ─── Floating HMS nav (only on HMS pages) ─── */}
+      {isHmsPage && (
         <div className="fixed top-16 left-3 z-50 flex flex-col gap-1.5">
-          <a
-            href="/dashboard"
-            className="w-9 h-9 bg-[#0F172A] border border-white/10 rounded-xl flex items-center justify-center text-emerald-400 text-sm font-bold shadow-lg hover:bg-emerald-500/20 transition-all group relative"
-            title="Back to Dashboard"
-          >
-            M
-            <div className="absolute left-11 top-1/2 -translate-y-1/2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-md whitespace-nowrap z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-              Dashboard
-            </div>
-          </a>
-          {[
-            { mod: 'opd', icon: '🏥', label: 'OPD' },
-            { mod: 'emr', icon: '📋', label: 'EMR' },
-            { mod: 'billing', icon: '🧾', label: 'Billing' },
-            { mod: 'lis', icon: '🔬', label: 'LIS' },
-          ].map(function (item) {
+          <a href="/dashboard" className="w-9 h-9 bg-[#0F172A] border border-white/10 rounded-xl flex items-center justify-center text-emerald-400 text-sm font-bold shadow-lg hover:bg-emerald-500/20 transition-all" title="Back to Dashboard">M</a>
+          {[{ mod: 'opd', label: 'OPD' }, { mod: 'emr', label: 'EMR' }, { mod: 'billing', label: 'Billing' }, { mod: 'lis', label: 'LIS' }].map(function (item) {
             var active = currentModule === item.mod;
             return (
-              <a
-                key={item.mod}
-                href={'/dashboard/hms?module=' + item.mod}
-                className={'w-9 h-9 bg-[#0F172A] border rounded-xl flex items-center justify-center text-sm shadow-lg transition-all group relative ' +
-                  (active ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-white/10 hover:bg-white/10')}
-                title={item.label}
-              >
-                {item.icon}
-                <div className="absolute left-11 top-1/2 -translate-y-1/2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-md whitespace-nowrap z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-                  {item.label}
-                </div>
-              </a>
+              <a key={item.mod} href={'/dashboard/hms?module=' + item.mod}
+                className={'w-9 h-9 bg-[#0F172A] border rounded-xl flex items-center justify-center text-xs font-bold shadow-lg transition-all ' + (active ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : 'border-white/10 hover:bg-white/10 text-white/60')}
+                title={item.label}>{item.label.charAt(0)}</a>
             );
           })}
         </div>
@@ -290,155 +171,79 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
 
       {/* ─── Sidebar ─── */}
       <aside
-        className={`fixed top-14 left-0 bottom-0 z-40 overflow-y-auto transition-all duration-200 ease-in-out pb-4 ${
-          hideSidebar ? '-translate-x-full' : (sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
+        className={`fixed top-12 left-0 bottom-0 z-40 overflow-y-auto transition-transform duration-200 ${
+          isHmsPage ? '-translate-x-full' : (sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
         }`}
-        style={{ width: collapsed ? 48 : 240, background: 'linear-gradient(180deg, #0F172A 0%, #1A2332 100%)' }}
+        style={{ width: 172, backgroundColor: '#FAFAF9', borderRight: '0.5px solid #E5E5E3' }}
       >
-        {/* Store name + plan */}
-        {collapsed ? (
-          <div className="py-3 border-b border-white/10 flex items-center justify-center">
-            <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400 text-xs font-bold">
-              {(user.name || 'M').charAt(0).toUpperCase()}
-            </div>
-          </div>
-        ) : (
-          <div className="px-4 py-4 border-b border-white/10">
-            <div className="text-sm font-semibold text-white truncate" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-              {user.name || 'My Clinic'}
-            </div>
-            <span className="inline-block mt-1 text-[10px] font-medium text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              {user.role?.replace(/_/g, ' ') || 'Admin'}
-            </span>
-          </div>
-        )}
+        <nav style={{ padding: '8px 6px' }}>
+          {SECTIONS.map((section, sIdx) => (
+            <div key={section.title} style={{ marginTop: sIdx > 0 ? 12 : 4 }}>
+              <div style={{ fontSize: 9, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#A1A09E', padding: '0 6px', marginBottom: 4 }}>
+                {section.title}
+              </div>
+              {section.items.map(item => {
+                var isActive = item.href ? (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) : false;
+                var isDisabled = !item.href && !item.external;
 
-        {/* Navigation sections */}
-        <nav className="py-2">
-          {visibleSections.map((section, sIdx) => (
-            <div key={section.title}>
-              {sIdx > 0 && <div className={collapsed ? 'mx-1 mt-2 mb-1 border-t border-white/5' : 'mx-4 mt-3 mb-1 border-t border-white/5'} />}
-              {!collapsed && (
-                <div className="px-4 mt-3 mb-1">
-                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                    {section.title}
-                  </span>
-                </div>
-              )}
-              <ul className={collapsed ? 'space-y-1 px-1' : 'space-y-0.5 px-2'}>
-                {section.items.map(item => {
-                  const hrefPath = item.href.split('?')[0];
-                  const hrefModule = item.href.includes('module=') ? item.href.split('module=')[1] : '';
-                  const isActive = hrefModule
-                    ? (pathname === '/dashboard/hms' && currentModule === hrefModule)
-                    : (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(hrefPath)));
-                  return (
-                    <li key={item.page} className="relative group">
-                      <a
-                        href={item.href}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center ${collapsed ? 'justify-center w-10 h-10 mx-auto p-0' : 'gap-3 px-3 py-2'} text-[13px] font-medium rounded-lg transition-all relative ${
-                          isActive
-                            ? 'bg-emerald-500/15 text-emerald-400'
-                            : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
-                        }`}
-                      >
-                        {isActive && !collapsed && (
-                          <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-emerald-400" />
-                        )}
-                        <span className={collapsed ? 'text-lg leading-none' : 'text-base leading-none'}>{item.icon}</span>
-                        {!collapsed && <span className="flex-1">{item.label}</span>}
-                        {!collapsed && item.badge && (
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                            item.badgeColor === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                            item.badgeColor === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                            'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </a>
-                      {/* Tooltip in collapsed mode */}
-                      {collapsed && (
-                        <div className="absolute left-[52px] top-1/2 -translate-y-1/2 bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-md whitespace-nowrap z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-                          {item.label}
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-                {/* Section-specific coming soon items */}
-                {!collapsed && section.comingSoon?.map(item => (
-                  <li key={item.label}>
-                    <button
-                      onClick={showComingSoon}
-                      className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg text-slate-600 hover:bg-white/5 transition-all w-full text-left"
-                    >
-                      <span className="text-base leading-none opacity-40">{item.icon}</span>
-                      <span className="flex-1 opacity-50">{item.label}</span>
-                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-600 border border-white/10">
-                        Soon
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                function handleClick(e: React.MouseEvent) {
+                  if (item.external) {
+                    e.preventDefault();
+                    openClinicSoftware();
+                  }
+                  if (isDisabled) e.preventDefault();
+                  setSidebarOpen(false);
+                }
+
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href || '#'}
+                    onClick={handleClick}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '5px 8px',
+                      borderRadius: 6,
+                      marginBottom: 1,
+                      fontSize: 11,
+                      fontWeight: isActive ? 500 : 400,
+                      color: isActive ? '#0F6E56' : '#5F5E5A',
+                      backgroundColor: isActive ? '#E1F5EE' : 'transparent',
+                      textDecoration: 'none',
+                      cursor: isDisabled ? 'default' : 'pointer',
+                      opacity: isDisabled ? 0.6 : 1,
+                    }}
+                    className="hover:bg-gray-100 transition-colors"
+                  >
+                    <span style={{
+                      width: 14, height: 14, borderRadius: 3, backgroundColor: item.iconBg, color: item.iconColor,
+                      fontSize: 8, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}>
+                      {item.letter}
+                    </span>
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {item.badge === 'soon' && (
+                      <span style={{ fontSize: 8, backgroundColor: '#F1EFE8', color: '#A1A09E', padding: '1px 5px', borderRadius: 8, marginLeft: 'auto' }}>soon</span>
+                    )}
+                    {item.badge === 'pro' && (
+                      <span style={{ fontSize: 8, backgroundColor: '#FAEEDA', color: '#854F0B', padding: '1px 5px', borderRadius: 8, marginLeft: 'auto' }}>Pro</span>
+                    )}
+                  </a>
+                );
+              })}
             </div>
           ))}
-
-          {/* Global coming soon section — hidden in collapsed */}
-          {!collapsed && (
-            <>
-              <div className="mx-4 mt-3 mb-1 border-t border-white/5" />
-              <div className="px-4 mt-3 mb-1">
-                <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Coming Soon</span>
-              </div>
-              <ul className="space-y-0.5 px-2">
-                {COMING_SOON_GLOBAL.map(item => (
-                  <li key={item.label}>
-                    <button
-                      onClick={showComingSoon}
-                      className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium rounded-lg text-slate-600 hover:bg-white/5 transition-all w-full text-left"
-                    >
-                      <span className="text-base leading-none opacity-40">{item.icon}</span>
-                      <span className="flex-1 opacity-50">{item.label}</span>
-                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-white/5 text-slate-600 border border-white/10">
-                        Soon
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {/* Collapse/expand toggle */}
-          <div className={collapsed ? 'mx-1 mt-3 border-t border-white/5 pt-2' : 'mx-4 mt-3 border-t border-white/5 pt-2'}>
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="w-full flex items-center justify-center py-1.5 text-slate-500 hover:text-slate-300 hover:bg-white/5 rounded-lg transition-colors text-xs"
-              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              {collapsed ? '»' : '«'}
-            </button>
-          </div>
         </nav>
-
       </aside>
 
       {/* ─── Main content ─── */}
-      <main className="pt-14 min-h-screen transition-all duration-200" style={{ marginLeft: sidebarW > 0 ? `${sidebarW}px` : '0' }}>
-        <div className={hideSidebar ? '' : collapsed ? 'p-4' : 'p-6 max-w-[1200px] mx-auto'}>
+      <main className="min-h-screen transition-all duration-200" style={{ paddingTop: 48, marginLeft: isHmsPage ? 0 : 172 }}>
+        <div className={isHmsPage ? '' : 'p-5 max-w-[1100px] mx-auto'}>
           {children}
         </div>
       </main>
-
-      {/* Coming soon toast */}
-      {comingSoonToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-sm px-5 py-3 rounded-xl shadow-lg border border-white/10 animate-[fadeInUp_0.2s_ease-out]">
-          {comingSoonToast}
-        </div>
-      )}
     </div>
   );
 }
