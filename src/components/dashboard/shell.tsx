@@ -14,7 +14,7 @@ interface SidebarItem {
   letter: string;
   href?: string;
   external?: string;
-  badge?: 'soon' | 'pro';
+  badge?: 'soon' | 'pro' | 'growth';
   iconBg: string;
   iconColor: string;
 }
@@ -30,8 +30,16 @@ const SECTIONS: SidebarSection[] = [
     items: [
       { label: 'My website', letter: 'W', href: '/dashboard/website', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
       { label: 'My domain', letter: 'D', href: '/dashboard/domain', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
-      { label: 'Google Business', letter: 'G', badge: 'soon', iconBg: '#F1EFE8', iconColor: '#5F5E5A' },
-      { label: 'Reviews', letter: 'R', badge: 'soon', iconBg: '#F1EFE8', iconColor: '#5F5E5A' },
+    ],
+  },
+  {
+    title: 'AI MARKETING',
+    items: [
+      { label: 'Content studio', letter: 'C', href: '/dashboard/content', badge: 'growth', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
+      { label: 'Social autopilot', letter: 'A', href: '/dashboard/social', badge: 'growth', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
+      { label: 'Google Business', letter: 'G', href: '/dashboard/google-business', badge: 'growth', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
+      { label: 'Reviews', letter: 'R', href: '/dashboard/reviews-ai', badge: 'growth', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
+      { label: 'SEO optimizer', letter: 'S', href: '/dashboard/seo', badge: 'pro', iconBg: '#E1F5EE', iconColor: '#0F6E56' },
     ],
   },
   {
@@ -277,6 +285,9 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                     )}
                     {item.badge === 'pro' && (
                       <span style={{ fontSize: 8, backgroundColor: '#FAEEDA', color: '#854F0B', padding: '1px 5px', borderRadius: 8, marginLeft: 'auto' }}>Pro</span>
+                    )}
+                    {item.badge === 'growth' && isStarter && (
+                      <span style={{ fontSize: 8, backgroundColor: '#E6F1FB', color: '#185FA5', padding: '1px 5px', borderRadius: 8, marginLeft: 'auto' }}>Growth</span>
                     )}
                   </a>
                 );
