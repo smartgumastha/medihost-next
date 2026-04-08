@@ -1,22 +1,47 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AdminShell } from '@/components/admin/shell';
-import { getAuthFromCookie } from '@/lib/auth';
+import { type AuthUser, getAuthFromClient } from '@/lib/auth';
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const raw = cookieStore.get('medihost_auth')?.value;
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Decode if URL-encoded, then parse
-  let cookieValue = raw;
-  if (raw && raw.startsWith('%')) {
-    try { cookieValue = decodeURIComponent(raw); } catch { /* already decoded */ }
+  useEffect(() => {
+    try {
+      const raw = document.cookie.split('; ').find(r => r.startsWith('medihost_auth='));
+      if (!raw) {
+        router.replace('/login');
+        return;
+      }
+      const decoded = decodeURIComponent(raw.split('=').slice(1).join('='));
+      const parsed = JSON.parse(decoded) as AuthUser;
+
+      if (!parsed || !parsed.is_super_admin) {
+        console.log('Admin access denied. is_super_admin:', parsed?.is_super_admin);
+        router.replace('/dashboard');
+        return;
+      }
+
+      setUser(parsed);
+    } catch (err) {
+      console.error('Admin auth error:', err);
+      router.replace('/login');
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  if (loading) {
+    return <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',color:'#534AB7',fontSize:'14px'}}>Loading admin panel...</div>;
   }
 
-  const user = getAuthFromCookie(cookieValue);
-
-  if (!user) redirect('/login');
-  if (!user.is_super_admin) redirect('/dashboard');
+  if (!user) {
+    return null;
+  }
 
   return <AdminShell user={user}>{children}</AdminShell>;
 }
