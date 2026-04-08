@@ -130,15 +130,14 @@ export function ProfileForm({ user }: { user: AuthUser | null }) {
 
     (async () => {
       try {
-        const res = await fetch('/api/proxy/api/presence/auth/me', {
-          headers: { Authorization: `Bearer ${user.token}` },
+        const res = await fetch('/api/partner/profile', {
           signal: controller.signal,
         });
 
         if (!res.ok) throw new Error('Failed to load profile');
 
         const json = await res.json();
-        const data = json.data || json;
+        const data = json.partner || json.data || json;
 
         setPartnerId(data._id || data.id || null);
         setSlug(data.slug || null);
@@ -196,12 +195,11 @@ export function ProfileForm({ user }: { user: AuthUser | null }) {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/proxy/api/presence/partners/${partnerId}`,
+        '/api/partner/profile',
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${user?.token}`,
           },
           body: JSON.stringify({
             business_name: form.businessName,

@@ -20,9 +20,29 @@ export function SettingsContent({ user }: { user: AuthUser | null }) {
   const [notifTrial, setNotifTrial] = useState(true);
   const [notifMarketing, setNotifMarketing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [pwSaving, setPwSaving] = useState(false);
   const [toast, setToast] = useState('');
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000); }
+
+  async function handleChangePassword() {
+    if (!currentPw || !newPw || newPw.length < 8) { showToast('New password must be at least 8 characters'); return; }
+    setPwSaving(true);
+    try {
+      var res = await fetch('/api/partner/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_password: currentPw, new_password: newPw }),
+      });
+      var data = await res.json();
+      if (res.ok && data.success !== false) {
+        showToast('Password updated'); setShowPasswordForm(false); setCurrentPw(''); setNewPw('');
+      } else { showToast(data.error || 'Failed to change password'); }
+    } catch { showToast('Network error'); }
+    finally { setPwSaving(false); }
+  }
 
   return (
     <div style={{ maxWidth: 560 }} className="space-y-6">
@@ -34,10 +54,13 @@ export function SettingsContent({ user }: { user: AuthUser | null }) {
         <Row label="Email">{user?.email || '—'}</Row>
         <Row label="Password">
           {showPasswordForm ? (
-            <div className="flex items-center gap-2">
-              <input type="password" placeholder="New password" className="border border-gray-300 rounded-md px-2 py-1 text-xs w-32" />
-              <button onClick={() => { setShowPasswordForm(false); showToast('Password updated'); }} className="text-xs font-medium text-white bg-emerald-600 px-2 py-1 rounded-md">Save</button>
-              <button onClick={() => setShowPasswordForm(false)} className="text-xs text-gray-500">Cancel</button>
+            <div className="flex flex-col gap-2">
+              <input type="password" placeholder="Current password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-48" />
+              <input type="password" placeholder="New password (8+ chars)" value={newPw} onChange={e => setNewPw(e.target.value)} className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-48" />
+              <div className="flex gap-2">
+                <button onClick={handleChangePassword} disabled={pwSaving} className="text-xs font-medium text-white bg-emerald-600 px-3 py-1.5 rounded-md disabled:opacity-50">{pwSaving ? 'Saving...' : 'Save'}</button>
+                <button onClick={() => { setShowPasswordForm(false); setCurrentPw(''); setNewPw(''); }} className="text-xs text-gray-500">Cancel</button>
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-2">

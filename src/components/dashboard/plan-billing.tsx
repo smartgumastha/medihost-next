@@ -22,12 +22,20 @@ export function PlanBilling({ user }: { user: AuthUser | null }) {
   var [loading, setLoading] = useState(true);
   var currentTier = user?.plan_tier || 'starter';
 
+  var [payments, setPayments] = useState<{ date: string; amount: string; plan: string; status: string }[]>([]);
+
   useEffect(() => {
-    fetch('/api/proxy/api/presence/pricing/plans')
+    fetch('/api/presence/pricing/plans')
       .then(r => r.json())
       .then(d => { if (d.success && d.plans) setPlans(d.plans); })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    // Load payment history
+    fetch('/api/partner/payments')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.payments) setPayments(d.payments); })
+      .catch(() => {});
   }, []);
 
   var currentPlan = plans.find(p => p.plan_tier === currentTier) || null;
@@ -113,10 +121,28 @@ export function PlanBilling({ user }: { user: AuthUser | null }) {
 
       {/* Section 3: Payment history */}
       <div>
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 10 }}>Payment history</h3>
-        <div style={{ backgroundColor: '#F6F6F4', border: '0.5px solid #E5E5E3', borderRadius: 8, padding: 20, textAlign: 'center' }}>
-          <p style={{ fontSize: 11, color: '#A1A09E' }}>No payments yet. {currentTier === 'starter' ? 'You are on the free plan.' : 'Your trial is active.'}</p>
-        </div>
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: '#111827', marginBottom: 10 }}>Payment history</h3>
+        {payments.length > 0 ? (
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead><tr style={{ borderBottom: '1px solid #E5E7EB', backgroundColor: '#F9FAFB' }}>
+                {['Date', 'Amount', 'Plan', 'Status'].map(h => <th key={h} style={{ textAlign: 'left', padding: 12, fontSize: 13, fontWeight: 600, color: '#6B7280' }}>{h}</th>)}
+              </tr></thead>
+              <tbody>{payments.map((p, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                  <td style={{ padding: 12, fontSize: 14, color: '#4B5563' }}>{p.date}</td>
+                  <td style={{ padding: 12, fontSize: 14, fontWeight: 500, color: '#111827' }}>{p.amount}</td>
+                  <td style={{ padding: 12, fontSize: 14, color: '#4B5563' }}>{p.plan}</td>
+                  <td style={{ padding: 12 }}><span style={{ fontSize: 10, fontWeight: 600, backgroundColor: p.status === 'paid' ? '#ECFDF5' : '#FEF3C7', color: p.status === 'paid' ? '#059669' : '#92400E', padding: '3px 10px', borderRadius: 12 }}>{p.status}</span></td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 12, padding: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 14, color: '#9CA3AF' }}>No payments yet. {currentTier === 'starter' ? 'You are on the free plan.' : 'Your trial is active.'}</p>
+          </div>
+        )}
       </div>
     </div>
   );
