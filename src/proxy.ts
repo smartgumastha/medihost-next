@@ -75,7 +75,7 @@ export function proxy(request: NextRequest) {
 
   // Get auth cookie
   const authCookie = request.cookies.get('medihost_auth')?.value;
-  let user: { role?: string } | null = null;
+  let user: { role?: string; is_super_admin?: boolean } | null = null;
   if (authCookie) {
     try { user = JSON.parse(authCookie); } catch {}
   }
@@ -92,7 +92,7 @@ export function proxy(request: NextRequest) {
     if (!authCookie) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
-    if (user && user.role !== 'SUPER_ADMIN' && user.role !== 'HOSPITAL_ADMIN') {
+    if (user && !user.is_super_admin) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
