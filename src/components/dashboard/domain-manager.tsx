@@ -134,6 +134,7 @@ export function DomainManager({ user }: { user: AuthUser | null }) {
   const slug = user?.hospitalId || '';
   const domain = hasDomain ? `${slug}.medihost.co.in` : '';
   const isLab = user?.role === 'LAB_TECHNICIAN';
+  const planTier = user?.plan_tier || 'starter';
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -543,58 +544,62 @@ export function DomainManager({ user }: { user: AuthUser | null }) {
                   <div className="space-y-3">
                     <Separator />
                     <h3 className="text-sm font-medium text-gray-700">Results for &ldquo;{searchQuery}&rdquo;</h3>
-                    {searchResults.map((result) => (
-                      <div
-                        key={result.domain}
-                        className={`flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-gray-50 ${
-                          selectedDomain?.domain === result.domain ? 'border-emerald-500 bg-emerald-50' : ''
-                        }`}
-                      >
+
+                    {/* Primary result — first available .in domain */}
+                    {searchResults.filter(r => r.available).slice(0, 1).map((result) => {
+                      var isFree = planTier === 'growth' || planTier === 'professional' || planTier === 'enterprise';
+                      return (
+                        <div key={result.domain} style={{ backgroundColor: '#E1F5EE', border: '1.5px solid #0F6E56', borderRadius: 10, padding: 16 }}>
+                          <div className="flex items-center justify-between flex-wrap gap-3">
+                            <div className="flex items-center gap-3">
+                              <span style={{ fontSize: 15, fontWeight: 600, color: '#0F6E56', fontFamily: 'monospace' }}>{result.domain}</span>
+                              <span style={{ fontSize: 10, fontWeight: 600, backgroundColor: '#0F6E56', color: '#fff', padding: '2px 8px', borderRadius: 4 }}>Available</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {isFree ? (
+                                <>
+                                  <span style={{ fontSize: 12, color: '#78776F', textDecoration: 'line-through' }}>{'\u20b9'}{result.price}/yr</span>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: '#0F6E56' }}>FREE</span>
+                                </>
+                              ) : (
+                                <span style={{ fontSize: 13, fontWeight: 600, color: '#0F6E56' }}>{'\u20b9'}{result.price}/yr</span>
+                              )}
+                              <Button size="sm" className="bg-emerald-700 text-white hover:bg-emerald-800" disabled={ordering} onClick={() => handleOrderDomain(result)}>
+                                {ordering && selectedDomain?.domain === result.domain ? <><Spinner /> Processing...</> : (isFree ? 'Claim free domain' : 'Buy now')}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Alternative results */}
+                    {searchResults.slice(1).map((result) => (
+                      <div key={result.domain} className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: '#E5E5E3' }}>
                         <div className="flex items-center gap-3">
-                          <span className="font-mono font-semibold text-gray-900">
-                            {result.domain}
-                          </span>
-                          {result.bestPick && (
-                            <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Best Pick</Badge>
-                          )}
-                          {!result.available && (
-                            <Badge className="bg-red-100 text-red-600 hover:bg-red-100">Taken</Badge>
-                          )}
+                          <span className="font-mono text-sm font-medium text-gray-900">{result.domain}</span>
+                          {!result.available && <Badge className="bg-red-100 text-red-600 hover:bg-red-100">Taken</Badge>}
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="font-semibold text-gray-900">
-                            {'\u20b9'}{result.price}
-                            <span className="text-xs font-normal text-gray-500">/yr</span>
-                          </span>
+                          <span className="text-sm text-gray-700">{'\u20b9'}{result.price}/yr</span>
                           {result.available ? (
-                            <Button
-                              size="sm"
-                              className="bg-emerald-600 text-white hover:bg-emerald-700"
-                              disabled={ordering}
-                              onClick={() => handleOrderDomain(result)}
-                            >
-                              {ordering && selectedDomain?.domain === result.domain ? (
-                                <span className="flex items-center gap-2">
-                                  <Spinner /> Processing...
-                                </span>
-                              ) : (
-                                'Buy Now'
-                              )}
+                            <Button size="sm" variant="outline" disabled={ordering} onClick={() => handleOrderDomain(result)}>
+                              {ordering && selectedDomain?.domain === result.domain ? 'Processing...' : 'Buy'}
                             </Button>
                           ) : (
-                            <Button size="sm" variant="outline" disabled>
-                              Unavailable
-                            </Button>
+                            <Button size="sm" variant="outline" disabled>Unavailable</Button>
                           )}
                         </div>
                       </div>
                     ))}
 
-                    {/* Payment info note */}
-                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                      <p className="text-xs text-blue-700">
-                        <strong>Secure Payment:</strong> Clicking &ldquo;Buy Now&rdquo; will open Razorpay checkout.
-                        Your domain will be registered automatically after successful payment.
+                    {/* Info box */}
+                    <div style={{ backgroundColor: '#E1F5EE', borderRadius: 8, padding: 14, marginTop: 12 }}>
+                      <p style={{ fontSize: 11, color: '#0F6E56', lineHeight: 1.6 }}>
+                        {planTier === 'growth' || planTier === 'professional' || planTier === 'enterprise'
+                          ? 'Your ' + (planTier.charAt(0).toUpperCase() + planTier.slice(1)) + ' plan includes a FREE .in domain. '
+                          : 'Upgrade to Growth plan to get a FREE .in domain. '}
+                        After purchase: domain registered instantly, DNS auto-configured, SSL provisioned. Your website goes live at your custom domain within 5 minutes.
                       </p>
                     </div>
                   </div>

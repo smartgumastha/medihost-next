@@ -51,6 +51,15 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
+  async redirects() {
+    return [
+      { source: '/dashboard.html', destination: '/dashboard', permanent: true },
+      { source: '/admin.html', destination: '/admin', permanent: true },
+      { source: '/onboard.html', destination: '/dashboard', permanent: true },
+      { source: '/login.html', destination: '/login', permanent: true },
+      { source: '/signup.html', destination: '/signup', permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;
