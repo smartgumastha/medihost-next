@@ -77,20 +77,28 @@ interface FormData {
   businessName: string;
   businessType: string;
   ownerName: string;
+  specialization: string;
   email: string;
   phone: string;
+  address: string;
   city: string;
   pincode: string;
+  tagline: string;
+  about: string;
 }
 
 const emptyForm: FormData = {
   businessName: '',
   businessType: 'clinic',
   ownerName: '',
+  specialization: '',
   email: '',
   phone: '',
+  address: '',
   city: '',
   pincode: '',
+  tagline: '',
+  about: '',
 };
 
 /* ------------------------------------------------------------------ */
@@ -135,13 +143,17 @@ export function ProfileForm({ user }: { user: AuthUser | null }) {
         setPartnerId(data._id || data.id || null);
         setSlug(data.slug || null);
         setForm({
-          businessName: data.businessName || data.name || '',
-          businessType: data.businessType || data.type || 'clinic',
-          ownerName: data.ownerName || data.doctorName || '',
+          businessName: data.businessName || data.business_name || data.name || '',
+          businessType: data.businessType || data.partner_type || data.type || 'clinic',
+          ownerName: data.ownerName || data.owner_name || data.doctorName || '',
+          specialization: data.specialization || '',
           email: data.email || user.email || '',
           phone: data.phone || data.mobile || '',
+          address: data.address || data.address_line1 || '',
           city: data.city || '',
           pincode: data.pincode || data.zipCode || '',
+          tagline: data.tagline || data.website_meta_title || '',
+          about: data.about || data.description || '',
         });
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
@@ -171,7 +183,7 @@ export function ProfileForm({ user }: { user: AuthUser | null }) {
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.businessName.trim() || !form.ownerName.trim() || !form.city.trim() || !form.pincode.trim()) {
+    if (!form.businessName.trim() || !form.ownerName.trim()) {
       showToast('Please fill all required fields.', 'error');
       return;
     }
@@ -192,13 +204,17 @@ export function ProfileForm({ user }: { user: AuthUser | null }) {
             Authorization: `Bearer ${user?.token}`,
           },
           body: JSON.stringify({
-            businessName: form.businessName,
-            businessType: form.businessType,
-            ownerName: form.ownerName,
+            business_name: form.businessName,
+            partner_type: form.businessType,
+            owner_name: form.ownerName,
+            specialization: form.specialization,
             email: form.email,
             phone: form.phone,
+            address_line1: form.address,
             city: form.city,
             pincode: form.pincode,
+            website_meta_title: form.tagline,
+            description: form.about,
           }),
         },
       );
@@ -266,7 +282,7 @@ export function ProfileForm({ user }: { user: AuthUser | null }) {
         <CardContent>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             {/* Avatar */}
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xl font-bold text-emerald-700">
+            <div className="flex shrink-0 items-center justify-center rounded-full" style={{ width: 48, height: 48, backgroundColor: '#E1F5EE', color: '#0F6E56', fontSize: 18, fontWeight: 500 }}>
               {initials}
             </div>
 
@@ -326,110 +342,87 @@ export function ProfileForm({ user }: { user: AuthUser | null }) {
         </CardHeader>
         <CardContent>
           <form onSubmit={onSave} className="space-y-5">
+            {/* Row 1: Clinic name + Clinic type */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* Business Name */}
               <div className="space-y-1.5">
-                <Label htmlFor="businessName">
-                  Business Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="businessName"
-                  name="businessName"
-                  value={form.businessName}
-                  onChange={onChange}
-                  placeholder="e.g. City Care Hospital"
-                  required
-                />
+                <Label htmlFor="businessName">Clinic / Hospital Name <span className="text-red-500">*</span></Label>
+                <Input id="businessName" name="businessName" value={form.businessName} onChange={onChange} placeholder="e.g. City Care Hospital" required />
               </div>
-
-              {/* Business Type */}
               <div className="space-y-1.5">
-                <Label htmlFor="businessType">Business Type</Label>
-                <select
-                  id="businessType"
-                  name="businessType"
-                  value={form.businessType}
-                  onChange={onChange}
-                  className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                  {BUSINESS_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
+                <Label htmlFor="businessType">Clinic Type</Label>
+                <select id="businessType" name="businessType" value={form.businessType} onChange={onChange}
+                  className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+                  {BUSINESS_TYPES.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}
                 </select>
               </div>
+            </div>
 
-              {/* Owner Name */}
+            {/* Row 2: Owner name + Specialization */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="ownerName">
-                  Owner / Doctor Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="ownerName"
-                  name="ownerName"
-                  value={form.ownerName}
-                  onChange={onChange}
-                  placeholder="Dr. John Doe"
-                  required
-                />
+                <Label htmlFor="ownerName">Owner / Doctor Name <span className="text-red-500">*</span></Label>
+                <Input id="ownerName" name="ownerName" value={form.ownerName} onChange={onChange} placeholder="Dr. John Doe" required />
               </div>
-
-              {/* Email */}
               <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={onChange}
-                  placeholder="you@example.com"
-                />
+                <Label htmlFor="specialization">Specialization</Label>
+                <Input id="specialization" name="specialization" value={form.specialization} onChange={onChange} placeholder="e.g. General Physician, Dentist" />
               </div>
+            </div>
 
-              {/* Phone */}
+            {/* Row 3: Phone + Email (read-only) */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={onChange}
-                  placeholder="9876543210"
-                />
+                <Input id="phone" name="phone" type="tel" value={form.phone} onChange={onChange} placeholder="9876543210" />
               </div>
-
-              {/* City */}
               <div className="space-y-1.5">
-                <Label htmlFor="city">
-                  City <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="city"
-                  name="city"
-                  value={form.city}
-                  onChange={onChange}
-                  placeholder="Mumbai"
-                  required
-                />
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" value={form.email} disabled className="opacity-60 cursor-not-allowed" />
               </div>
+            </div>
 
-              {/* Pincode */}
+            {/* Row 4: Address + City */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="pincode">
-                  Pincode <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="pincode"
-                  name="pincode"
-                  value={form.pincode}
-                  onChange={onChange}
-                  placeholder="400001"
-                  required
-                />
+                <Label htmlFor="address">Address</Label>
+                <Input id="address" name="address" value={form.address} onChange={onChange} placeholder="123 Main Street" />
               </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="city">City</Label>
+                <Input id="city" name="city" value={form.city} onChange={onChange} placeholder="Mumbai" />
+              </div>
+            </div>
+
+            {/* Row 5: Tagline (full width) */}
+            <div className="space-y-1.5">
+              <Label htmlFor="tagline">Tagline</Label>
+              <Input id="tagline" name="tagline" value={form.tagline} onChange={onChange} placeholder="Short tagline for your website" />
+              <p className="text-[10px] text-gray-400">Appears on your website hero section</p>
+            </div>
+
+            {/* Row 6: About (full width textarea) */}
+            <div className="space-y-1.5">
+              <Label htmlFor="about">About</Label>
+              <textarea id="about" name="about" value={form.about} onChange={(e) => setForm(prev => ({ ...prev, about: e.target.value }))}
+                placeholder="1-2 sentences about your clinic" rows={3}
+                className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 resize-none" />
+              <p className="text-[10px] text-gray-400">Appears on your website about section</p>
+            </div>
+
+            {/* Branding section */}
+            <Separator />
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-3">Branding</h4>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center rounded-lg" style={{ width: 48, height: 48, backgroundColor: '#E1F5EE', color: '#0F6E56', fontSize: 18, fontWeight: 500 }}>
+                  {initials}
+                </div>
+                <div>
+                  <button type="button" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 underline">Upload logo</button>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Recommended: 200x200px, PNG or JPG</p>
+                </div>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-3">Changes sync to your website and HMS automatically.</p>
             </div>
 
             {/* Save */}

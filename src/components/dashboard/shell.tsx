@@ -179,7 +179,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         <nav style={{ padding: '8px 6px' }}>
           {SECTIONS.map((section, sIdx) => (
             <div key={section.title} style={{ marginTop: sIdx > 0 ? 12 : 4 }}>
-              <div style={{ fontSize: 9, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#A1A09E', padding: '0 6px', marginBottom: 4 }}>
+              <div style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#78776F', padding: '0 6px', marginBottom: 4 }}>
                 {section.title}
               </div>
               {section.items.map(item => {
@@ -208,8 +208,8 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                       borderRadius: 6,
                       marginBottom: 1,
                       fontSize: 11,
-                      fontWeight: isActive ? 500 : 400,
-                      color: isActive ? '#0F6E56' : '#5F5E5A',
+                      fontWeight: isActive ? 600 : 400,
+                      color: isActive ? '#0F6E56' : '#3D3D3A',
                       backgroundColor: isActive ? '#E1F5EE' : 'transparent',
                       textDecoration: 'none',
                       cursor: isDisabled ? 'default' : 'pointer',
@@ -218,8 +218,8 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                     className="hover:bg-gray-100 transition-colors"
                   >
                     <span style={{
-                      width: 14, height: 14, borderRadius: 3, backgroundColor: item.iconBg, color: item.iconColor,
-                      fontSize: 8, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      width: 18, height: 18, borderRadius: 3, backgroundColor: item.iconBg, color: item.iconColor,
+                      fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                     }}>
                       {item.letter}
                     </span>
