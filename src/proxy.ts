@@ -31,24 +31,24 @@ export function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  // HMS login subdomain
-  if (hostname === 'hms.medihost.in') {
+  // HMS login subdomain (skip API routes)
+  if (hostname === 'hms.medihost.in' && !pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('product', 'hms');
     return NextResponse.rewrite(url);
   }
 
-  // LIS login subdomain
-  if (hostname === 'lis.medihost.in') {
+  // LIS login subdomain (skip API routes)
+  if (hostname === 'lis.medihost.in' && !pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('product', 'lis');
     return NextResponse.rewrite(url);
   }
 
-  // Physio login subdomain
-  if (hostname === 'physio.medihost.in') {
+  // Physio login subdomain (skip API routes)
+  if (hostname === 'physio.medihost.in' && !pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('product', 'physio');
