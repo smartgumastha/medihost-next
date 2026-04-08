@@ -93,8 +93,8 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
       });
       const data = await res.json();
       if (data.success && data.user) {
-        var role = data.user.role || 'HOSPITAL_ADMIN';
-        var defaultUrl = getRedirectUrl(role, product);
+        // Super admin goes to /admin unless there's an intent redirect
+        var defaultUrl = data.user.is_super_admin ? '/admin' : getRedirectUrl(data.user.role || 'HOSPITAL_ADMIN', product);
 
         // External redirects (HMS/LIS/Physio) — only when no intent redirect
         if (defaultUrl.startsWith('http')) {
@@ -106,7 +106,7 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
                 token: token, hospitalId: String(data.user.hospitalId || ''),
                 userid: String(data.user.id || ''), first_name: data.user.name?.split(' ')[0] || '',
                 last_name: data.user.name?.split(' ').slice(1).join(' ') || '',
-                email: data.user.email || '', role: role, role_id: 2,
+                email: data.user.email || '', role: data.user.role || 'PARTNER', role_id: 2,
               }));
               window.location.href = defaultUrl + '?mw_token=' + encodeURIComponent(token) + '&mw_hospital_id=' + encodeURIComponent(data.user.hospitalId || '') + '&mw_login_data=' + ld;
             } else {
@@ -141,8 +141,8 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
       var data = await res.json();
 
       if (data.success && data.user) {
-        var role = data.user.role || 'HOSPITAL_ADMIN';
-        var defaultUrl = getRedirectUrl(role, product);
+        // Super admin goes to /admin unless there's an intent redirect
+        var defaultUrl = data.user.is_super_admin ? '/admin' : getRedirectUrl(data.user.role || 'HOSPITAL_ADMIN', product);
 
         if (defaultUrl.startsWith('http')) {
           var hasIntentRedirect2 = !!buildRedirectUrl();
@@ -153,7 +153,7 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
                 token: data.user.hmsToken || data.user.token, hospitalId: String(data.user.hospitalId || ''),
                 userid: String(data.user.id || ''), first_name: data.user.name?.split(' ')[0] || '',
                 last_name: data.user.name?.split(' ').slice(1).join(' ') || '',
-                email: data.user.email || email, role: role, role_id: 2,
+                email: data.user.email || email, role: data.user.role || 'PARTNER', role_id: 2,
               }));
               window.location.href = defaultUrl + '?mw_token=' + encodeURIComponent(token) + '&mw_hospital_id=' + encodeURIComponent(data.user.hospitalId || '') + '&mw_login_data=' + ld;
             } else {
@@ -223,7 +223,7 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
 
         {/* Email tab */}
         {authTab === 'email' && (
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-medium text-slate-300">
                 Email
@@ -255,6 +255,7 @@ export function LoginForm({ product = 'medihost', accentColor = '#10B981' }: Log
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 text-white placeholder:text-slate-500 outline-none transition-colors"
                 onFocus={(e) => e.target.style.borderColor = `${accentColor}80`}
                 onBlur={(e) => e.target.style.borderColor = ''}

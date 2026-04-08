@@ -227,7 +227,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                 <DropdownMenuItem onClick={() => router.push('/dashboard/plan')} className="text-sm">
                   Plan & Billing
                 </DropdownMenuItem>
-                {(user.role === 'SUPER_ADMIN' || user.role === 'HOSPITAL_ADMIN') && (
+                {(user.is_super_admin || user.role === 'SUPER_ADMIN' || user.role === 'HOSPITAL_ADMIN') && (
                   <DropdownMenuItem onClick={() => router.push('/admin')} className="text-sm">
                     Admin Panel
                   </DropdownMenuItem>
