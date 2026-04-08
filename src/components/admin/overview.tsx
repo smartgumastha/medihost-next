@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { getTokenFromClient } from '@/lib/auth';
 
 const DEFAULT_STATS = [
   { label: 'Total Partners', value: '127', sub: '+5 today', border: 'border-t-emerald-500', accent: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -75,8 +76,9 @@ export function AdminOverview() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const res = await fetch('/api/proxy/api/presence/admin/dashboard', {
-          headers: { 'x-admin-key': 'MediHost@2026' },
+        var token = getTokenFromClient();
+        const res = await fetch('/api/admin/dashboard', {
+          headers: token ? { 'Authorization': 'Bearer ' + token } : {},
         });
         if (res.ok) {
           const data = await res.json();

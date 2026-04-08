@@ -23,27 +23,33 @@ const NAV_SECTIONS = [
     ]
   },
   {
-    title: 'WEBSITES & DOMAINS',
+    title: 'PRESENCE',
     items: [
       { label: 'Websites', icon: '🌐', href: '/admin/websites' },
       { label: 'Domains', icon: '🔗', href: '/admin/domains' },
-    ]
-  },
-  {
-    title: 'HEMATO',
-    items: [
-      { label: 'Dashboard', icon: '🩸', href: '/admin/hemato' },
-      { label: 'Phlebo Enquiries', icon: '🏍️', href: '/admin/hemato/phlebos' },
-      { label: 'Lab Enquiries', icon: '🔬', href: '/admin/hemato/labs' },
-      { label: 'Approved Phlebos', icon: '✅', href: '/admin/hemato/approved-phlebos' },
-      { label: 'Approved Labs', icon: '🏢', href: '/admin/hemato/approved-labs' },
+      { label: 'Domain Settings', icon: '⚙️', href: '/admin/domain-settings' },
     ]
   },
   {
     title: 'BUSINESS',
     items: [
       { label: 'Pricing', icon: '💰', href: '/admin/pricing' },
-      { label: 'Offers', icon: '🎟️', href: '/admin/offers' },
+      { label: 'Offers & Coupons', icon: '🎟️', href: '/admin/offers' },
+    ]
+  },
+  {
+    title: 'RESELLERS',
+    items: [
+      { label: 'Resellers', icon: '🤝', href: '/admin/resellers' },
+      { label: 'Reseller Settings', icon: '⚙️', href: '/admin/reseller-settings' },
+    ]
+  },
+  {
+    title: 'HEMATO',
+    items: [
+      { label: 'Dashboard', icon: '🩸', href: '/admin/hemato' },
+      { label: 'Phlebos', icon: '🏍️', href: '/admin/hemato/phlebos' },
+      { label: 'Labs', icon: '🔬', href: '/admin/hemato/labs' },
     ]
   },
 ];
@@ -69,7 +75,7 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
               <span className="text-lg font-extrabold tracking-tight text-gray-900">
                 MediHost<span className="text-[10px] align-super font-bold text-gray-400">™</span> AI
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md">Admin</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md">Admin</span>
             </a>
           </div>
           <div className="flex items-center gap-3">
@@ -84,7 +90,7 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1 cursor-pointer">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-red-600 text-white text-xs font-bold">
+                  <AvatarFallback className="bg-purple-600 text-white text-xs font-bold">
                     {user.name?.charAt(0)?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
@@ -103,23 +109,26 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
       {/* Mobile overlay */}
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Sidebar — Dark */}
+      {/* Sidebar — Dark with purple accent */}
       <aside className={`fixed top-14 left-0 bottom-0 w-[260px] z-40 overflow-y-auto transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`} style={{ backgroundColor: '#1A1A2E' }}>
-        {/* Sidebar header */}
+        {/* User info header */}
         <div className="px-5 pt-5 pb-4 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white text-sm font-extrabold shadow-lg shadow-red-600/30">M</div>
-            <div>
-              <div className="text-sm font-bold text-white tracking-tight">MediHost Admin</div>
-              <span className="text-[9px] font-bold uppercase tracking-widest text-red-400 bg-red-500/15 px-1.5 py-0.5 rounded">ADMIN</span>
+            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center text-white text-sm font-extrabold shadow-lg shadow-purple-600/30">
+              {user.name?.charAt(0)?.toUpperCase() || 'M'}
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm font-bold text-white tracking-tight truncate">{user.name || 'Admin'}</div>
+              <div className="text-[10px] text-gray-400 truncate">{user.email}</div>
             </div>
           </div>
+          <span className="inline-block mt-2 text-[9px] font-bold uppercase tracking-widest text-purple-300 bg-purple-500/15 px-1.5 py-0.5 rounded">Super Admin</span>
         </div>
 
         <nav className="py-3">
           {NAV_SECTIONS.map(section => (
             <div key={section.title} className="mb-1">
-              <div className="px-5 py-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'rgba(248,113,113,0.5)' }}>{section.title}</div>
+              <div className="px-5 py-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: 'rgba(139,92,246,0.5)' }}>{section.title}</div>
               <ul className="space-y-0.5">
                 {section.items.map(item => {
                   const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -130,7 +139,7 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
                         onClick={() => setSidebarOpen(false)}
                         className={`flex items-center gap-3 px-5 py-2.5 text-sm font-medium transition-all ${
                           isActive
-                            ? 'text-white border-l-[3px] border-l-red-500 bg-white/10'
+                            ? 'text-white border-l-[3px] border-l-purple-500 bg-white/10'
                             : 'text-gray-300 border-l-[3px] border-l-transparent hover:bg-white/[0.06] hover:text-white'
                         }`}
                       >
@@ -146,8 +155,8 @@ export function AdminShell({ user, children }: { user: AuthUser; children: React
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
-          <div className="text-[10px] uppercase font-semibold tracking-wider" style={{ color: 'rgba(248,113,113,0.4)' }}>Role</div>
-          <div className="text-xs font-semibold text-gray-300 mt-0.5">{user.role.replace(/_/g, ' ')}</div>
+          <div className="text-[10px] uppercase font-semibold tracking-wider" style={{ color: 'rgba(139,92,246,0.4)' }}>Plan</div>
+          <div className="text-xs font-semibold text-gray-300 mt-0.5">{user.plan_tier || 'N/A'}</div>
         </div>
       </aside>
 

@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const user = getAuthFromCookie(authCookie);
 
   if (!user) redirect('/login');
-  if (user.role !== 'SUPER_ADMIN' && user.role !== 'HOSPITAL_ADMIN') redirect('/dashboard');
+  if (!user.is_super_admin) redirect('/dashboard');
 
   return <AdminShell user={user}>{children}</AdminShell>;
 }
