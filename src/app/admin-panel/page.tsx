@@ -26,7 +26,7 @@ export default function AdminPanelPage() {
     }
   }, []);
 
-  if (!user) return <div style={{padding:'40px',textAlign:'center',color:'#534AB7'}}>Checking admin access...</div>;
+  if (!user) return <div style={{padding:'40px',textAlign:'center',color:'#534AB7'}}>Checking admin access v2...</div>;
 
   return <AdminShell user={user}><AdminOverview /></AdminShell>;
 }
