@@ -31,24 +31,23 @@ export function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  // HMS login subdomain (skip API routes)
-  if (hostname === 'hms.medihost.in' && !pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
+  // HMS/LIS/Physio login subdomains — only rewrite root path to login page
+  // All other paths (/api/*, /dashboard, /_next/*) pass through normally
+  if (hostname === 'hms.medihost.in' && (pathname === '/' || pathname === '')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('product', 'hms');
     return NextResponse.rewrite(url);
   }
 
-  // LIS login subdomain (skip API routes)
-  if (hostname === 'lis.medihost.in' && !pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
+  if (hostname === 'lis.medihost.in' && (pathname === '/' || pathname === '')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('product', 'lis');
     return NextResponse.rewrite(url);
   }
 
-  // Physio login subdomain (skip API routes)
-  if (hostname === 'physio.medihost.in' && !pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
+  if (hostname === 'physio.medihost.in' && (pathname === '/' || pathname === '')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('product', 'physio');
