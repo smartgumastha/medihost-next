@@ -81,6 +81,8 @@ export async function POST(request: NextRequest) {
       token: token,
       plan_tier: String(partnerData.plan_tier || 'starter'),
       is_super_admin: Boolean(partnerData.is_super_admin),
+      trial_ends_at: partnerData.trial_ends_at ? Number(partnerData.trial_ends_at) : undefined,
+      subscription_status: String(partnerData.subscription_status || ''),
     };
 
     const response = NextResponse.json({ success: true, user, existing: !signupData.success });

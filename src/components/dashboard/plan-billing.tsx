@@ -89,8 +89,14 @@ export function PlanBilling({ user }: { user: AuthUser | null }) {
                     {plan.monthly_price === 0 ? 'FREE' : 'Rs.' + fmt(plan.monthly_price)}
                   </div>
                   <div style={{ fontSize: 10, color: '#A1A09E', marginTop: 2 }}>{plan.tagline || ''}</div>
+                  {(plan.plan_tier === 'growth' || plan.plan_tier === 'professional') && (
+                    <span style={{ display: 'inline-block', marginTop: 6, fontSize: 8, fontWeight: 600, backgroundColor: '#E1F5EE', color: '#0F6E56', padding: '2px 5px', borderRadius: 4, marginRight: 4 }}>FREE .in domain</span>
+                  )}
+                  {plan.plan_tier === 'enterprise' && (
+                    <span style={{ display: 'inline-block', marginTop: 6, fontSize: 8, fontWeight: 600, backgroundColor: '#E1F5EE', color: '#0F6E56', padding: '2px 5px', borderRadius: 4, marginRight: 4 }}>FREE .in or .com domain</span>
+                  )}
                   {plan.is_popular && (
-                    <span style={{ display: 'inline-block', marginTop: 6, fontSize: 8, fontWeight: 600, backgroundColor: '#E1F5EE', color: '#0F6E56', padding: '2px 5px', borderRadius: 4 }}>Popular</span>
+                    <span style={{ display: 'inline-block', marginTop: 6, fontSize: 8, fontWeight: 600, backgroundColor: '#E6F1FB', color: '#185FA5', padding: '2px 5px', borderRadius: 4, marginRight: 4 }}>Popular</span>
                   )}
                   {isCurrent && (
                     <span style={{ display: 'inline-block', marginTop: 6, fontSize: 8, fontWeight: 600, backgroundColor: '#E1F5EE', color: '#0F6E56', padding: '2px 5px', borderRadius: 4 }}>Current</span>
@@ -101,6 +107,9 @@ export function PlanBilling({ user }: { user: AuthUser | null }) {
           </div>
         )}
       </div>
+
+      {/* TODO: Backend cron job for trial expiry emails (5d, 3d, 1d, expired) via Resend */}
+      {/* Phase 5.8: Exit intent, return visitor, pricing hesitation triggers — admin controls in Phase 6 */}
 
       {/* Section 3: Payment history */}
       <div>

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { getAuthFromCookie } from '@/lib/auth';
 import { SetupChecklist } from '@/components/dashboard/setup-checklist';
+import { TrialExpiredCard } from '@/components/dashboard/trial-expired-card';
 
 export const metadata = { title: 'Dashboard — MediHost' };
 
@@ -232,10 +233,16 @@ export default async function DashboardPage() {
   var name = user?.name?.split(' ')[0] || 'Partner';
   var role = user?.role || 'HOSPITAL_ADMIN';
 
+  // Check if trial expired
+  var isExpired = user?.subscription_status === 'expired' ||
+    (user?.trial_ends_at && (user.subscription_status === 'trialing' || user.subscription_status === 'trial') && Date.now() > user.trial_ends_at);
+
   switch (role) {
     case 'SUPER_ADMIN':
     case 'HOSPITAL_ADMIN':
-      return <AdminDashboard name={name} />;
+      return isExpired ? <><TrialExpiredCard /><AdminDashboard name={name} /></> : <AdminDashboard name={name} />;
+    case 'PARTNER':
+      return isExpired ? <><TrialExpiredCard /><GenericDashboard name={name} role={role} /></> : <GenericDashboard name={name} role={role} />;
     case 'RECEPTIONIST':
       return <ReceptionistDashboard name={name} />;
     case 'DOCTOR':
@@ -245,6 +252,6 @@ export default async function DashboardPage() {
     case 'BILLING':
       return <BillingDashboard name={name} />;
     default:
-      return <GenericDashboard name={name} role={role} />;
+      return isExpired ? <><TrialExpiredCard /><GenericDashboard name={name} role={role} /></> : <GenericDashboard name={name} role={role} />;
   }
 }

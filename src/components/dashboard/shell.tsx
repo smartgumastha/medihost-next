@@ -6,6 +6,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { type AuthUser } from '@/lib/auth';
+import { TrialBar } from '@/components/dashboard/trial-bar';
+import { FeatureLockModal, LOCK_CONFIGS } from '@/components/dashboard/feature-lock-modal';
 
 interface SidebarItem {
   label: string;
@@ -52,8 +54,19 @@ const SECTIONS: SidebarSection[] = [
   },
 ];
 
-function getPlanBadge(tier?: string): { bg: string; color: string; label: string } {
+function getTrialDaysLeft(trialEndsAt?: number): number {
+  if (!trialEndsAt) return -1;
+  return Math.ceil((trialEndsAt - Date.now()) / (24 * 60 * 60 * 1000));
+}
+
+function getPlanBadge(tier?: string, subscriptionStatus?: string, trialEndsAt?: number): { bg: string; color: string; label: string } {
   if (!tier || tier === 'starter') return { bg: '#E1F5EE', color: '#0F6E56', label: 'Free' };
+  if (subscriptionStatus === 'trialing' || subscriptionStatus === 'trial') {
+    var days = getTrialDaysLeft(trialEndsAt);
+    if (days <= 0) return { bg: '#FCEBEB', color: '#791F1F', label: 'Trial ended' };
+    return { bg: '#FAEEDA', color: '#854F0B', label: 'Trial - ' + days + 'd left' };
+  }
+  if (subscriptionStatus === 'expired') return { bg: '#FCEBEB', color: '#791F1F', label: 'Expired' };
   if (tier === 'growth' || tier === 'professional' || tier === 'enterprise') return { bg: '#E6F1FB', color: '#185FA5', label: tier.charAt(0).toUpperCase() + tier.slice(1) };
   return { bg: '#FAEEDA', color: '#854F0B', label: 'Trial' };
 }
@@ -70,6 +83,12 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
   }
+
+  var [lockModal, setLockModal] = useState<string | null>(null);
+  var trialDaysLeft = getTrialDaysLeft(user.trial_ends_at);
+  var isTrial = user.subscription_status === 'trialing' || user.subscription_status === 'trial';
+  var isExpired = user.subscription_status === 'expired' || (isTrial && trialDaysLeft <= 0);
+  var isStarter = !user.plan_tier || user.plan_tier === 'starter';
 
   const [hmsLoading, setHmsLoading] = useState(false);
 
@@ -96,7 +115,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
     }
   }
 
-  var planBadge = getPlanBadge(user.plan_tier);
+  var planBadge = getPlanBadge(user.plan_tier, user.subscription_status, user.trial_ends_at);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F6F6F7' }}>
@@ -151,6 +170,18 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         </div>
       </nav>
 
+      {/* Trial bar */}
+      {(isTrial || isExpired) && !isHmsPage && (
+        <div style={{ position: 'fixed', top: 48, left: 0, right: 0, zIndex: 49 }}>
+          <TrialBar daysLeft={trialDaysLeft} planName={(user.plan_tier || 'Growth').charAt(0).toUpperCase() + (user.plan_tier || 'growth').slice(1)} expired={isExpired} />
+        </div>
+      )}
+
+      {/* Feature lock modal */}
+      {lockModal && LOCK_CONFIGS[lockModal] && (
+        <FeatureLockModal {...LOCK_CONFIGS[lockModal]} onClose={() => setLockModal(null)} />
+      )}
+
       {/* Mobile overlay */}
       {sidebarOpen && <div className="fixed inset-0 bg-black/20 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
@@ -186,7 +217,24 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                 var isActive = item.href ? (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) : false;
                 var isDisabled = !item.href && !item.external;
 
+                // Feature locking logic
+                var isLocked = false;
+                if (item.badge === 'pro') {
+                  // LIS/Pharmacy require Professional plan
+                  isLocked = isStarter || user.plan_tier === 'growth';
+                }
+                if (item.external && isExpired) {
+                  // HMS features locked when trial expired
+                  isLocked = true;
+                }
+
                 function handleClick(e: React.MouseEvent) {
+                  if (isLocked) {
+                    e.preventDefault();
+                    setLockModal(item.badge === 'pro' ? item.label.toLowerCase().replace(/\s+/g, '_') : 'hms_expired');
+                    setSidebarOpen(false);
+                    return;
+                  }
                   if (item.external) {
                     e.preventDefault();
                     openClinicSoftware();
@@ -213,7 +261,7 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                       backgroundColor: isActive ? '#E1F5EE' : 'transparent',
                       textDecoration: 'none',
                       cursor: isDisabled ? 'default' : 'pointer',
-                      opacity: isDisabled ? 0.6 : 1,
+                      opacity: isDisabled ? 0.6 : isLocked ? 0.5 : 1,
                     }}
                     className="hover:bg-gray-100 transition-colors"
                   >

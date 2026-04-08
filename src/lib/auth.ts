@@ -47,6 +47,8 @@ export interface AuthUser {
   hmsToken?: string;
   plan_tier?: string;
   is_super_admin?: boolean;
+  trial_ends_at?: number;
+  subscription_status?: string;
 }
 
 export function getAuthFromCookie(cookieValue: string | undefined): AuthUser | null {
