@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       token = signupData.token;
       partnerId = String(signupData.partner?.id || '');
       partnerData = signupData.partner || {};
-    } else if (signupData.error?.includes('already') || signupData.error?.includes('exists') || signupRes.status === 409) {
+    } else if (signupData.existing_user || signupData.error?.includes('already') || signupData.error?.includes('exists') || signupRes.status === 409) {
       // Email exists — try login instead (handle existing users gracefully)
       const loginRes = await fetch(`${API_BASE}/api/presence/partner-auth/login`, {
         method: 'POST',
