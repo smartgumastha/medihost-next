@@ -233,12 +233,16 @@ export default async function DashboardPage() {
   var name = user?.name?.split(' ')[0] || 'Partner';
   var role = user?.role || 'HOSPITAL_ADMIN';
 
-  // Check if trial expired
-  var isExpired = user?.subscription_status === 'expired' ||
-    (user?.trial_ends_at && (user.subscription_status === 'trialing' || user.subscription_status === 'trial') && Date.now() > user.trial_ends_at);
+  // Check if trial expired — SUPER_ADMIN bypasses all plan gating
+  var isSuperAdmin = role === 'SUPER_ADMIN' || user?.is_super_admin === true;
+  var isExpired = !isSuperAdmin && (
+    user?.subscription_status === 'expired' ||
+    (user?.trial_ends_at && (user.subscription_status === 'trialing' || user.subscription_status === 'trial') && Date.now() > user.trial_ends_at)
+  );
 
   switch (role) {
     case 'SUPER_ADMIN':
+      return <AdminDashboard name={name} />;
     case 'HOSPITAL_ADMIN':
       return isExpired ? <><TrialExpiredCard /><AdminDashboard name={name} /></> : <AdminDashboard name={name} />;
     case 'PARTNER':

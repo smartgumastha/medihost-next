@@ -24,18 +24,19 @@ export async function POST(request: NextRequest) {
 
     if (partnerData.success && partnerData.token) {
       var partner = partnerData.partner || {};
+      var isSuperAdmin = partner.is_super_admin === true || partner.is_super_admin === 'true';
       partnerUser = {
         id: String(partner.id || ''),
         email: partner.email || email,
         name: partner.owner_name || partner.business_name || email,
-        role: partner.role || 'PARTNER',
+        role: isSuperAdmin ? 'SUPER_ADMIN' : (partner.role || 'PARTNER'),
         hospitalId: String(partner.hospital_id || ''),
         partnerId: String(partner.id || ''),
         token: partnerData.token,
-        plan_tier: String(partner.plan_tier || 'starter'),
-        is_super_admin: Boolean(partner.is_super_admin),
+        plan_tier: isSuperAdmin ? 'enterprise' : String(partner.plan_tier || 'starter'),
+        is_super_admin: isSuperAdmin,
         trial_ends_at: partner.trial_ends_at ? Number(partner.trial_ends_at) : undefined,
-        subscription_status: partner.subscription_status || undefined,
+        subscription_status: isSuperAdmin ? 'active' : (partner.subscription_status || undefined),
       };
     }
   } catch (err) {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Step 2: If super_admin, also try HMS login to get hospital_id + hms_token
-  if (partnerUser && partnerUser.is_super_admin) {
+  if (partnerUser && (partnerUser.is_super_admin === true || partnerUser.is_super_admin === 'true')) {
     try {
       var hmsRes = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
