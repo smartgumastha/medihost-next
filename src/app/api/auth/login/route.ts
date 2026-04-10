@@ -8,20 +8,21 @@ export async function POST(request: NextRequest) {
 
   console.log('[LOGIN ROUTE] Received:', JSON.stringify({ email, passLength: password?.length, passStart: password?.substring(0, 2) }));
 
-  // Try partner login first
+  // Step 1: Try partner login first
+  var partnerUser: Record<string, unknown> | null = null;
   try {
-    const partnerRes = await fetch(`${API_BASE}/api/presence/partner-auth/login`, {
+    var partnerRes = await fetch(`${API_BASE}/api/presence/partner-auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const partnerData = await partnerRes.json();
+    var partnerData = await partnerRes.json();
 
     console.log('[LOGIN ROUTE] Partner backend:', partnerRes.status, JSON.stringify({ success: partnerData.success, error: partnerData.error, hasToken: !!partnerData.token }));
 
     if (partnerData.success && partnerData.token) {
-      const partner = partnerData.partner || {};
-      const user = {
+      var partner = partnerData.partner || {};
+      partnerUser = {
         id: String(partner.id || ''),
         email: partner.email || email,
         name: partner.owner_name || partner.business_name || email,
@@ -34,56 +35,87 @@ export async function POST(request: NextRequest) {
         trial_ends_at: partner.trial_ends_at ? Number(partner.trial_ends_at) : undefined,
         subscription_status: partner.subscription_status || undefined,
       };
-
-      const response = NextResponse.json({ success: true, user });
-      response.cookies.set('medihost_auth', JSON.stringify(user), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60,
-        path: '/',
-      });
-      return response;
     }
   } catch (err) {
     console.error('[LOGIN ROUTE] Partner login fetch error:', err);
   }
 
-  // Fallback: try HMS login
+  // Step 2: If super_admin, also try HMS login to get hospital_id + hms_token
+  if (partnerUser && partnerUser.is_super_admin) {
+    try {
+      var hmsRes = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      var hmsResp = await hmsRes.json();
+      var hmsData = hmsResp.data || hmsResp;
+
+      console.log('[LOGIN ROUTE] Super admin HMS merge:', hmsRes.status, JSON.stringify({ hasToken: !!hmsData.token }));
+
+      if (hmsData.token) {
+        // Merge: keep is_super_admin from partner, add HMS data
+        partnerUser.hospitalId = String(hmsData.hospital_id || hmsData.hospitalId || partnerUser.hospitalId || '');
+        partnerUser.hmsToken = hmsData.token;
+        partnerUser.role = 'SUPER_ADMIN';
+        if (!partnerUser.name || partnerUser.name === email) {
+          partnerUser.name = `${hmsData.first_name || ''} ${hmsData.last_name || ''}`.trim() || partnerUser.name;
+        }
+      }
+    } catch (err) {
+      console.error('[LOGIN ROUTE] Super admin HMS merge failed (non-fatal):', err);
+      // Partner login still succeeds — HMS merge is best-effort
+    }
+  }
+
+  // Step 3: Return partner user if we have one
+  if (partnerUser) {
+    var response = NextResponse.json({ success: true, user: partnerUser });
+    response.cookies.set('medihost_auth', JSON.stringify(partnerUser), {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/',
+    });
+    return response;
+  }
+
+  // Step 4: Fallback — try HMS login only (non-partner users)
   try {
-    const hmsRes = await fetch(`${API_BASE}/api/auth/login`, {
+    var hmsOnlyRes = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const hmsResp = await hmsRes.json();
-    const hmsData = hmsResp.data || hmsResp;
+    var hmsOnlyResp = await hmsOnlyRes.json();
+    var hmsOnlyData = hmsOnlyResp.data || hmsOnlyResp;
 
-    console.log('[LOGIN ROUTE] HMS backend:', hmsRes.status, JSON.stringify({ hasToken: !!hmsData.token, error: hmsData.error }));
+    console.log('[LOGIN ROUTE] HMS fallback:', hmsOnlyRes.status, JSON.stringify({ hasToken: !!hmsOnlyData.token }));
 
-    if (hmsData.token) {
-      const user = {
-        id: String(hmsData.userid || hmsData.user_id || ''),
-        email: hmsData.email || email,
-        name: `${hmsData.first_name || ''} ${hmsData.last_name || ''}`.trim() || email,
-        role: hmsData.role || 'HOSPITAL_ADMIN',
-        hospitalId: String(hmsData.hospital_id || hmsData.hospitalId || ''),
-        token: hmsData.token,
-        hmsToken: hmsData.token,
+    if (hmsOnlyData.token) {
+      var hmsUser = {
+        id: String(hmsOnlyData.userid || hmsOnlyData.user_id || ''),
+        email: hmsOnlyData.email || email,
+        name: `${hmsOnlyData.first_name || ''} ${hmsOnlyData.last_name || ''}`.trim() || email,
+        role: hmsOnlyData.role || 'HOSPITAL_ADMIN',
+        hospitalId: String(hmsOnlyData.hospital_id || hmsOnlyData.hospitalId || ''),
+        token: hmsOnlyData.token,
+        hmsToken: hmsOnlyData.token,
       };
 
-      const response = NextResponse.json({ success: true, user });
-      response.cookies.set('medihost_auth', JSON.stringify(user), {
+      var hmsResponse = NextResponse.json({ success: true, user: hmsUser });
+      hmsResponse.cookies.set('medihost_auth', JSON.stringify(hmsUser), {
         httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60,
         path: '/',
       });
-      return response;
+      return hmsResponse;
     }
   } catch (err) {
-    console.error('HMS login failed:', err);
+    console.error('[LOGIN ROUTE] HMS fallback failed:', err);
   }
 
   return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 });
