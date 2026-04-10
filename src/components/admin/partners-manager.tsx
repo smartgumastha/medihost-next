@@ -128,14 +128,35 @@ export function PartnersManager() {
   useEffect(() => {
     async function loadPartners() {
       try {
-        const res = await fetch('/api/proxy/api/presence/partners?page=1&limit=50', {
+        const res = await fetch('/api/presence/admin/partners?page=1&limit=50', {
           headers: { 'x-admin-key': 'MediHost@2026' },
         });
         if (res.ok) {
           const data = await res.json();
           const list = data.partners || data.data?.partners || [];
           if (list.length > 0) {
-            setPartners(list);
+            // Map backend fields to component fields
+            const mapped = list.map(function(p: Record<string, unknown>) {
+              var trialEndsAt = Number(p.trial_ends_at) || 0;
+              var trialDays = trialEndsAt > Date.now() ? Math.ceil((trialEndsAt - Date.now()) / 86400000) : 0;
+              var status = p.subscription_status === 'expired' ? 'expired' : (p.subscription_status === 'trialing' || p.subscription_status === 'trial') ? 'trial' : 'active';
+              return {
+                id: Number(p.id) || 0,
+                business_name: String(p.business_name || ''),
+                owner_name: String(p.owner_name || ''),
+                email: String(p.email || ''),
+                phone: String(p.phone || ''),
+                plan: String(p.plan_tier || 'starter') as Partner['plan'],
+                status: status as Partner['status'],
+                source: String(p.signup_source || p.source || 'direct'),
+                city: String(p.city || ''),
+                last_login: p.last_login_at ? new Date(Number(p.last_login_at)).toLocaleDateString() : 'never',
+                login_count: Number(p.login_count) || 0,
+                created: p.created_at ? new Date(Number(p.created_at)).toISOString().split('T')[0] : '',
+                trial_days: trialDays,
+              };
+            });
+            setPartners(mapped);
             return;
           }
         }
