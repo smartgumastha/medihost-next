@@ -6,19 +6,21 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const { email, password } = body;
 
-  console.log('[LOGIN ROUTE] Received:', JSON.stringify({ email, passLength: password?.length, passStart: password?.substring(0, 2) }));
+  console.log('[LOGIN DEBUG] email:', email, '| passLength:', password?.length, '| API_BASE:', API_BASE);
 
   // Step 1: Try partner login first
   var partnerUser: Record<string, unknown> | null = null;
   try {
-    var partnerRes = await fetch(`${API_BASE}/api/presence/partner-auth/login`, {
+    var partnerUrl = `${API_BASE}/api/presence/partner-auth/login`;
+    console.log('[LOGIN DEBUG] Calling partner:', partnerUrl);
+    var partnerRes = await fetch(partnerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
     var partnerData = await partnerRes.json();
 
-    console.log('[LOGIN ROUTE] Partner backend:', partnerRes.status, JSON.stringify({ success: partnerData.success, error: partnerData.error, hasToken: !!partnerData.token }));
+    console.log('[LOGIN DEBUG] Partner response:', partnerRes.status, JSON.stringify({ success: partnerData.success, error: partnerData.error, hasToken: !!partnerData.token, message: partnerData.message }));
 
     if (partnerData.success && partnerData.token) {
       var partner = partnerData.partner || {};
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
       var hmsResp = await hmsRes.json();
       var hmsData = hmsResp.data || hmsResp;
 
-      console.log('[LOGIN ROUTE] Super admin HMS merge:', hmsRes.status, JSON.stringify({ hasToken: !!hmsData.token }));
+      console.log('[LOGIN DEBUG] HMS merge:', hmsRes.status, JSON.stringify({ hasToken: !!hmsData.token, plan_tier: hmsData.plan_tier }));
 
       if (hmsData.token) {
         // Merge: keep is_super_admin from partner, add HMS data
@@ -78,6 +80,7 @@ export async function POST(request: NextRequest) {
 
   // Step 3: Return partner user if we have one
   if (partnerUser) {
+    console.log('[LOGIN DEBUG] SUCCESS — returning partnerUser, plan_tier:', partnerUser.plan_tier, 'role:', partnerUser.role);
     var response = NextResponse.json({ success: true, user: partnerUser });
     response.cookies.set('medihost_auth', JSON.stringify(partnerUser), {
       httpOnly: false,
@@ -99,7 +102,7 @@ export async function POST(request: NextRequest) {
     var hmsOnlyResp = await hmsOnlyRes.json();
     var hmsOnlyData = hmsOnlyResp.data || hmsOnlyResp;
 
-    console.log('[LOGIN ROUTE] HMS fallback:', hmsOnlyRes.status, JSON.stringify({ hasToken: !!hmsOnlyData.token }));
+    console.log('[LOGIN DEBUG] HMS fallback:', hmsOnlyRes.status, JSON.stringify({ hasToken: !!hmsOnlyData.token, error: hmsOnlyData.error || hmsOnlyData.message }));
 
     if (hmsOnlyData.token) {
       var hmsUser = {
@@ -128,5 +131,6 @@ export async function POST(request: NextRequest) {
     console.error('[LOGIN ROUTE] HMS fallback failed:', err);
   }
 
+  console.log('[LOGIN DEBUG] FAIL — no partnerUser, no HMS fallback. Returning 401.');
   return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 });
 }
