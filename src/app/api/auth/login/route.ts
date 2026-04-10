@@ -58,6 +58,14 @@ export async function POST(request: NextRequest) {
         partnerUser.hospitalId = String(hmsData.hospital_id || hmsData.hospitalId || partnerUser.hospitalId || '');
         partnerUser.hmsToken = hmsData.token;
         partnerUser.role = 'SUPER_ADMIN';
+        // plan_tier from HMS login reads from subscriptions table (source of truth)
+        // presence_partners.plan_tier is LEGACY — never use it
+        if (hmsData.plan_tier) {
+          partnerUser.plan_tier = hmsData.plan_tier;
+        }
+        if (hmsData.subscription_status) {
+          partnerUser.subscription_status = hmsData.subscription_status;
+        }
         if (!partnerUser.name || partnerUser.name === email) {
           partnerUser.name = `${hmsData.first_name || ''} ${hmsData.last_name || ''}`.trim() || partnerUser.name;
         }
@@ -102,6 +110,8 @@ export async function POST(request: NextRequest) {
         hospitalId: String(hmsOnlyData.hospital_id || hmsOnlyData.hospitalId || ''),
         token: hmsOnlyData.token,
         hmsToken: hmsOnlyData.token,
+        plan_tier: hmsOnlyData.plan_tier || 'free',
+        subscription_status: hmsOnlyData.subscription_status || 'active',
       };
 
       var hmsResponse = NextResponse.json({ success: true, user: hmsUser });
