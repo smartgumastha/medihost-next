@@ -52,10 +52,11 @@ const SECTIONS: SidebarSection[] = [
   {
     title: 'CLINIC (HMS)',
     items: [
+      { label: 'Patients', letter: 'P', href: '/dashboard/patients/new', iconBg: '#EFF6FF', iconColor: '#2563EB' },
       { label: 'OPD', letter: 'O', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
       { label: 'Billing', letter: 'B', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
       { label: 'EMR', letter: 'E', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
-      { label: 'LIS', letter: 'L', badge: 'pro', iconBg: '#EFF6FF', iconColor: '#2563EB' },
+      { label: 'LIS', letter: 'L', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
     ],
   },
   {
@@ -245,8 +246,11 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
                 var isActive = item.href ? (pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))) : false;
                 var isDisabled = !item.href && !item.external;
                 var isLocked = false;
-                if (item.badge === 'pro') isLocked = isStarter || user.plan_tier === 'growth';
-                if (item.external && isExpired) isLocked = true;
+                // Super admin bypasses all tier gates
+                if (!user.is_super_admin) {
+                  if (item.badge === 'pro') isLocked = isStarter || user.plan_tier === 'growth';
+                  if (item.external && isExpired) isLocked = true;
+                }
 
                 function handleClick(e: React.MouseEvent) {
                   if (isLocked) {
