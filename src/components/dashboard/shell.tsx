@@ -35,6 +35,7 @@ const SECTIONS: SidebarSection[] = [
   {
     title: 'AI MARKETING',
     items: [
+      { label: 'Connections', letter: 'H', href: '/dashboard/connections', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'Content studio', letter: 'C', href: '/dashboard/content', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'Social autopilot', letter: 'A', href: '/dashboard/social', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'Google Business', letter: 'G', href: '/dashboard/google-business', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
