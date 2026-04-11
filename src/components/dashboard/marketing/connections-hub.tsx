@@ -1,6 +1,23 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { SiGoogle, SiFacebook, SiInstagram, SiWhatsapp, SiYoutube, SiGoogleads, SiMeta } from "react-icons/si";
+
+function PlatformIcon({ icon, size = 22 }: { icon: string; size?: number }) {
+  const iconMap: Record<string, React.ReactNode> = {
+    google: <SiGoogle size={size} color="#4285F4" />,
+    facebook: <SiFacebook size={size} color="#1877F2" />,
+    instagram: <SiInstagram size={size} color="#E4405F" />,
+    whatsapp: <SiWhatsapp size={size} color="#25D366" />,
+    youtube: <SiYoutube size={size} color="#FF0000" />,
+    googleads: <SiGoogleads size={size} color="#4285F4" />,
+    meta: <SiMeta size={size} color="#0082FB" />,
+  };
+  if (iconMap[icon]) return <>{iconMap[icon]}</>;
+  if (icon === "practo") return <span className="text-sm font-bold text-green-600">P</span>;
+  if (icon === "justdial") return <span className="text-sm font-bold text-yellow-600">JD</span>;
+  return <span className="text-lg">{icon}</span>;
+}
 
 // ── Types ──
 interface ConnectedPlatform {
@@ -34,7 +51,7 @@ const CATEGORIES = [
 
 const PLATFORMS: ConnectedPlatform[] = [
   {
-    id: "gbp", name: "Google Business Profile", icon: "\uD83D\uDD0D", category: "listings",
+    id: "gbp", name: "Google Business Profile", icon: "google", category: "listings",
     status: "connected", accountName: "LifeCare Multispeciality Clinic", accountId: "GBP-78234",
     lastSync: "2 min ago", nextSync: "in 13 min", syncFrequency: "15min",
     metrics: [{ label: "Profile views", value: "2,847" }, { label: "Direction requests", value: "342" }, { label: "Calls", value: "89" }, { label: "Rating", value: "4.6\u2605" }],
@@ -43,7 +60,7 @@ const PLATFORMS: ConnectedPlatform[] = [
     healthScore: 94, color: "text-blue-700", bgColor: "bg-blue-50",
   },
   {
-    id: "facebook", name: "Facebook Page", icon: "\uD83D\uDCD8", category: "social",
+    id: "facebook", name: "Facebook Page", icon: "facebook", category: "social",
     status: "connected", accountName: "LifeCare Clinic", accountId: "FB-1234567",
     lastSync: "8 min ago", nextSync: "in 52 min", syncFrequency: "1hr",
     metrics: [{ label: "Page followers", value: "3,241" }, { label: "Post reach", value: "12.4K" }, { label: "Engagement", value: "4.2%" }, { label: "Messages", value: "23" }],
@@ -52,7 +69,7 @@ const PLATFORMS: ConnectedPlatform[] = [
     healthScore: 87, color: "text-blue-700", bgColor: "bg-blue-50",
   },
   {
-    id: "instagram", name: "Instagram Business", icon: "\uD83D\uDCF8", category: "social",
+    id: "instagram", name: "Instagram Business", icon: "instagram", category: "social",
     status: "connected", accountName: "@lifecare_clinic", accountId: "IG-9876543",
     lastSync: "15 min ago", nextSync: "in 45 min", syncFrequency: "1hr",
     metrics: [{ label: "Followers", value: "1,892" }, { label: "Reach", value: "8.7K" }, { label: "Engagement", value: "5.1%" }, { label: "Story views", value: "640" }],
@@ -61,7 +78,7 @@ const PLATFORMS: ConnectedPlatform[] = [
     healthScore: 91, color: "text-pink-700", bgColor: "bg-pink-50",
   },
   {
-    id: "whatsapp", name: "WhatsApp Business", icon: "\uD83D\uDCAC", category: "messaging",
+    id: "whatsapp", name: "WhatsApp Business", icon: "whatsapp", category: "messaging",
     status: "connected", accountName: "+91 98765 43210", accountId: "WA-BAPI-001",
     lastSync: "Just now", nextSync: "Real-time", syncFrequency: "15min",
     metrics: [{ label: "Messages sent", value: "1,247" }, { label: "Delivered", value: "98.2%" }, { label: "Read rate", value: "76%" }, { label: "Appointments", value: "142" }],
@@ -70,7 +87,7 @@ const PLATFORMS: ConnectedPlatform[] = [
     healthScore: 98, color: "text-green-700", bgColor: "bg-green-50",
   },
   {
-    id: "youtube", name: "YouTube Channel", icon: "\u25B6\uFE0F", category: "video",
+    id: "youtube", name: "YouTube Channel", icon: "youtube", category: "video",
     status: "disconnected", accountName: "", accountId: "",
     lastSync: "Never", nextSync: "\u2014", syncFrequency: "24hr",
     metrics: [{ label: "Subscribers", value: "\u2014" }, { label: "Views", value: "\u2014" }, { label: "Watch time", value: "\u2014" }],
@@ -79,7 +96,7 @@ const PLATFORMS: ConnectedPlatform[] = [
     healthScore: 0, color: "text-red-700", bgColor: "bg-red-50",
   },
   {
-    id: "google_ads", name: "Google Ads", icon: "\uD83D\uDCCA", category: "ads",
+    id: "google_ads", name: "Google Ads", icon: "googleads", category: "ads",
     status: "disconnected", accountName: "", accountId: "",
     lastSync: "Never", nextSync: "\u2014", syncFrequency: "1hr",
     metrics: [{ label: "Campaigns", value: "\u2014" }, { label: "Clicks", value: "\u2014" }, { label: "Conversions", value: "\u2014" }, { label: "Spend", value: "\u2014" }],
@@ -88,7 +105,7 @@ const PLATFORMS: ConnectedPlatform[] = [
     healthScore: 0, color: "text-amber-700", bgColor: "bg-amber-50",
   },
   {
-    id: "facebook_ads", name: "Facebook & Instagram Ads", icon: "\uD83C\uDFAF", category: "ads",
+    id: "facebook_ads", name: "Facebook & Instagram Ads", icon: "meta", category: "ads",
     status: "disconnected", accountName: "", accountId: "",
     lastSync: "Never", nextSync: "\u2014", syncFrequency: "1hr",
     metrics: [{ label: "Campaigns", value: "\u2014" }, { label: "Leads", value: "\u2014" }, { label: "CPL", value: "\u2014" }, { label: "Spend", value: "\u2014" }],
@@ -97,7 +114,7 @@ const PLATFORMS: ConnectedPlatform[] = [
     healthScore: 0, color: "text-indigo-700", bgColor: "bg-indigo-50",
   },
   {
-    id: "practo", name: "Practo", icon: "\uD83D\uDFE2", category: "listings",
+    id: "practo", name: "Practo", icon: "practo", category: "listings",
     status: "error", accountName: "Dr. Anil Kumar", accountId: "PRC-45678",
     lastSync: "3 days ago", nextSync: "Retry pending", syncFrequency: "6hr",
     metrics: [{ label: "Profile views", value: "1,204" }, { label: "Bookings", value: "67" }, { label: "Rating", value: "4.5\u2605" }],
@@ -106,7 +123,7 @@ const PLATFORMS: ConnectedPlatform[] = [
     healthScore: 32, color: "text-green-700", bgColor: "bg-green-50",
   },
   {
-    id: "justdial", name: "JustDial", icon: "\uD83D\uDCDE", category: "listings",
+    id: "justdial", name: "JustDial", icon: "justdial", category: "listings",
     status: "disconnected", accountName: "", accountId: "",
     lastSync: "Never", nextSync: "\u2014", syncFrequency: "24hr",
     metrics: [{ label: "Listing views", value: "\u2014" }, { label: "Calls", value: "\u2014" }],
@@ -163,7 +180,7 @@ function PlatformDetail({ platform, onClose, onToggle, onSync }: {
             <StatusDot status={platform.status} />
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-4xl">{platform.icon}</div>
+            <div className="flex items-center justify-center"><PlatformIcon icon={platform.icon} size={32} /></div>
             <div>
               <h3 className="text-xl font-bold text-gray-900">{platform.name}</h3>
               {platform.accountName && (
@@ -360,8 +377,8 @@ export function ConnectionsHub() {
             }`}>
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
-                <div className={`w-11 h-11 rounded-xl ${platform.bgColor} flex items-center justify-center text-xl`}>
-                  {platform.icon}
+                <div className={`w-11 h-11 rounded-xl ${platform.bgColor} flex items-center justify-center`}>
+                  <PlatformIcon icon={platform.icon} />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900">{platform.name}</h3>
