@@ -35,6 +35,7 @@ const SECTIONS: SidebarSection[] = [
   {
     title: 'AI MARKETING ENGINE',
     items: [
+      { label: 'Marketing setup', letter: 'M', href: '/dashboard/marketing', iconBg: '#064E3B', iconColor: '#FFFFFF' },
       { label: 'Connections', letter: 'C', href: '/dashboard/connections', iconBg: '#059669', iconColor: '#FFFFFF' },
       { label: 'Brand studio', letter: 'B', href: '/dashboard/brand', badge: 'growth', iconBg: '#9333EA', iconColor: '#FFFFFF' },
       { label: 'Content studio', letter: 'C', href: '/dashboard/content', badge: 'growth', iconBg: '#2563EB', iconColor: '#FFFFFF' },
