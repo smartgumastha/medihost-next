@@ -41,6 +41,7 @@ const SECTIONS: SidebarSection[] = [
       { label: 'Google Business', letter: 'G', href: '/dashboard/google-business', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'Reviews', letter: 'R', href: '/dashboard/reviews-ai', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'SEO optimizer', letter: 'S', href: '/dashboard/seo', badge: 'pro', iconBg: '#FEF3C7', iconColor: '#D97706' },
+      { label: 'Brand studio', letter: 'B', href: '/dashboard/brand', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'Ads manager', letter: 'D', href: '/dashboard/ads', badge: 'pro', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'Leads', letter: 'L', href: '/dashboard/leads', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'Analytics', letter: 'A', href: '/dashboard/analytics', badge: 'growth', iconBg: '#FEF3C7', iconColor: '#D97706' },
