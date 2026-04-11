@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale } from "@/hooks/useLocale";
 import { validateIdentifier } from "@/lib/validators";
 import { buildFHIRPatient, type PatientFormData } from "@/lib/fhir/patientBuilder";
@@ -35,7 +36,10 @@ var EMPTY_FORM: PatientFormData = {
   emergencyContact: { name: "", phone: "", relationship: "" },
 };
 
+type ToastType = "success" | "error";
+
 export default function DynamicPatientForm() {
+  var router = useRouter();
   var [countryCode, setCountryCode] = useState("IN");
   var [countryOpen, setCountryOpen] = useState(false);
   var { locale, loading: localeLoading } = useLocale(countryCode);
@@ -44,6 +48,15 @@ export default function DynamicPatientForm() {
   var [errors, setErrors] = useState<Record<string, string>>({});
   var [showFhir, setShowFhir] = useState(false);
   var [visibleSensitive, setVisibleSensitive] = useState<Record<string, boolean>>({});
+  var [submitting, setSubmitting] = useState(false);
+  var [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+
+  var clearToast = useCallback(function() { setToast(null); }, []);
+  useEffect(function() {
+    if (!toast) return;
+    var timer = setTimeout(clearToast, 4000);
+    return function() { clearTimeout(timer); };
+  }, [toast, clearToast]);
 
   var fhirJson = useMemo(function() {
     if (!locale) return null;
@@ -115,10 +128,53 @@ export default function DynamicPatientForm() {
   function next() { if (validateStep()) setStep(function(s) { return Math.min(s + 1, 5); }); }
   function prev() { setStep(function(s) { return Math.max(s - 1, 0); }); }
 
-  function handleSubmit() {
-    console.log("Patient form data:", form);
-    console.log("FHIR R4 Patient:", JSON.stringify(fhirJson, null, 2));
-    alert("Patient data logged to console. Backend save coming in Phase 3.");
+  async function handleSubmit() {
+    setSubmitting(true);
+    try {
+      var body: Record<string, unknown> = {
+        first_name: form.firstName,
+        middle_name: "",
+        last_name: form.lastName,
+        phone: form.phone,
+        email: form.email,
+        gender: form.gender,
+        dob: form.dob,
+        age: form.dob ? String(new Date().getFullYear() - new Date(form.dob).getFullYear()) : "",
+        blood_group: form.bloodGroup,
+        city: form.address.city,
+        state: form.address.stateProvince,
+        pincode: form.address.postalCode,
+        address: [form.address.line1, form.address.line2].filter(Boolean).join(", "),
+        address_line1: form.address.line1,
+        address_line2: form.address.line2,
+        emergency_contact_name: form.emergencyContact.name,
+        emergency_contact_phone: form.emergencyContact.phone,
+        emergency_relation: form.emergencyContact.relationship,
+        preferred_language: form.language,
+        occupation: "",
+        notes: "",
+        identifiers: JSON.stringify(form.identifiers),
+      };
+
+      var res = await fetch("/api/patients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      var data = await res.json();
+
+      if (res.ok) {
+        setToast({ message: "Patient registered successfully! UHID: " + (data.patient?.uhid || data.uhid || ""), type: "success" });
+        setTimeout(function() { router.push("/dashboard/patients"); }, 1500);
+      } else {
+        setToast({ message: data.error || data.message || "Failed to register patient", type: "error" });
+      }
+    } catch (err: unknown) {
+      setToast({ message: err instanceof Error ? err.message : "Network error", type: "error" });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (localeLoading || !locale) {
@@ -135,6 +191,14 @@ export default function DynamicPatientForm() {
 
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: "fixed", top: 24, right: 24, zIndex: 50, display: "flex", alignItems: "center", gap: 8, padding: "12px 16px", borderRadius: 8, fontSize: 14, fontWeight: 500, color: "#fff", background: toast.type === "success" ? "#059669" : "#dc2626", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+          <span>{toast.type === "success" ? "\u2713" : "\u2717"}</span>
+          <span>{toast.message}</span>
+          <button onClick={clearToast} style={{ marginLeft: 8, border: "none", background: "none", color: "#fff", cursor: "pointer", opacity: 0.7 }}>&times;</button>
+        </div>
+      )}
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
         <div>
@@ -300,7 +364,7 @@ export default function DynamicPatientForm() {
         {step < 5 ? (
           <button type="button" onClick={next} style={{ padding: "10px 20px", borderRadius: 8, border: "none", fontSize: 14, fontWeight: 500, cursor: "pointer", background: "#0f172a", color: "#fff" }}>Next &rarr;</button>
         ) : (
-          <button type="button" onClick={handleSubmit} style={{ padding: "10px 20px", borderRadius: 8, border: "none", fontSize: 14, fontWeight: 600, cursor: "pointer", background: "#059669", color: "#fff" }}>&check; Register Patient</button>
+          <button type="button" onClick={handleSubmit} disabled={submitting} style={{ padding: "10px 20px", borderRadius: 8, border: "none", fontSize: 14, fontWeight: 600, cursor: submitting ? "not-allowed" : "pointer", background: "#059669", color: "#fff", opacity: submitting ? 0.6 : 1 }}>{submitting ? "Saving..." : "\u2713 Register Patient"}</button>
         )}
       </div>
     </div>
