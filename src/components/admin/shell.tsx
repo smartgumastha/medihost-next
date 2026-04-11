@@ -14,12 +14,13 @@ const NAV_ITEMS = [
   { label: 'Partners', href: '/admin/partners' },
   { label: 'Plans & Pricing', href: '/admin/pricing' },
   { label: 'Coupons', href: '/admin/offers' },
-  { label: 'Conversion Triggers', href: '/admin/triggers' },
+  { label: 'Campaigns', href: '/admin/campaigns' },
+  { label: 'Automation Rules', href: '/admin/triggers' },
+  { label: 'Email Logs', href: '/admin/email-logs' },
   { label: 'Domains', href: '/admin/domains' },
   { label: 'Domain Settings', href: '/admin/domain-settings' },
   { label: 'Resellers', href: '/admin/resellers' },
   { label: 'Reseller Settings', href: '/admin/reseller-settings' },
-  { label: 'Email Logs', href: '/admin/email-logs' },
   { label: 'Payments & Revenue', href: '/admin/revenue' },
 ];
 
