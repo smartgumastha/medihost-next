@@ -1,7 +1,7 @@
-import { OffersManager } from '@/components/admin/offers-manager';
+import { CouponManagement } from '@/components/admin/coupon-management';
 
-export const metadata = { title: 'Offers & Coupons — Admin' };
+export const metadata = { title: 'Coupons — Admin' };
 
 export default function OffersPage() {
-  return <OffersManager />;
+  return <CouponManagement />;
 }

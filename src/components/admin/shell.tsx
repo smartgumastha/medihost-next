@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin' },
   { label: 'Partners', href: '/admin/partners' },
   { label: 'Plans & Pricing', href: '/admin/pricing' },
-  { label: 'Offers & Coupons', href: '/admin/offers' },
+  { label: 'Coupons', href: '/admin/offers' },
   { label: 'Conversion Triggers', href: '/admin/triggers' },
   { label: 'Domains', href: '/admin/domains' },
   { label: 'Domain Settings', href: '/admin/domain-settings' },
