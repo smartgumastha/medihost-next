@@ -1,7 +1,7 @@
-import { PricingControl } from '@/components/admin/pricing-control';
+import { PlanManagement } from '@/components/admin/plan-management';
 
-export const metadata = { title: 'Pricing — Admin' };
+export const metadata = { title: 'Plans & Pricing — Admin' };
 
 export default function PricingPage() {
-  return <PricingControl />;
+  return <PlanManagement />;
 }

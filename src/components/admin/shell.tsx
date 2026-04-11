@@ -12,7 +12,7 @@ import { type AuthUser } from '@/lib/auth';
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin' },
   { label: 'Partners', href: '/admin/partners' },
-  { label: 'Pricing', href: '/admin/pricing' },
+  { label: 'Plans & Pricing', href: '/admin/pricing' },
   { label: 'Offers & Coupons', href: '/admin/offers' },
   { label: 'Conversion Triggers', href: '/admin/triggers' },
   { label: 'Domains', href: '/admin/domains' },
