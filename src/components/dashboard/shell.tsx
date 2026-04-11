@@ -57,9 +57,10 @@ const SECTIONS: SidebarSection[] = [
   {
     title: 'CLINIC (HMS)',
     items: [
-      { label: 'Patients', letter: 'P', href: '/dashboard/patients/new', iconBg: '#EFF6FF', iconColor: '#2563EB' },
+      { label: 'Patients', letter: 'P', href: '/dashboard/patients', iconBg: '#EFF6FF', iconColor: '#2563EB' },
       { label: 'OPD', letter: 'O', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
       { label: 'Billing', letter: 'B', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
+      { label: 'Reports', letter: 'R', href: '/dashboard/reports', iconBg: '#F0FDF4', iconColor: '#059669' },
       { label: 'EMR', letter: 'E', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
       { label: 'LIS', letter: 'L', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
     ],
