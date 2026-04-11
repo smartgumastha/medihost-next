@@ -1,7 +1,7 @@
-import { AutomationRules } from '@/components/admin/automation-rules';
+import { CampaignEngine } from '@/components/admin/campaign-engine';
 
-export const metadata = { title: 'Automation Rules — Admin' };
+export const metadata = { title: 'Campaigns — Admin' };
 
 export default function TriggersPage() {
-  return <AutomationRules />;
+  return <CampaignEngine />;
 }
