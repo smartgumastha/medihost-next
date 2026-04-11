@@ -28,7 +28,8 @@ var RELATIONSHIPS = ["Spouse", "Parent", "Child", "Sibling", "Friend", "Guardian
 var INS_RELATIONSHIPS = ["self", "spouse", "child", "parent", "other"];
 
 var EMPTY_FORM: PatientFormData = {
-  firstName: "", lastName: "", dob: "", gender: "", phone: "", email: "",
+  firstName: "", lastName: "", suffix: "", maidenName: "", gpName: "",
+  dob: "", gender: "", phone: "", email: "",
   bloodGroup: "", maritalStatus: "", language: "en", race: "", ethnicity: "",
   identifiers: {},
   address: { line1: "", line2: "", line3: "", city: "", district: "", stateProvince: "", stateCode: "", postalCode: "", countryCode: "IN" },
@@ -135,6 +136,9 @@ export default function DynamicPatientForm() {
         first_name: form.firstName,
         middle_name: "",
         last_name: form.lastName,
+        suffix: form.suffix || "",
+        maiden_name: form.maidenName || "",
+        gp_name: form.gpName || "",
         phone: form.phone,
         email: form.email,
         gender: form.gender,
@@ -252,6 +256,11 @@ export default function DynamicPatientForm() {
               <div><label style={labelStyle}>First Name *</label><input style={inputStyle} value={form.firstName} onChange={function(e) { setField("firstName", e.target.value); }} />{errors.firstName && <p style={errorStyle}>{errors.firstName}</p>}</div>
               <div><label style={labelStyle}>Last Name</label><input style={inputStyle} value={form.lastName} onChange={function(e) { setField("lastName", e.target.value); }} /></div>
             </div>
+            <div style={{ display: "grid", gridTemplateColumns: form.gender === "female" ? "1fr 1fr 1fr" : "1fr 1fr", gap: 16 }}>
+              <div><label style={labelStyle}>Suffix</label><input style={inputStyle} value={form.suffix || ""} onChange={function(e) { setField("suffix", e.target.value); }} placeholder="Jr., Sr., III" /></div>
+              {form.gender === "female" && <div><label style={labelStyle}>Maiden Name</label><input style={inputStyle} value={form.maidenName || ""} onChange={function(e) { setField("maidenName", e.target.value); }} /></div>}
+              <div><label style={labelStyle}>GP / Family Doctor Name</label><input style={inputStyle} value={form.gpName || ""} onChange={function(e) { setField("gpName", e.target.value); }} /><p style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>General Practitioner or referring doctor</p></div>
+            </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div><label style={labelStyle}>Date of Birth *</label><input type="date" style={inputStyle} value={form.dob} onChange={function(e) { setField("dob", e.target.value); }} />{errors.dob && <p style={errorStyle}>{errors.dob}</p>}</div>
               <div><label style={labelStyle}>Gender *</label><div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>{GENDERS.map(function(g) { return <button key={g.value} type="button" onClick={function() { setField("gender", g.value); }} style={form.gender === g.value ? chipActive : chipBase}>{g.label}</button>; })}</div>{errors.gender && <p style={errorStyle}>{errors.gender}</p>}</div>
@@ -347,7 +356,7 @@ export default function DynamicPatientForm() {
         {step === 5 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div style={{ padding: 16, borderRadius: 8, border: "1px solid #e2e8f0" }}><div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Demographics</div><div style={{ fontSize: 13, color: "#374151", lineHeight: 1.8 }}><div><span style={{ color: "#9ca3af" }}>Name:</span> {form.firstName} {form.lastName}</div><div><span style={{ color: "#9ca3af" }}>DOB:</span> {form.dob}</div><div><span style={{ color: "#9ca3af" }}>Gender:</span> {form.gender}</div><div><span style={{ color: "#9ca3af" }}>Phone:</span> {locale.phone_country_code}{form.phone}</div>{form.email && <div><span style={{ color: "#9ca3af" }}>Email:</span> {form.email}</div>}</div></div>
+              <div style={{ padding: 16, borderRadius: 8, border: "1px solid #e2e8f0" }}><div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Demographics</div><div style={{ fontSize: 13, color: "#374151", lineHeight: 1.8 }}><div><span style={{ color: "#9ca3af" }}>Name:</span> {form.firstName} {form.lastName}{form.suffix ? " " + form.suffix : ""}</div>{form.maidenName && <div><span style={{ color: "#9ca3af" }}>Maiden Name:</span> {form.maidenName}</div>}{form.gpName && <div><span style={{ color: "#9ca3af" }}>GP:</span> {form.gpName}</div>}<div><span style={{ color: "#9ca3af" }}>DOB:</span> {form.dob}</div><div><span style={{ color: "#9ca3af" }}>Gender:</span> {form.gender}</div><div><span style={{ color: "#9ca3af" }}>Phone:</span> {locale.phone_country_code}{form.phone}</div>{form.email && <div><span style={{ color: "#9ca3af" }}>Email:</span> {form.email}</div>}</div></div>
               <div style={{ padding: 16, borderRadius: 8, border: "1px solid #e2e8f0" }}><div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Address</div><div style={{ fontSize: 13, color: "#374151", lineHeight: 1.8 }}>{form.address.line1 && <div>{form.address.line1}</div>}{form.address.city && <div>{form.address.city}, {form.address.stateProvince}</div>}{form.address.postalCode && <div>{form.address.postalCode}</div>}</div></div>
               <div style={{ padding: 16, borderRadius: 8, border: "1px solid #e2e8f0" }}><div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Insurance</div><div style={{ fontSize: 13, color: "#374151", lineHeight: 1.8 }}><div><span style={{ color: "#9ca3af" }}>Type:</span> {form.insurance.type.replace("_", " ")}</div>{form.insurance.networkName && <div><span style={{ color: "#9ca3af" }}>Network:</span> {form.insurance.networkName}</div>}{form.insurance.policyNumber && <div><span style={{ color: "#9ca3af" }}>Policy:</span> {form.insurance.policyNumber}</div>}</div></div>
               <div style={{ padding: 16, borderRadius: 8, border: "1px solid #e2e8f0" }}><div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Emergency Contact</div><div style={{ fontSize: 13, color: "#374151", lineHeight: 1.8 }}>{form.emergencyContact.name ? <><div>{form.emergencyContact.name}</div><div>{locale.phone_country_code}{form.emergencyContact.phone}</div><div>{form.emergencyContact.relationship}</div></> : <div style={{ color: "#9ca3af" }}>Not provided</div>}</div></div>

@@ -3,6 +3,9 @@ import type { LocaleConfig } from "@/hooks/useLocale";
 export interface PatientFormData {
   firstName: string;
   lastName: string;
+  suffix?: string;
+  maidenName?: string;
+  gpName?: string;
   dob: string;
   gender: string;
   phone: string;
