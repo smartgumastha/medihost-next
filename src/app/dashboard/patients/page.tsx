@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -80,6 +81,7 @@ export default function PatientsPage() {
   var [sortField, setSortField] = useState<"name" | "date">("date");
   var [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   var debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  var router = useRouter();
   var limit = 25;
 
   var fetchPatients = useCallback(async function(searchQuery: string, pageNum: number) {
@@ -244,7 +246,7 @@ export default function PatientsPage() {
                   <td className="px-4 py-3 text-gray-600">{formatDate(p.last_visit_at)}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="inline-flex gap-1">
-                      <button onClick={function() { setSelectedPatient(p); }} title="View" className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-emerald-600 transition-colors">
+                      <button onClick={function() { router.push("/dashboard/patients/" + p.patient_id); }} title="View" className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-emerald-600 transition-colors">
                         <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><circle cx="12" cy="12" r="3"/></svg>
                       </button>
                       <button title="Edit" className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-blue-600 transition-colors">
@@ -281,7 +283,7 @@ export default function PatientsPage() {
         )}
         {!loading && sorted.map(function(p) {
           return (
-            <div key={p.patient_id} className="rounded-xl border border-gray-200 bg-white p-4" onClick={function() { setSelectedPatient(p); }}>
+            <div key={p.patient_id} className="rounded-xl border border-gray-200 bg-white p-4 cursor-pointer" onClick={function() { router.push("/dashboard/patients/" + p.patient_id); }}>
               <div className="flex justify-between items-start">
                 <div>
                   <div className="font-medium text-gray-900">{p.first_name} {p.last_name}</div>
