@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { label: 'Resellers', href: '/admin/resellers' },
   { label: 'Reseller Settings', href: '/admin/reseller-settings' },
   { label: 'Email Logs', href: '/admin/email-logs' },
-  { label: 'Revenue', href: '/admin/revenue' },
+  { label: 'Payments & Revenue', href: '/admin/revenue' },
 ];
 
 export function AdminShell({ user, children }: { user: AuthUser; children: React.ReactNode }) {
