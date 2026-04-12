@@ -329,23 +329,31 @@ function IssueTokenModal({ onClose, onSuccess, onError }: {
   var [submitting, setSubmitting] = useState(false);
   var debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Fetch today's appointments for "from appointment" mode
-  var [todayAppts, setTodayAppts] = useState<Array<{ appointment_id: string; patient_id: string; Patient?: { first_name?: string; last_name?: string; phone?: string; uhid?: string }; scheduled_time?: string; chief_complaint?: string; doctor?: { first_name?: string; last_name?: string }; doctor_id?: string }>>([]);
+  // Doctors list + today's appointments
+  var [doctors, setDoctors] = useState<Array<{ user_id: string; first_name: string; last_name?: string }>>([]);
+  var [todayAppts, setTodayAppts] = useState<Array<{ appointment_id: string; patient_id: string; doctor_id?: string; Patient?: { first_name?: string; last_name?: string; phone?: string; uhid?: string }; scheduled_time?: string; chief_complaint?: string; doctor?: { first_name?: string; last_name?: string } }>>([]);
 
+  // Fetch doctors on mount
   useEffect(function() {
-    if (mode === "appointment") {
-      fetch("/api/appointments?date=" + new Date().toISOString().slice(0, 10))
-        .then(function(r) { return r.json(); })
-        .then(function(json) {
-          if (json.success && json.data) {
-            var appts = json.data.appointments || json.data || [];
-            // filter only BOOKED ones
-            setTodayAppts(appts.filter(function(a: { status: string }) { return a.status === "BOOKED"; }));
+    fetch("/api/appointments?date=" + new Date().toISOString().slice(0, 10))
+      .then(function(r) { return r.json(); })
+      .then(function(json) {
+        if (json.success && json.data) {
+          var appts = json.data.appointments || json.data || [];
+          setTodayAppts(appts.filter(function(a: { status: string }) { return a.status === "BOOKED"; }));
+          // Extract unique doctors from appointments
+          var docMap: Record<string, { user_id: string; first_name: string; last_name?: string }> = {};
+          for (var a of appts) {
+            if (a.doctor_id && a.doctor) {
+              docMap[String(a.doctor_id)] = { user_id: String(a.doctor_id), first_name: a.doctor.first_name || "", last_name: a.doctor.last_name || "" };
+            }
           }
-        })
-        .catch(function() { /* silent */ });
-    }
-  }, [mode]);
+          var docList = Object.values(docMap);
+          if (docList.length > 0) setDoctors(docList);
+        }
+      })
+      .catch(function() { /* silent */ });
+  }, []);
 
   function handleSearch(value: string) {
     setSearch(value);
@@ -366,15 +374,16 @@ function IssueTokenModal({ onClose, onSuccess, onError }: {
 
   async function handleIssue() {
     if (!selectedPatient) { onError("Select a patient first"); return; }
+    if (!doctorId) { onError("Select a doctor"); return; }
     setSubmitting(true);
     try {
       var body: Record<string, string> = {
         patient_id: selectedPatient.patient_id,
+        doctor_id: doctorId,
         token_type: mode === "appointment" ? "appointment" : "walkin",
         visit_type: "new",
         chief_complaint: chiefComplaint,
       };
-      if (doctorId) body.doctor_id = doctorId;
 
       var res = await fetch("/api/opd", {
         method: "POST",
@@ -407,11 +416,11 @@ function IssueTokenModal({ onClose, onSuccess, onError }: {
 
         {/* Mode Toggle */}
         <div className="flex gap-2 mb-5">
-          <button onClick={function() { setMode("walkin"); setSelectedPatient(null); }}
+          <button onClick={function() { setMode("walkin"); setSelectedPatient(null); setDoctorId(""); }}
             className={"flex-1 py-2 rounded-lg text-sm font-medium border transition-colors " + (mode === "walkin" ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-gray-600 border-gray-200")}>
             Walk-in
           </button>
-          <button onClick={function() { setMode("appointment"); setSelectedPatient(null); }}
+          <button onClick={function() { setMode("appointment"); setSelectedPatient(null); setDoctorId(""); }}
             className={"flex-1 py-2 rounded-lg text-sm font-medium border transition-colors " + (mode === "appointment" ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-gray-600 border-gray-200")}>
             From Appointment
           </button>
@@ -423,17 +432,18 @@ function IssueTokenModal({ onClose, onSuccess, onError }: {
             {todayAppts.length === 0 && <div className="text-center text-sm text-gray-400 py-4">No booked appointments today</div>}
             {todayAppts.map(function(a) {
               var name = a.Patient ? (a.Patient.first_name || "") + " " + (a.Patient.last_name || "") : "Patient";
+              var docName = a.doctor ? "Dr. " + (a.doctor.first_name || "") + " " + (a.doctor.last_name || "") : "";
               return (
                 <button key={a.appointment_id} onClick={function() {
                   setSelectedPatient({ patient_id: a.patient_id, first_name: a.Patient?.first_name || "", last_name: a.Patient?.last_name, phone: a.Patient?.phone, uhid: a.Patient?.uhid });
                   if (a.chief_complaint) setChiefComplaint(a.chief_complaint);
-                  if (a.doctor_id) setDoctorId(a.doctor_id);
+                  if (a.doctor_id) setDoctorId(String(a.doctor_id));
                 }} className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors">
                   <div className="flex justify-between">
                     <span className="text-sm font-medium text-gray-900">{name.trim()}</span>
                     <span className="text-xs text-gray-500">{a.scheduled_time || ""}</span>
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">{a.Patient?.phone || ""} {a.chief_complaint ? "\u00B7 " + a.chief_complaint : ""}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{a.Patient?.phone || ""} {docName ? "\u00B7 " + docName : ""} {a.chief_complaint ? "\u00B7 " + a.chief_complaint : ""}</div>
                 </button>
               );
             })}
@@ -478,17 +488,30 @@ function IssueTokenModal({ onClose, onSuccess, onError }: {
                 <div className="text-sm font-medium text-gray-900">{selectedPatient.first_name} {selectedPatient.last_name || ""}</div>
                 <div className="text-xs text-gray-500">{selectedPatient.phone} {selectedPatient.uhid ? "\u00B7 " + selectedPatient.uhid : ""}</div>
               </div>
-              <button onClick={function() { setSelectedPatient(null); }} className="text-xs text-gray-500 hover:text-red-500">Change</button>
+              <button onClick={function() { setSelectedPatient(null); setDoctorId(""); }} className="text-xs text-gray-500 hover:text-red-500">Change</button>
             </div>
 
             <div className="space-y-4">
+              {/* Doctor dropdown */}
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Doctor *</label>
+                <select value={doctorId} onChange={function(e) { setDoctorId(e.target.value); }}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                  <option value="">Select doctor</option>
+                  {doctors.map(function(d) {
+                    return <option key={d.user_id} value={d.user_id}>Dr. {d.first_name} {d.last_name || ""}</option>;
+                  })}
+                </select>
+                {doctors.length === 0 && <p className="text-xs text-amber-600 mt-1">No doctors found. Book an appointment first to register doctors.</p>}
+              </div>
+
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Chief Complaint</label>
                 <input type="text" value={chiefComplaint} onChange={function(e) { setChiefComplaint(e.target.value); }} placeholder="e.g., Fever, headache..."
                   className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" />
               </div>
 
-              <button onClick={handleIssue} disabled={submitting}
+              <button onClick={handleIssue} disabled={submitting || !doctorId}
                 className="w-full py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {submitting ? "Issuing..." : "Issue Token"}
               </button>
