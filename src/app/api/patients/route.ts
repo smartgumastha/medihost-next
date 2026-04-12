@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
     }
 
     var token = auth.hmsToken || auth.token;
-    console.log("[POST /api/patients] hospitalId:", auth.hospitalId, "hmsToken exists:", !!auth.hmsToken);
+    console.log("[POST /api/patients] AUTH KEYS:", Object.keys(auth).join(","));
+    console.log("[POST /api/patients] hospitalId:", auth.hospitalId, "hmsToken exists:", !!auth.hmsToken, "token first20:", token?.substring(0, 20));
     var body = await request.json();
     var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/patients`;
     var res = await fetch(url, {
@@ -51,7 +52,8 @@ export async function GET(request: NextRequest) {
     }
 
     var token = auth.hmsToken || auth.token;
-    console.log("[GET /api/patients] hospitalId:", auth.hospitalId, "hmsToken exists:", !!auth.hmsToken);
+    console.log("[GET /api/patients] AUTH KEYS:", Object.keys(auth).join(","));
+    console.log("[GET /api/patients] hospitalId:", auth.hospitalId, "hmsToken exists:", !!auth.hmsToken, "token first20:", token?.substring(0, 20));
     var searchParams = request.nextUrl.searchParams.toString();
     var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/patients${searchParams ? "?" + searchParams : ""}`;
     var res = await fetch(url, {

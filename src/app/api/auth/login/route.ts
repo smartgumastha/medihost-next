@@ -43,8 +43,9 @@ export async function POST(request: NextRequest) {
     console.error('[LOGIN ROUTE] Partner login fetch error:', err);
   }
 
-  // Step 2: If super_admin, also try HMS login to get hospital_id + hms_token
-  if (partnerUser && (partnerUser.is_super_admin === true || partnerUser.is_super_admin === 'true')) {
+  // Step 2: For ALL partner users, also try HMS login to get hmsToken
+  // (HMS endpoints require HMS token, not partner token)
+  if (partnerUser) {
     try {
       var hmsRes = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
@@ -57,12 +58,12 @@ export async function POST(request: NextRequest) {
       console.log('[LOGIN DEBUG] HMS merge:', hmsRes.status, JSON.stringify({ hasToken: !!hmsData.token, plan_tier: hmsData.plan_tier }));
 
       if (hmsData.token) {
-        // Merge: keep is_super_admin from partner, add HMS data
         partnerUser.hospitalId = String(hmsData.hospital_id || hmsData.hospitalId || partnerUser.hospitalId || '');
         partnerUser.hmsToken = hmsData.token;
-        partnerUser.role = 'SUPER_ADMIN';
+        if (partnerUser.is_super_admin === true || partnerUser.is_super_admin === 'true') {
+          partnerUser.role = 'SUPER_ADMIN';
+        }
         // plan_tier from HMS login reads from subscriptions table (source of truth)
-        // presence_partners.plan_tier is LEGACY — never use it
         if (hmsData.plan_tier) {
           partnerUser.plan_tier = hmsData.plan_tier;
         }
@@ -72,9 +73,28 @@ export async function POST(request: NextRequest) {
         if (!partnerUser.name || partnerUser.name === email) {
           partnerUser.name = `${hmsData.first_name || ''} ${hmsData.last_name || ''}`.trim() || partnerUser.name;
         }
+      } else {
+        // HMS login failed — try token exchange via partner-auth endpoint
+        console.log('[LOGIN DEBUG] HMS login failed, trying partner-auth/hms-token exchange');
+        var exchangeRes = await fetch(`${API_BASE}/api/presence/partner-auth/hms-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${partnerUser.token}`,
+          },
+          body: '{}',
+        });
+        var exchangeData = await exchangeRes.json();
+        if (exchangeData.success && exchangeData.hms_token) {
+          partnerUser.hmsToken = exchangeData.hms_token;
+          partnerUser.hospitalId = String(exchangeData.hospital_id || partnerUser.hospitalId || '');
+          console.log('[LOGIN DEBUG] HMS token exchange succeeded, hospital_id:', partnerUser.hospitalId);
+        } else {
+          console.log('[LOGIN DEBUG] HMS token exchange also failed:', exchangeData.error);
+        }
       }
     } catch (err) {
-      console.error('[LOGIN ROUTE] Super admin HMS merge failed (non-fatal):', err);
+      console.error('[LOGIN ROUTE] HMS merge failed (non-fatal):', err);
       // Partner login still succeeds — HMS merge is best-effort
     }
   }
