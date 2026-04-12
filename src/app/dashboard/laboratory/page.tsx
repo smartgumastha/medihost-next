@@ -82,6 +82,9 @@ var TAB_STATUS: Record<ActiveTab, string> = {
   completed: "completed",
 };
 
+// Verification tab also needs tech_verified orders (awaiting pathologist)
+var VERIFICATION_STATUSES = ["result_entered", "tech_verified"];
+
 /* ================================================================== */
 /*  Main Component                                                     */
 /* ================================================================== */
@@ -106,9 +109,19 @@ export default function LaboratoryPage() {
   var fetchOrders = useCallback(async function(status: string) {
     setLoading(true);
     try {
-      var res = await fetch("/api/laboratory?endpoint=orders&status=" + status);
-      var json = await res.json();
-      setOrders(json.success ? (json.data || []) : []);
+      if (status === "result_entered") {
+        // Verification tab: fetch both result_entered and tech_verified
+        var [r1, r2] = await Promise.all([
+          fetch("/api/laboratory?endpoint=orders&status=result_entered").then(function(r) { return r.json(); }),
+          fetch("/api/laboratory?endpoint=orders&status=tech_verified").then(function(r) { return r.json(); }),
+        ]);
+        var combined = [...(r1.success ? r1.data || [] : []), ...(r2.success ? r2.data || [] : [])];
+        setOrders(combined);
+      } else {
+        var res = await fetch("/api/laboratory?endpoint=orders&status=" + status);
+        var json = await res.json();
+        setOrders(json.success ? (json.data || []) : []);
+      }
     } catch { setOrders([]); }
     finally { setLoading(false); }
   }, []);
@@ -116,16 +129,17 @@ export default function LaboratoryPage() {
   // Fetch stats for all tabs
   var fetchStats = useCallback(async function() {
     try {
-      var [r1, r2, r3, r4] = await Promise.all([
+      var [r1, r2, r3, r3b, r4] = await Promise.all([
         fetch("/api/laboratory?endpoint=orders&status=ordered").then(function(r) { return r.json(); }),
         fetch("/api/laboratory?endpoint=orders&status=sample_collected").then(function(r) { return r.json(); }),
         fetch("/api/laboratory?endpoint=orders&status=result_entered").then(function(r) { return r.json(); }),
+        fetch("/api/laboratory?endpoint=orders&status=tech_verified").then(function(r) { return r.json(); }),
         fetch("/api/laboratory?endpoint=orders&status=completed").then(function(r) { return r.json(); }),
       ]);
       setStats({
         pending: (r1.data || []).length,
         collected: (r2.data || []).length,
-        entered: (r3.data || []).length,
+        entered: (r3.data || []).length + (r3b.data || []).length,
         completed: (r4.data || []).length,
       });
     } catch { /* silent */ }
@@ -342,8 +356,8 @@ export default function LaboratoryPage() {
                         {tab === "in_process" && <button onClick={function() { openResultEntry(o); }} className="px-3 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-medium hover:bg-amber-700 transition-colors">Enter Results</button>}
                         {tab === "verification" && (
                           <div className="flex gap-1 justify-end">
-                            <button onClick={function() { handleVerify(o, "tech"); }} disabled={saving} className="px-2.5 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 disabled:opacity-50">Tech Verify</button>
-                            <button onClick={function() { handleVerify(o, "pathologist"); }} disabled={saving} className="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50">Approve</button>
+                            {o.lis_status === "result_entered" && <button onClick={function() { handleVerify(o, "tech"); }} disabled={saving} className="px-2.5 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 disabled:opacity-50">Tech Verify</button>}
+                            {o.lis_status === "tech_verified" && <button onClick={function() { handleVerify(o, "pathologist"); }} disabled={saving} className="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50">Pathologist Approve</button>}
                           </div>
                         )}
                         {tab === "completed" && (
