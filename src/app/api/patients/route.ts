@@ -1,29 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthFromCookie } from "@/lib/auth";
+import { hmsFetch } from "@/lib/hms-fetch";
 
 var BACKEND = "https://smartgumastha-backend-production.up.railway.app";
 
 export async function POST(request: NextRequest) {
   try {
     var cookieValue = request.cookies.get("medihost_auth")?.value;
-    console.log("[POST /api/patients] cookie length:", cookieValue?.length, "first50:", cookieValue?.substring(0, 50));
     var auth = getAuthFromCookie(cookieValue ? decodeURIComponent(cookieValue) : undefined);
     if (!auth || !auth.hospitalId || !auth.token) {
-      console.log("[POST /api/patients] Auth check failed — hospitalId:", auth?.hospitalId, "hasToken:", !!auth?.token);
       return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 });
     }
 
-    var token = auth.hmsToken || auth.token;
-    console.log("[POST /api/patients] AUTH KEYS:", Object.keys(auth).join(","));
-    console.log("[POST /api/patients] hospitalId:", auth.hospitalId, "hmsToken exists:", !!auth.hmsToken, "token first20:", token?.substring(0, 20));
     var body = await request.json();
     var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/patients`;
-    var res = await fetch(url, {
+    var res = await hmsFetch(url, auth, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
@@ -44,21 +37,14 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     var cookieValue = request.cookies.get("medihost_auth")?.value;
-    console.log("[GET /api/patients] cookie length:", cookieValue?.length, "first50:", cookieValue?.substring(0, 50));
     var auth = getAuthFromCookie(cookieValue ? decodeURIComponent(cookieValue) : undefined);
     if (!auth || !auth.hospitalId || !auth.token) {
-      console.log("[GET /api/patients] Auth check failed — hospitalId:", auth?.hospitalId, "hasToken:", !!auth?.token);
       return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 });
     }
 
-    var token = auth.hmsToken || auth.token;
-    console.log("[GET /api/patients] AUTH KEYS:", Object.keys(auth).join(","));
-    console.log("[GET /api/patients] hospitalId:", auth.hospitalId, "hmsToken exists:", !!auth.hmsToken, "token first20:", token?.substring(0, 20));
     var searchParams = request.nextUrl.searchParams.toString();
     var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/patients${searchParams ? "?" + searchParams : ""}`;
-    var res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    var res = await hmsFetch(url, auth);
 
     var text = await res.text();
     var data;
