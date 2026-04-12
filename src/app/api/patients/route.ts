@@ -10,12 +10,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  var token = auth.hmsToken || auth.token;
   var body = await request.json();
   var res = await fetch(`${BACKEND}/api/hospitals/${auth.hospitalId}/patients`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${auth.token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(body),
   });
@@ -31,10 +32,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  var token = auth.hmsToken || auth.token;
   var searchParams = request.nextUrl.searchParams.toString();
   var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/patients${searchParams ? "?" + searchParams : ""}`;
   var res = await fetch(url, {
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   var data = await res.json();

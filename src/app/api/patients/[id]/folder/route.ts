@@ -13,10 +13,11 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  var token = auth.hmsToken || auth.token;
   var { id } = await params;
   var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/patients/${id}/folder`;
   var res = await fetch(url, {
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   var data = await res.json();
