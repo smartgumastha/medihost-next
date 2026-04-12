@@ -66,8 +66,6 @@ const SECTIONS: SidebarSection[] = [
       { label: 'Pharmacy', letter: 'Rx', href: '/dashboard/pharmacy', iconBg: '#FCE7F3', iconColor: '#DB2777' },
       { label: 'Billing Desk', letter: '\u20B9', href: '/dashboard/billing-desk', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'Reports', letter: 'R', href: '/dashboard/reports', iconBg: '#F0FDF4', iconColor: '#059669' },
-      { label: 'EMR', letter: 'E', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
-      { label: 'LIS', letter: 'L', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
     ],
   },
   {
