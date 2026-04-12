@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthFromCookie } from "@/lib/auth";
+import { hmsFetch } from "@/lib/hms-fetch";
 
 var BACKEND = "https://smartgumastha-backend-production.up.railway.app";
 
@@ -7,19 +8,19 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  var cookieValue = request.cookies.get("medihost_auth")?.value;
-  var auth = getAuthFromCookie(cookieValue ? decodeURIComponent(cookieValue) : undefined);
-  if (!auth || !auth.hospitalId || !auth.token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    var cookieValue = request.cookies.get("medihost_auth")?.value;
+    var auth = getAuthFromCookie(cookieValue ? decodeURIComponent(cookieValue) : undefined);
+    if (!auth || !auth.hospitalId || !auth.token) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+
+    var { id } = await params;
+    var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/patients/${id}/folder`;
+    var res = await hmsFetch(url, auth);
+    var text = await res.text();
+    var data; try { data = JSON.parse(text); } catch { data = { success: false, error: text.substring(0, 200) }; }
+    return NextResponse.json(data, { status: res.status });
+  } catch (err: unknown) {
+    console.error("[GET /api/patients/[id]/folder] Error:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
-
-  var token = auth.hmsToken || auth.token;
-  var { id } = await params;
-  var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/patients/${id}/folder`;
-  var res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  var data = await res.json();
-  return NextResponse.json(data, { status: res.status });
 }
