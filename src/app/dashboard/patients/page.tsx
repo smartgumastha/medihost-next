@@ -91,12 +91,14 @@ export default function PatientsPage() {
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
       var res = await fetch("/api/patients?" + params.toString());
       var json = await res.json();
-      if (json.success && json.data) {
-        setPatients(json.data.patients || []);
-        setTotal(json.data.total || 0);
-      } else if (Array.isArray(json.data)) {
+      if (json.success && Array.isArray(json.data)) {
+        // Backend returns { success: true, data: [...] }
         setPatients(json.data);
         setTotal(json.data.length);
+      } else if (json.success && json.data && json.data.patients) {
+        // Alternative format: { success: true, data: { patients: [...], total: N } }
+        setPatients(json.data.patients);
+        setTotal(json.data.total || json.data.patients.length);
       } else if (Array.isArray(json.patients)) {
         setPatients(json.patients);
         setTotal(json.total || json.patients.length);
