@@ -333,23 +333,30 @@ function IssueTokenModal({ onClose, onSuccess, onError }: {
   var [doctors, setDoctors] = useState<Array<{ user_id: string; first_name: string; last_name?: string }>>([]);
   var [todayAppts, setTodayAppts] = useState<Array<{ appointment_id: string; patient_id: string; doctor_id?: string; Patient?: { first_name?: string; last_name?: string; phone?: string; uhid?: string }; scheduled_time?: string; chief_complaint?: string; doctor?: { first_name?: string; last_name?: string } }>>([]);
 
-  // Fetch doctors on mount
+  // Fetch doctors from staff API on mount
   useEffect(function() {
+    fetch("/api/staff")
+      .then(function(r) { return r.json(); })
+      .then(function(json) {
+        if (json.success && json.data) {
+          var staff = Array.isArray(json.data) ? json.data : [];
+          var docList = staff.filter(function(s: { role_name?: string; role_master_id?: number }) {
+            return s.role_name === "DOCTOR" || s.role_master_id === 3;
+          }).map(function(s: { user_id: string; first_name: string; last_name?: string }) {
+            return { user_id: String(s.user_id), first_name: s.first_name, last_name: s.last_name };
+          });
+          setDoctors(docList);
+        }
+      })
+      .catch(function() { /* silent */ });
+
+    // Also fetch today's appointments for "From Appointment" mode
     fetch("/api/appointments?date=" + new Date().toISOString().slice(0, 10))
       .then(function(r) { return r.json(); })
       .then(function(json) {
         if (json.success && json.data) {
           var appts = json.data.appointments || json.data || [];
           setTodayAppts(appts.filter(function(a: { status: string }) { return a.status === "BOOKED"; }));
-          // Extract unique doctors from appointments
-          var docMap: Record<string, { user_id: string; first_name: string; last_name?: string }> = {};
-          for (var a of appts) {
-            if (a.doctor_id && a.doctor) {
-              docMap[String(a.doctor_id)] = { user_id: String(a.doctor_id), first_name: a.doctor.first_name || "", last_name: a.doctor.last_name || "" };
-            }
-          }
-          var docList = Object.values(docMap);
-          if (docList.length > 0) setDoctors(docList);
         }
       })
       .catch(function() { /* silent */ });

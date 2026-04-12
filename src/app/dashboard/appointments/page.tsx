@@ -288,8 +288,26 @@ function BookPatientModal({ selectedDate, onClose, onSuccess, onError }: {
   var [chiefComplaint, setChiefComplaint] = useState("");
   var [apptType, setApptType] = useState("OPD");
   var [time, setTime] = useState("09:00");
+  var [doctorId, setDoctorId] = useState("");
+  var [doctors, setDoctors] = useState<Array<{ user_id: string; first_name: string; last_name?: string }>>([]);
   var [submitting, setSubmitting] = useState(false);
   var debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(function() {
+    fetch("/api/staff")
+      .then(function(r) { return r.json(); })
+      .then(function(json) {
+        if (json.success && json.data) {
+          var staff = Array.isArray(json.data) ? json.data : [];
+          setDoctors(staff.filter(function(s: { role_name?: string; role_master_id?: number }) {
+            return s.role_name === "DOCTOR" || s.role_master_id === 3;
+          }).map(function(s: { user_id: string; first_name: string; last_name?: string }) {
+            return { user_id: String(s.user_id), first_name: s.first_name, last_name: s.last_name };
+          }));
+        }
+      })
+      .catch(function() { /* silent */ });
+  }, []);
 
   function handleSearch(value: string) {
     setSearch(value);
@@ -319,6 +337,7 @@ function BookPatientModal({ selectedDate, onClose, onSuccess, onError }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           patient_id: selectedPatient.patient_id,
+          doctor_id: doctorId ? Number(doctorId) : null,
           scheduled_date: selectedDate,
           scheduled_time: time,
           type: apptType,
@@ -410,6 +429,14 @@ function BookPatientModal({ selectedDate, onClose, onSuccess, onError }: {
                       );
                     })}
                   </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Doctor (optional)</label>
+                  <select value={doctorId} onChange={function(e) { setDoctorId(e.target.value); }}
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm">
+                    <option value="">Any available doctor</option>
+                    {doctors.map(function(d) { return <option key={d.user_id} value={d.user_id}>Dr. {d.first_name} {d.last_name || ""}</option>; })}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Chief Complaint</label>
