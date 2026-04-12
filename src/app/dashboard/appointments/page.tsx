@@ -323,7 +323,7 @@ function BookPatientModal({ selectedDate, onClose, onSuccess, onError }: {
           scheduled_time: time,
           type: apptType,
           chief_complaint: chiefComplaint,
-          booked_via: "DASHBOARD",
+          booked_via: "WEB",
         }),
       });
       var json = await res.json();
@@ -401,11 +401,11 @@ function BookPatientModal({ selectedDate, onClose, onSuccess, onError }: {
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Type</label>
                   <div className="flex gap-2">
-                    {["OPD", "Follow-up", "Emergency"].map(function(t) {
+                    {["OPD", "FOLLOW_UP", "EMERGENCY"].map(function(t) {
                       return (
                         <button key={t} onClick={function() { setApptType(t); }}
                           className={"px-3 py-1.5 rounded-full text-xs font-medium border transition-colors " + (apptType === t ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-gray-600 border-gray-200")}>
-                          {t}
+                          {t === "FOLLOW_UP" ? "Follow-up" : t === "EMERGENCY" ? "Emergency" : t}
                         </button>
                       );
                     })}
@@ -479,7 +479,7 @@ function OpenSlotModal({ selectedDate, onClose, onSuccess, onError }: {
         scheduled_time: time,
         type: apptType,
         chief_complaint: chiefComplaint,
-        booked_via: "DASHBOARD",
+        booked_via: "WEB",
       };
       if (foundPatient) {
         body.patient_id = foundPatient.patient_id;
@@ -556,7 +556,7 @@ function OpenSlotModal({ selectedDate, onClose, onSuccess, onError }: {
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Type</label>
             <div className="flex gap-2">
-              {["OPD", "Follow-up", "Emergency"].map(function(t) {
+              {["OPD", "FOLLOW_UP", "EMERGENCY"].map(function(t) {
                 return (
                   <button key={t} onClick={function() { setApptType(t); }}
                     className={"px-3 py-1.5 rounded-full text-xs font-medium border transition-colors " + (apptType === t ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-gray-600 border-gray-200")}>
