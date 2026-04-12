@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   sp.delete("endpoint");
   var qs = sp.toString();
   var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/lis/${endpoint}${qs ? "?" + qs : ""}`;
-  var res = await fetch(url, { headers: { Authorization: `Bearer ${auth.token}` } });
+  var res = await fetch(url, { headers: { Authorization: `Bearer ${auth.hmsToken || auth.token}` } });
   var data = await res.json();
   return NextResponse.json(data, { status: res.status });
 }
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   var path = id ? `${BACKEND}/api/hospitals/${auth.hospitalId}/lis/${endpoint}/${id}` : `${BACKEND}/api/hospitals/${auth.hospitalId}/lis/${endpoint}`;
   var res = await fetch(path, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.hmsToken || auth.token}` },
     body: JSON.stringify(body),
   });
   var data = await res.json();

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   var searchParams = request.nextUrl.searchParams.toString();
   var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/appointments${searchParams ? "?" + searchParams : ""}`;
   var res = await fetch(url, {
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${auth.hmsToken || auth.token}` },
   });
 
   var data = await res.json();
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${auth.token}`,
+      Authorization: `Bearer ${auth.hmsToken || auth.token}`,
     },
     body: JSON.stringify(body),
   });
@@ -54,7 +54,7 @@ export async function PATCH(request: NextRequest) {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${auth.token}`,
+      Authorization: `Bearer ${auth.hmsToken || auth.token}`,
     },
     body: JSON.stringify(rest),
   });
@@ -73,7 +73,7 @@ export async function DELETE(request: NextRequest) {
   var { appointment_id } = await request.json();
   var res = await fetch(`${BACKEND}/api/hospitals/${auth.hospitalId}/appointments/${appointment_id}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${auth.hmsToken || auth.token}` },
   });
 
   var data = await res.json();

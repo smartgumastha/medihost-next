@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
   var url = `${BACKEND}/api/hospitals/${auth.hospitalId}/reports/eod`;
   var res = await fetch(url, {
-    headers: { Authorization: `Bearer ${auth.token}` },
+    headers: { Authorization: `Bearer ${auth.hmsToken || auth.token}` },
   });
 
   var data = await res.json();

@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   var body = await request.json();
   var res = await fetch(`${BACKEND}/api/hospitals/${auth.hospitalId}/bills/from-orders`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.token}` },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.hmsToken || auth.token}` },
     body: JSON.stringify(body),
   });
   var data = await res.json();
