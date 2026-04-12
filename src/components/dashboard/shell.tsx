@@ -60,6 +60,7 @@ const SECTIONS: SidebarSection[] = [
       { label: 'Patients', letter: 'P', href: '/dashboard/patients', iconBg: '#EFF6FF', iconColor: '#2563EB' },
       { label: 'Appointments', letter: 'A', href: '/dashboard/appointments', iconBg: '#FEF3C7', iconColor: '#D97706' },
       { label: 'OPD Queue', letter: 'Q', href: '/dashboard/opd-queue', iconBg: '#EDE9FE', iconColor: '#7C3AED' },
+      { label: 'Triage', letter: 'T', href: '/dashboard/triage', iconBg: '#FEE2E2', iconColor: '#DC2626' },
       { label: 'Billing', letter: 'B', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
       { label: 'Reports', letter: 'R', href: '/dashboard/reports', iconBg: '#F0FDF4', iconColor: '#059669' },
       { label: 'EMR', letter: 'E', external: 'https://app.hemato.in', iconBg: '#EFF6FF', iconColor: '#2563EB' },
