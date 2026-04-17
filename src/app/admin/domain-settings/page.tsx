@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from 'react';
 
-var API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://smartgumastha-backend-production.up.railway.app';
-var ADMIN_KEY = 'MediHost@2026';
-
 interface Settings {
   markup_percent: number;
   fallback_price_in: number;
@@ -26,9 +23,7 @@ export default function DomainSettingsPage() {
   var [message, setMessage] = useState('');
 
   useEffect(function () {
-    fetch(API_BASE + '/api/presence/pricing/admin/domain-settings', {
-      headers: { 'x-admin-key': ADMIN_KEY },
-    })
+    fetch('/api/presence-pricing-admin/domain-settings')
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data.success && data.settings) {
@@ -48,9 +43,9 @@ export default function DomainSettingsPage() {
   function handleSave() {
     setSaving(true);
     setMessage('');
-    fetch(API_BASE + '/api/presence/pricing/admin/domain-settings', {
+    fetch('/api/presence-pricing-admin/domain-settings', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(settings),
     })
       .then(function (r) { return r.json(); })

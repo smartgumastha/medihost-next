@@ -128,9 +128,7 @@ export function PartnersManager() {
   useEffect(() => {
     async function loadPartners() {
       try {
-        const res = await fetch('/api/presence/admin/partners?page=1&limit=50', {
-          headers: { 'x-admin-key': 'MediHost@2026' },
-        });
+        const res = await fetch('/api/presence-admin/partners?page=1&limit=50');
         if (res.ok) {
           const data = await res.json();
           const list = data.partners || data.data?.partners || [];

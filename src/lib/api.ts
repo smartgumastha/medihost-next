@@ -39,26 +39,3 @@ export async function apiPut(path: string, body: unknown, token?: string) {
     body: JSON.stringify(body),
   });
 }
-
-export async function adminGet(path: string) {
-  return apiFetch(path, {
-    method: 'GET',
-    headers: { 'x-admin-key': process.env.ADMIN_KEY || 'MediHost@2026' },
-  });
-}
-
-export async function adminPost(path: string, body: unknown) {
-  return apiFetch(path, {
-    method: 'POST',
-    headers: { 'x-admin-key': process.env.ADMIN_KEY || 'MediHost@2026' },
-    body: JSON.stringify(body),
-  });
-}
-
-export async function adminPut(path: string, body: unknown) {
-  return apiFetch(path, {
-    method: 'PUT',
-    headers: { 'x-admin-key': process.env.ADMIN_KEY || 'MediHost@2026' },
-    body: JSON.stringify(body),
-  });
-}

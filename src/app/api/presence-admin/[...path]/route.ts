@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const API_BASE = process.env.API_URL || 'https://smartgumastha-backend-production.up.railway.app';
-const ADMIN_KEY = 'MediHost@2026';
+const ADMIN_KEY = process.env.ADMIN_KEY;
 
 async function proxyPresenceAdmin(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  if (!ADMIN_KEY) {
+    return NextResponse.json({ error: 'ADMIN_KEY env var is not set on this deployment' }, { status: 500 });
+  }
+
   const { path } = await params;
   const backendPath = '/api/presence/admin/' + path.join('/');
   const url = new URL(backendPath, API_BASE);
