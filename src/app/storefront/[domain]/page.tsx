@@ -1,27 +1,53 @@
 import { Metadata } from 'next';
 import { StorefrontPage } from '@/components/storefront/storefront-page';
+import { getClinicData } from '@/lib/storefront';
+import { buildMedicalBusinessSchema } from '@/lib/schema-org';
 
-const API_BASE = process.env.API_URL || 'https://smartgumastha-backend-production.up.railway.app';
-
-async function getClinicData(domain: string) {
-  try {
-    const res = await fetch(`${API_BASE}/api/storefront/site?domain=${domain}.medihost.in`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.site || data.data?.site || data;
-  } catch {
-    return null;
-  }
+function buildOrigin(domain: string): string {
+  return domain.includes('.') ? `https://${domain}` : `https://${domain}.medihost.in`;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ domain: string }> }): Promise<Metadata> {
   const { domain } = await params;
   const clinic = await getClinicData(domain);
+  const origin = buildOrigin(domain);
+
+  if (!clinic) {
+    return {
+      title: 'Clinic',
+      description: '',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const name = clinic.business_name || 'Clinic';
+  const title = clinic.website_meta_title || `${name} | MHAI`;
+  const description =
+    clinic.website_meta_description ||
+    clinic.website_content?.about ||
+    `${name} — book appointments, view services, contact info.`;
+  const logo = clinic.website_logo_url;
+
   return {
-    title: clinic?.website_meta_title || clinic?.business_name || 'Clinic',
-    description: clinic?.website_meta_description || clinic?.website_content?.about || '',
+    title,
+    description,
+    metadataBase: new URL(origin),
+    alternates: { canonical: origin },
+    openGraph: {
+      title,
+      description,
+      url: origin,
+      siteName: name,
+      images: logo ? [{ url: logo }] : [],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: logo ? [logo] : [],
+    },
+    robots: { index: true, follow: true },
   };
 }
 
@@ -43,5 +69,18 @@ export default async function Page({ params }: { params: Promise<{ domain: strin
     );
   }
 
-  return <StorefrontPage clinic={clinic} domain={domain} />;
+  const origin = buildOrigin(domain);
+  const schema = buildMedicalBusinessSchema(clinic, domain, origin);
+
+  return (
+    <>
+      {schema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      )}
+      <StorefrontPage clinic={clinic} domain={domain} />
+    </>
+  );
 }
